@@ -5,11 +5,12 @@ md=capstone.Cs(capstone.CS_ARCH_X86,capstone.CS_MODE_16); md.detail=True
 def load(f):
     d=open(f,'rb').read(); h=struct.unpack('<14H',d[:28]); img=d[h[4]*16:]
     return d,h,img
-def analyse(f):
+def analyse(f, seeds=()):
     d,h,img=load(f)
     e=next(md.disasm(img[0:3],0)); ds=int(e.op_str.split(',')[1],16)
     codeend=ds*16
     funcs={0:None}; work=[0]; seen=set()
+    for x in seeds: funcs[x]=None; work.append(x)
     for m in re.finditer(rb'\x55(\x83\xec.\x8b\xec|\x8b\xec)',img[:codeend],re.S):
         funcs[m.start()]=None; work.append(m.start())
     def walk(start):
