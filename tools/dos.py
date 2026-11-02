@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+"""Run DOS commands headless in DOSBox: C: is a work directory, D: is build/tc (the toolchain).
+
+    python3 tools/dos.py WORKDIR "CMD" ["CMD" ...]
+
+As a module: run(workdir, [cmds]) -> None. PATH holds the Lattice compiler, INCLUDE its headers.
+Each call uses its own config file, so several runs can go at once.
+"""
+import os, subprocess, sys, tempfile
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+TC = os.path.join(ROOT, 'build', 'tc')
+
+CONF = """[sdl]
+fullscreen=false
+[dosbox]
+memsize=16
+machine=svga_s3
+[cpu]
+core=dynamic
+cycles=max
+[speaker]
+pcspeaker=false
+tandy=off
+[mixer]
+nosound=true
+[midi]
+mpu401=none
+[autoexec]
+mount c "{c}"
+mount d "{d}"
+set PATH=D:\\LC;Z:\\
+set INCLUDE=D:\\INC\\
+c:
+"""
+
+
+def run(workdir, cmds, timeout=300):
+    workdir = os.path.abspath(workdir)
+    fd, conf = tempfile.mkstemp(suffix='.conf')
+    with os.fdopen(fd, 'w') as f:
+        f.write(CONF.format(c=workdir, d=TC))
+        for c in cmds:
+            f.write(c + '\n')
+        f.write('exit\n')
+    env = dict(os.environ, SDL_VIDEODRIVER='dummy', SDL_AUDIODRIVER='dummy')
+    try:
+        subprocess.run(['dosbox', '-conf', conf, '-exit'], env=env, timeout=timeout,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    finally:
+        os.unlink(conf)
+
+
+if __name__ == '__main__':
+    run(sys.argv[1], sys.argv[2:])
