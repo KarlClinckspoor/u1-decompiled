@@ -25,6 +25,6 @@ for k,s in enumerate(starts):
             if op.type==x86.X86_OP_MEM and op.mem.base!=0 and op.mem.disp>0x100: refs.add(op.mem.disp&0xffff)
             if op.type==x86.X86_OP_IMM and i.mnemonic in('mov','push') and 0x74<=op.imm<dsize+0x2000 and op.size==2: refs.add(('i',op.imm))
     out.append(dict(s=s,e=end,n=nxt,fr=img[s:s+3] in(b'\x55\x83\xec',b'\x55\x8b\xec'),lib=names.get(s,[]),calls=calls,refs=sorted(r for r in refs if isinstance(r,int)),imm=sorted(r[1] for r in refs if not isinstance(r,int))))
-json.dump(out,open(exe.rsplit('/',1)[-1]+'.map.json','w'))
+import os; os.makedirs('build',exist_ok=True); json.dump(out,open(os.path.join('build',exe.rsplit('/',1)[-1]+'.map.json'),'w'))
 for f in out:
     print('%04x-%04x(%04x) %s %-10s calls %s | data %s | imm %s'%(f['s'],f['e'],f['n'],'F' if f['fr'] else 'a',','.join(f['lib'])[:10],' '.join('%x'%c for c in f['calls']),' '.join('%x'%r for r in f['refs']),' '.join('%x'%r for r in f['imm'])))

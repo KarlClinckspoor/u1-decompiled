@@ -40,4 +40,5 @@ Builds run the DOS tools in headless DOSBox (`dosbox` on the PATH).
 - `src/gen/`: GEN.EXE: `gen.lnk` (link order), `GEN.C`, `LCLIB.ASM`, `ORIGIN.ASM`, `IOB.ASM`,
   `gen.syms` (names of every function and global by address), `work/` (C in progress)
 - `tools/`: build, compare, disassembly and generation tools (docs/MATCHING.md explains the loop)
-- `docs/MAP.md`: layout of the executables; `docs/MATCHING.md`: how Lattice C 3.10 code reads
+- `docs/HANDOFF.md`: state and next steps; `docs/MAP.md`: layout of the executables;
+  `docs/MATCHING.md`: how Lattice C 3.10 code reads
