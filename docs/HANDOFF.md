@@ -17,7 +17,7 @@ What GEN.EXE is built from (link order in `src/gen/gen.lnk`):
 | game code 03E9-1948 | `src/gen/GEN.C` | C, all 29 functions. Data 0124-0692 and BSS 0A30-0DB0 defined in the file |
 | Lattice library 1948-34BF | `src/lclib/*.ASM` | 49 modules, generated MASM (tools/genasm.py) with symbolic addresses; 14 are byte-identical to 3.00g's |
 | Origin library 34BF-4254 | `src/origin/OR*.ASM`, `OR*.C` | 17 modules in library order (docs/MAP.md). 3 are C (387E/3920, 39C5, 3AD7; `-ms -v -w -cs`), 14 are generated MASM with symbolic data and code addresses |
-| _IOB | `src/gen/IOB.ASM` | Generated; must stay last (its UDATA ends BSS) |
+| _IOB | `src/lclib/_IOB.ASM` | Lattice's FILE table (118h bytes of UDATA); must stay last (its UDATA ends BSS) |
 
 Names are still addresses (`F_xxxx` code, `D_xxxx` DGROUP); `src/gen/gen.syms` maps every
 address to its name. GEN.C functions carry a one-line comment saying what they do.
@@ -75,6 +75,10 @@ differently as bytes until it matches; force lists are kept in OUTDIR/NAME.force
 In a .syms file, `C` = code entry, `L` = code label on data (never disassembled from, e.g.
 `L 2FC0 XLOADER`), `D` = DGROUP data.
 
+`xmap.py EXE -o NAME.syms --map` finds GEN's shared modules (src/lclib, src/origin) in another EXE,
+using the fixups of build/gen/*.OBJ as the mask (run `build.py gen` first), names their code and
+data with GEN's names, adds F_/D_ names for the rest and prints the module map.
+
 Other tools: `exediff.py` (header, relocations, image), `cmp.py` (object vs EXE),
 `omf.py` (object/library reader), `fmap.py` (function map), `libmatch.py`, `libfuzzy.py`,
 `libsim.py`, `libdir.py` (library identification), `rdis.py` (recursive disassembly).
@@ -130,6 +134,15 @@ Running agents in parallel: give each a disjoint address range and its own work 
 `src/gen/work/` (or the EXE's equivalent), point it to docs/MATCHING.md, and integrate their
 files yourself. Data layout is only checked at link time. Agents should use real string
 literals, not D_ references to strings.
+
+## Elsewhere
+
+abedegno's Exhume (https://github.com/abedegno/Exhume, also in
+`../underworld-exhumed-enhanced/exhume/`) is the same method for Borland (Ultima Underworld II).
+No Lattice profile, so not used for matching here. Worth reading when the time comes: its
+`skills/orchestrate`, `match-file`, `verify-and-merge` (parallel agents, for OUT.EXE),
+`docs/readability.md` and `skills/readability-pass` with `syncnames.py`/`structrec.py` (step 5),
+and `runtime/port` + `replay` (a port checked against recorded DOS sessions).
 
 ## Loose ends
 

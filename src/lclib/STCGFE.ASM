@@ -13,9 +13,10 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 PROG	SEGMENT
+	EXTRN	STCCPY:NEAR
 	EXTRN	STRLEN:NEAR
 PROG	ENDS
-	PUBLIC	STCGFE
+	PUBLIC	STCGFE,F_2F16,F_2F2D
 
 PROG	SEGMENT
 STCGFE:
@@ -47,13 +48,31 @@ L_2EF5:
 	CMP	AX, WORD PTR CS:L_2F06[SI]          ; 2EFA 2E 3B 84 06 2F
 	JNE	L_2EF5                              ; 2EFF 75 F4
 	JMP	WORD PTR CS:L_2F08[SI]              ; 2F01 2E FF A4 08 2F
-L_2F06:
-	DB	3AH,0	; 2F06
+L_2F06:						; 2F06 table: character, handler
+	DW	3AH					; ':'
 L_2F08:
-	DB	2DH,2FH,5CH,0,2DH,2FH,2FH,0,2DH,2FH,2EH,0	; 2F08
-	DB	16H,2FH,8BH,46H,2,40H,0BBH,4,0,53H,50H,0FFH	; 2F14
-	DB	76H,0AH,0E8H,89H,4,8BH,0E5H,48H,83H,0C4H,6,5DH	; 2F20
-	DB	0C3H,33H,0C0H,83H,0C4H,6,5DH,0C3H	; 2F2C
+	DW	F_2F2D
+	DW	5CH,F_2F2D				; ''
+	DW	2FH,F_2F2D				; '/'
+	DW	2EH,F_2F16				; '.'
+F_2F16:
+	MOV	AX, WORD PTR [BP+2]                 ; 2F16 8B 46 02
+	INC	AX                                  ; 2F19 40
+	MOV	BX, 4                               ; 2F1A BB 04 00
+	PUSH	BX                                 ; 2F1D 53
+	PUSH	AX                                 ; 2F1E 50
+	PUSH	WORD PTR [BP+0AH]                  ; 2F1F FF 76 0A
+	CALL	STCCPY                             ; 2F22 E8 89 04
+	MOV	SP, BP                              ; 2F25 8B E5
+	DEC	AX                                  ; 2F27 48
+	ADD	SP, 6                               ; 2F28 83 C4 06
+	POP	BP                                  ; 2F2B 5D
+	RET                                     ; 2F2C C3
+F_2F2D:
+	XOR	AX, AX                              ; 2F2D 33 C0
+	ADD	SP, 6                               ; 2F2F 83 C4 06
+	POP	BP                                  ; 2F32 5D
+	RET                                     ; 2F33 C3
 L_2F34:
 	DEC	WORD PTR [BP+4]                     ; 2F34 FF 4E 04
 	JMP	SHORT L_2EE2                        ; 2F37 EB A9

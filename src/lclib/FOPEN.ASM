@@ -32,7 +32,7 @@ FOPEN:
 	MOV	WORD PTR [BP+2], AX                 ; 19F9 89 46 02
 L_19FC:
 	MOV	AX, WORD PTR [BP+2]                 ; 19FC 8B 46 02
-	CMP	AX, 0EC8H                           ; 19FF 3D C8 0E
+	CMP	AX, OFFSET DGROUP:_IOB+118H         ; 19FF 3D C8 0E
 	JAE	L_1A12                              ; 1A02 73 0E
 	MOV	SI, AX                              ; 1A04 8B F0
 	CMP	WORD PTR [SI+0AH], 0                ; 1A06 83 7C 0A 00
@@ -41,7 +41,7 @@ L_19FC:
 	JMP	SHORT L_19FC                        ; 1A10 EB EA
 L_1A12:
 	MOV	AX, WORD PTR [BP+2]                 ; 1A12 8B 46 02
-	CMP	AX, 0EC8H                           ; 1A15 3D C8 0E
+	CMP	AX, OFFSET DGROUP:_IOB+118H         ; 1A15 3D C8 0E
 	JNE	L_1A27                              ; 1A18 75 0D
 	MOV	WORD PTR ERRNO, 18H                 ; 1A1A C7 06 C0 06 18 00
 	XOR	AX, AX                              ; 1A20 33 C0

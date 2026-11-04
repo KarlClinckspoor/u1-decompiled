@@ -11,7 +11,7 @@ Small model, linked by Microsoft LINK 3.x in this order:
 | code | Origin's support library modules (graphics, keyboard, sound, timer) | src/origin/ |
 | DGROUP 0000 | startup data (segment table, argv/env, 8087 flags, abort messages), 0x123 bytes | C.ASM |
 | DGROUP | DATA of the modules above, word aligned, in link order | |
-| DGROUP | UDATA (BSS) in link order; Lattice's _IOB (20 FILEs) last | IOB.ASM |
+| DGROUP | UDATA (BSS) in link order; Lattice's _IOB (20 FILEs) last | src/lclib/_IOB.ASM |
 | XSTACK | 0x1400-byte stack segment (header SS:SP points at its top) | C.ASM |
 | FAR_BSS | empty; marks the end of the program | C.ASM |
 
@@ -134,7 +134,7 @@ all of GEN, OUT, SPACE and MONDAIN, and the zero bytes before it are LINK's padd
 | L33F9 | 33F9-34BF | F_33F9, F_3407, F_3415 |  |  |
 
 Address immediates are symbolic (`OFFSET DGROUP:_IOB`, `OFFSET DGROUP:_UFBS`, ...), _MAIN uses
-`_IOB+n` rather than the IOB.ASM labels, D06C8's heap pointer is `DW D_06CC`, and _EXEC's LEAs
+`_IOB+n` for the fields of the FILE table, D06C8's heap pointer is `DW D_06CC`, and _EXEC's LEAs
 into its loader are `DW XLOADER+n`, so the modules can be linked into the other EXEs.
 
 ## ULTIMA.EXE

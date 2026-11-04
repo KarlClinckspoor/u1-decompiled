@@ -43,7 +43,7 @@ neither is set (7-Zip is looked for in `Program Files` too). The disassembly too
 - `src/origin/`: Origin's support library (graphics, text, keyboard, sound, timer), one file per
   module, named after its first function (`OR34BF.ASM`, `OR387E.C`, ...); every EXE links a subset
 - `src/lclib/`: the Lattice C 3.1x library modules the EXEs link, one file per module
-- `src/gen/`: GEN.EXE: `gen.lnk` (link order), `GEN.C`, `IOB.ASM`,
+- `src/gen/`: GEN.EXE: `gen.lnk` (link order), `GEN.C`,
   `gen.syms` (names of every function and global by address)
 - `tools/`: build, compare, disassembly and generation tools (docs/MATCHING.md explains the loop)
 - `docs/HANDOFF.md`: state and next steps; `docs/MAP.md`: layout of the executables;
