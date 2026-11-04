@@ -8,7 +8,7 @@ GOG release, byte for byte.
 
 | executable | what | status |
 |---|---|---|
-| GEN.EXE | character creation | **rebuilds identical**. Game code in C (src/gen/GEN.C, 29 functions); Origin's support library as 17 modules (3 in C, 14 in assembly); Lattice library as generated assembly |
+| GEN.EXE | character creation | **rebuilds identical**. Game code in C (src/gen/GEN.C, 29 functions); Origin's support library as 17 modules (3 in C, 14 in assembly); Lattice library as 49 generated assembly modules |
 | ULTIMA.EXE | loader, title | not started (has a protection-envelope remnant, see docs/MAP.md) |
 | OUT.EXE | the game | not started |
 | SPACE.EXE | space flight | not started |
@@ -42,7 +42,8 @@ neither is set (7-Zip is looked for in `Program Files` too). The disassembly too
 - `src/lattice/C.ASM`: Lattice startup (CXINIT), shared by every executable
 - `src/origin/`: Origin's support library (graphics, text, keyboard, sound, timer), one file per
   module, named after its first function (`OR34BF.ASM`, `OR387E.C`, ...); every EXE links a subset
-- `src/gen/`: GEN.EXE: `gen.lnk` (link order), `GEN.C`, `LCLIB.ASM`, `IOB.ASM`,
+- `src/lclib/`: the Lattice C 3.1x library modules the EXEs link, one file per module
+- `src/gen/`: GEN.EXE: `gen.lnk` (link order), `GEN.C`, `IOB.ASM`,
   `gen.syms` (names of every function and global by address)
 - `tools/`: build, compare, disassembly and generation tools (docs/MATCHING.md explains the loop)
 - `docs/HANDOFF.md`: state and next steps; `docs/MAP.md`: layout of the executables;

@@ -15,14 +15,14 @@ What GEN.EXE is built from (link order in `src/gen/gen.lnk`):
 |---|---|---|
 | startup CXINIT | `src/lattice/C.ASM` | Hand-written MASM. Matches all five EXEs (only symbol addresses differ) |
 | game code 03E9-1948 | `src/gen/GEN.C` | C, all 29 functions. Data 0124-0692 and BSS 0A30-0DB0 defined in the file |
-| Lattice library 1948-34BF | `src/gen/LCLIB.ASM` | Generated MASM (tools/genasm.py), one module |
+| Lattice library 1948-34BF | `src/lclib/*.ASM` | 49 modules, generated MASM (tools/genasm.py) with symbolic addresses; 14 are byte-identical to 3.00g's |
 | Origin library 34BF-4254 | `src/origin/OR*.ASM`, `OR*.C` | 17 modules in library order (docs/MAP.md). 3 are C (387E/3920, 39C5, 3AD7; `-ms -v -w -cs`), 14 are generated MASM with symbolic data and code addresses |
 | _IOB | `src/gen/IOB.ASM` | Generated; must stay last (its UDATA ends BSS) |
 
 Names are still addresses (`F_xxxx` code, `D_xxxx` DGROUP); `src/gen/gen.syms` maps every
 address to its name. GEN.C functions carry a one-line comment saying what they do.
 
-Step 1 of "Next steps" (Origin library) is done; the rest is not started.
+Steps 1 and 2 of "Next steps" (Origin library, Lattice library modules) are done; the rest is not started.
 
 ## Toolchain facts (proven)
 
@@ -109,10 +109,11 @@ Other tools: `exediff.py` (header, relocations, image), `cmp.py` (object vs EXE)
 1. ~~Origin routines to C~~ **done.** Only 4 routines were C (Lattice frame); the rest is
    hand-written assembly. The library is split into its 17 modules in `src/origin/` (method in
    docs/MAP.md). Left for the readable pass: comments in the assembly modules.
-2. **Split LCLIB.ASM into Lattice modules** (FOPEN, _FLSBF, CXSERR, ...) with their own data,
-   so the other EXEs can link the subsets they use. Data-only modules (STACK, _MNEED, ERROR,
-   _FMODE, _POOL, _UFBS) can sit anywhere in the link list. Code+data modules must keep the same
-   order in both. 3.00g-identical modules could use the real objects (`LIB LCS *NAME`).
+2. ~~Split LCLIB.ASM into Lattice modules~~ **done**: 49 modules in `src/lclib/` (table and
+   method in docs/MAP.md). The other EXEs link different subsets in a different order: write
+   their .lnk from the modules, adding the modules GEN lacks (generate them from that EXE the same
+   way, symbolic addresses included). Open: the 14 modules identical to 3.00g could link the
+   real objects (`LIB LCS *NAME`) instead.
 3. **ULTIMA.EXE**: same method; then a post-link step for the protection remnant. The header
    CS:IP is 088F:0000; at image 0x88F0 a stub restores SS:SP and RETFs to the startup; 0x500
    encrypted-looking bytes follow. Append the stub and tail from gamedata/ULTIMA.EXE at build

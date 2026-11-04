@@ -1,7 +1,55 @@
 ; GEN.EXE link order
 ../lattice/C.ASM
 GEN.C		; game code
-LCLIB.ASM	; Lattice C 3.1x library modules
+../lclib/EXECL.ASM	; Lattice C 3.1x library modules, in link order
+../lclib/FCLOSE.ASM
+../lclib/FOPEN.ASM
+../lclib/FREAD.ASM
+../lclib/FWRITE.ASM
+../lclib/_MAIN.ASM
+../lclib/STACK.ASM
+../lclib/_MNEED.ASM
+../lclib/_POOL.ASM
+../lclib/ONERROR.ASM
+../lclib/ERROR.ASM
+../lclib/RBRK.ASM
+../lclib/L1E2C.ASM
+../lclib/L1EB9.ASM
+../lclib/CLOSE.ASM
+../lclib/EXECLE.ASM
+../lclib/EXIT.ASM
+../lclib/OPEN.ASM
+../lclib/_FILBF.ASM
+../lclib/_FLSBF.ASM
+../lclib/_FMODE.ASM
+../lclib/D06C8.ASM
+../lclib/CXSERR.ASM
+../lclib/GETFC.ASM
+../lclib/CHKUFB.ASM
+../lclib/GETPF.ASM
+../lclib/_IOMODE.ASM
+../lclib/_UFBS.ASM
+../lclib/READ.ASM
+../lclib/WRITE.ASM
+../lclib/L2A93.ASM
+../lclib/_GETBF.ASM
+../lclib/L2C5F.ASM
+../lclib/DOPEN.ASM
+../lclib/DUNIQUE.ASM
+../lclib/DWRITE.ASM
+../lclib/_EXIT.ASM
+../lclib/BUFSIZ.ASM
+../lclib/ONEXIT.ASM
+../lclib/L2D47.ASM
+../lclib/LSEEK.ASM
+../lclib/STCGFE.ASM
+../lclib/STRMFE.ASM
+../lclib/_EXEC.ASM
+../lclib/GETFA.ASM
+../lclib/STRCPY.ASM
+../lclib/STRLEN.ASM
+../lclib/STCCPY.ASM
+../lclib/L33F9.ASM
 ../origin/OR34BF.ASM	; Origin support library, in library order
 ../origin/OR357C.ASM
 ../origin/OR3599.ASM
