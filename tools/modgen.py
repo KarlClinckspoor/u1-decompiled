@@ -139,7 +139,7 @@ class Gen:
                     self.code[0] <= int(m2.group(3), 0) < self.code[1]:
                 return 'CS:%s[%s]' % (self.clab(int(m2.group(3), 0)), m2.group(1).upper())
             if m2 and m2.group(1) in ('bx', 'si', 'di', 'bx+si', 'bx+di') and m2.group(2) == '+' \
-                    and int(m2.group(3), 0) >= 0x100:
+                    and int(m2.group(3), 0) >= 0x100 and seg not in ('es:', 'ss:'):   # ES/SS: not DGROUP
                 return seg + '%s[%s]' % (self.dref(int(m2.group(3), 0)), m2.group(1))
             parts = re.sub(r'0x([0-9a-f]+)', lambda q: hexm(int(q.group(1), 16)), parts)
             return seg + '[' + parts + ']'
@@ -156,6 +156,8 @@ class Gen:
         relo = [r for r in self.rel if a <= r < a + i.size]
         if a in self.force:
             return None
+        if m in ('cdq', 'cwde') and i.size == 1:    # capstone's names for 99h/98h; 16-bit CWD/CBW
+            return {'cdq': 'CWD', 'cwde': 'CBW'}[m]
         if m in ('call', 'jmp', 'ljmp', 'lcall') or m.startswith('j') or m.startswith('loop') or m == 'jcxz':
             if not i.op_str.startswith('0x'):
                 if m in ('ljmp', 'lcall'):

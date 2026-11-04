@@ -9,7 +9,6 @@ GEN.C		; game code
 ../lclib/_MAIN.ASM
 ../lclib/STACK.ASM
 ../lclib/_MNEED.ASM
-../lclib/_POOL.ASM
 ../lclib/ONERROR.ASM
 ../lclib/ERROR.ASM
 ../lclib/RBRK.ASM

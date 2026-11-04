@@ -137,6 +137,22 @@ Address immediates are symbolic (`OFFSET DGROUP:_IOB`, `OFFSET DGROUP:_UFBS`, ..
 `_IOB+n` for the fields of the FILE table, D06C8's heap pointer is `DW D_06CC`, and _EXEC's LEAs
 into its loader are `DW XLOADER+n`, so the modules can be linked into the other EXEs.
 
+## MONDAIN.EXE (final battle) - 31650 bytes, sha1 9456ed0ae86a5cd6336de1b670538f1ebe0f8741
+DGROUP paragraph 0x597. Link order in src/mondain/mondain.lnk.
+
+| code | | data |
+|---|---|---|
+| 0000-03E9 | startup | 0000-0123 |
+| 03E9-2230 | game code (MONDAIN.ASM, stand-in) | 0124-0902 (`_stack` = 3000 at 0124), BSS 2040-48A0 |
+| 2230-3018 | Lattice modules, first pass (EXECL ... L33F9, with CXC33) | 0902-0A02 |
+| 3018-4BBD | Origin modules: GEN's less OR3AD7, plus OM33BB OM353A OM37FD OM3AE2 OM3BF6 OM3CF1 OM3E2F OM3F58 | 0A10-2020 |
+| 4BBD-5969 | Lattice modules, second pass (FCLOSE ... LSEEK) | 2020-2032 |
+| | _IOB | BSS 48A0-49B8 |
+
+LINK took the library modules in two passes: what the game code needs, then the Origin library,
+then the Lattice modules the Origin modules need (file I/O). The extra Origin modules from 3F58 on
+are C (menus, numbers, game-frame drawing like OR387E), using the game's globals at 2040-2048.
+
 ## ULTIMA.EXE
 Header CS:IP 088F:0000 points at a stub after the program (image 0x88F0) that restores SS:SP
 and jumps to the startup at load:0000; 0x500 bytes after it look encrypted and the header

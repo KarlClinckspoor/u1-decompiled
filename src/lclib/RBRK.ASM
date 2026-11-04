@@ -13,7 +13,6 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_0698:BYTE
 	EXTRN	D_06C8:BYTE
 	EXTRN	D_06CA:BYTE
 	EXTRN	D_06CC:BYTE
@@ -43,7 +42,7 @@ RBRK:
 	MOV	BX, WORD PTR _HBASE                 ; 1DB6 8B 1E 4C 00
 	SUB	BX, WORD PTR _PSP+2                 ; 1DBA 2B 1E 0C 00
 	MOV	DX, WORD PTR _MNEED                 ; 1DBE 8B 16 96 06
-	MOV	CX, WORD PTR D_0698                 ; 1DC2 8B 0E 98 06
+	MOV	CX, WORD PTR _MNEED+2               ; 1DC2 8B 0E 98 06
 	ADD	DX, 0FH                             ; 1DC6 83 C2 0F
 	ADC	CX, 0                               ; 1DC9 83 D1 00
 	CMP	CX, 0FH                             ; 1DCC 83 F9 0F

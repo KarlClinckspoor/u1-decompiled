@@ -12,7 +12,7 @@ GOG release, byte for byte.
 | ULTIMA.EXE | loader, title | not started (has a protection-envelope remnant, see docs/MAP.md) |
 | OUT.EXE | the game | not started |
 | SPACE.EXE | space flight | not started |
-| MONDAIN.EXE | final battle | not started |
+| MONDAIN.EXE | final battle | **rebuilds identical** from the shared startup, library and Origin modules plus a generated stand-in for its game code (src/mondain/MONDAIN.ASM) |
 
 The startup module (src/lattice/C.ASM) is shared by all five and already matches them all.
 

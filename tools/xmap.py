@@ -13,7 +13,7 @@ The rest of EXE's code gets F_xxxx names from tools/rdis.py (function entries), 
 address it references gets D_xxxx. With -o the result is written as a .syms file; --map prints
 where each module is and the code that no module covers.
 """
-import bisect, os, re, struct, sys
+import bisect, glob, os, re, struct, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
@@ -68,7 +68,7 @@ def gen_modules():
     mods = []
     for l in open(os.path.join(ROOT, 'src', 'gen', 'gen.lnk')):
         l = l.split(';')[0].strip()
-        if 'lclib' in l or 'origin' in l:
+        if 'lclib' in l or 'origin' in l or 'lattice' in l:
             mods.append(os.path.normpath(os.path.join(ROOT, 'src', 'gen', l)))
     first = []
     for p in mods:
@@ -79,6 +79,8 @@ def gen_modules():
             a = []
             for blk in re.findall(r'^PROG\tSEGMENT\r\n(.*?)^PROG\tENDS', t, re.M | re.S):
                 a += re.findall(r'; ([0-9A-F]{4})\b', blk)[:1]
+        if os.path.basename(p).upper() == 'C.ASM':
+            a = ['0000']               # the startup, hand-written: CXINIT at 0
         if a:
             first.append((int(a[0], 16), os.path.splitext(os.path.basename(p))[0]))
     first.sort()
@@ -97,7 +99,8 @@ def operands(i):
         for op in i.operands:
             if op.type == x86.X86_OP_MEM:
                 seg = op.mem.segment
-        out.append(('cs' if seg == x86.X86_REG_CS else 'data', i.disp_offset,
+        kind = {x86.X86_REG_CS: 'cs', x86.X86_REG_ES: 'es', x86.X86_REG_SS: 'es'}.get(seg, 'data')
+        out.append((kind, i.disp_offset,
                     struct.unpack('<H', bytes(i.bytes[i.disp_offset:i.disp_offset + 2]))[0]))
     if i.imm_size == 2 and not (i.mnemonic.startswith(('j', 'call', 'loop')) or i.mnemonic in ('ljmp', 'lcall')):
         v = struct.unpack('<H', bytes(i.bytes[i.imm_offset:i.imm_offset + 2]))[0]
@@ -127,6 +130,7 @@ def main():
             pat = (bytes(m['data'][k]), bytes(1 - x for x in m['mask'][k]))
         else:                         # no build yet: guess address operands from the code
             pat = masked(gimg[a0:a1], a0)
+        a1 = a0 + len(pat[0])          # the module's own length
         f = find(img[:ds], *pat)
         if len(f) != 1:
             notes.append('%s (GEN %04X-%04X): found %d times' % (name, a0, a1, len(f)))
@@ -136,6 +140,14 @@ def main():
         for k, v in gcode.items():
             if a0 <= k < a1:
                 code[p + k - a0] = v
+        src = [q for q in glob.glob(os.path.join(ROOT, 'src', '*', name + '.*')) if q.upper().endswith(('.ASM', '.C'))]
+        own = {}                       # this module's own data labels: GEN address -> name
+        if src:
+            t = open(src[0], encoding='latin1', newline='').read()
+            for blk in re.findall(r'^DATA\tSEGMENT\r?\n(.*?)^DATA\tENDS', t, re.M | re.S):
+                for nm in re.findall(r'^(\w+)\t(?:DB|DW)', blk, re.M):
+                    own.update({k: v for k, v in gdata.items() if v == nm})
+        shift = None
         fix = pat[1]                  # 0 where GEN's object has a fixup (an address)
         gi = list(md.disasm(gimg[a0:a1], a0))
         ti = list(md.disasm(img[p:p + a1 - a0], p))
@@ -149,6 +161,11 @@ def main():
                     j = bisect.bisect_right(gdkeys, vx) - 1
                     if j >= 0 and vx - gdkeys[j] < 0x200 and vy >= vx - gdkeys[j]:
                         data.setdefault(vy - (vx - gdkeys[j]), gdata[gdkeys[j]])
+                        if gdkeys[j] in own:
+                            shift = vy - vx
+        if shift is not None:         # every label of the module moves with it
+            for k, v in own.items():
+                data.setdefault(k + shift, v)
     # the rest: function entries and referenced data
     from rdis import analyse
     _, ce, _, funcs, allins = analyse(exe, sorted(code))
