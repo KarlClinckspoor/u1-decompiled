@@ -12,22 +12,24 @@ State as of 2026-11-04. Read this first, then README.md, docs/MAP.md and docs/MA
 | ULTIMA.EXE (loader, title) | **Rebuilds byte-identical** (sha1 6589c21ebd80a03dec5b1d0d07068a638f450ee0): shared modules plus stand-ins; `src/ultima/postlink.py` appends the envelope's remains from gamedata at build time |
 | OUT.EXE (the game) | **Rebuilds byte-identical** (sha1 e4048b57ea64c0bdf51c7ec74f939002711a9475): shared modules plus stand-ins (`src/out/OUT1-3.ASM`, split because MASM 3.00 runs out of memory on 36 KB) |
 
-What GEN.EXE is built from (link order in `src/gen/gen.lnk`):
+Every EXE is built from the same pieces (link order in `src/NAME/NAME.lnk`, layouts in
+docs/MAP.md):
 
-| module | source | state |
+| piece | source | state |
 |---|---|---|
-| startup CXINIT | `src/lattice/C.ASM` | Hand-written MASM. Matches all five EXEs (only symbol addresses differ) |
-| game code 03E9-1948 | `src/gen/GEN.C` | C, all 29 functions. Data 0124-0692 and BSS 0A30-0DB0 defined in the file |
-| Lattice library 1948-34BF | `src/lclib/*.ASM` | 49 modules, generated MASM (tools/genasm.py) with symbolic addresses; 14 are byte-identical to 3.00g's |
-| Origin library 34BF-4254 | `src/origin/OR*.ASM`, `OR*.C` | 17 modules in library order (docs/MAP.md). 3 are C (387E/3920, 39C5, 3AD7; `-ms -v -w -cs`), 14 are generated MASM with symbolic data and code addresses |
+| startup CXINIT | `src/lattice/C.ASM` | Hand-written MASM, shared by all five |
+| game code | `src/gen/GEN.C`; `src/mondain/MONDAIN.ASM`, `src/space/SPACE.ASM`, `src/ultima/ULTIMA.ASM`, `src/out/OUT1-3.ASM` | GEN: C, all 29 functions. The others: generated MASM stand-ins (each owns its EXE's game data and all BSS before _IOB) |
+| Lattice library | `src/lclib/*.ASM` (73 modules) | Generated MASM with symbolic addresses; each EXE links its subset (GEN 49, ULTIMA 69); about 20 are byte-identical to 3.00g's |
+| Origin library | `src/origin/*` (47 modules) | OR* first found in GEN, OM* in MONDAIN, OS* in SPACE, OU* in ULTIMA, OO* in OUT. 3 are C (OR387E, OR39C5, OR3AD7; `-ms -v -w -cs`), the rest generated MASM |
 | _IOB | `src/lclib/_IOB.ASM` | Lattice's FILE table (118h bytes of UDATA); must stay last (its UDATA ends BSS) |
+| ULTIMA's envelope | `src/ultima/postlink.py` | Copies the protection envelope's remains from gamedata at build time |
 
-Names are still addresses (`F_xxxx` code, `D_xxxx` DGROUP); `src/gen/gen.syms` maps every
-address to its name. GEN.C functions carry a one-line comment saying what they do.
+Names are still addresses (`F_xxxx` code, `D_xxxx` DGROUP) except for library functions and
+startup symbols; `src/NAME/NAME.syms` maps every address of NAME.EXE to its name. GEN.C functions
+carry a one-line comment saying what they do.
 
-Steps 1-3 of "Next steps" are done and all five EXEs link identical (step 4, first part): the
-startup, library and Origin modules are shared sources; each game's own code is still a
-generated stand-in (GEN's is C). Next: the game code in C, EXE by EXE (step 4.3).
+Steps 1-3 of "Next steps" are done and all five EXEs link identical (step 4, first part). Next:
+the game code of MONDAIN, ULTIMA, SPACE and OUT in C (step 4.3).
 
 ## Toolchain facts (proven)
 
@@ -45,15 +47,24 @@ generated stand-in (GEN's is C). Next: the game code in C, EXE by EXE (step 4.3)
   and DUNIQUE (empty, it pads SPACE's data to 26C0) show it; the C modules are WORD.
 - DATA is `PARA` aligned in C.ASM (as in Lattice's own C.ASM); LINK then pads the code up to
   DGROUP's paragraph (it used to be 12 explicit zero bytes at the end of ORIGIN.ASM).
-- The header checksums of GEN, OUT, SPACE and MONDAIN are valid MS LINK checksums; ULTIMA.EXE's
-  is not (see below).
+- The header checksums of all five are the ones LINK writes; ULTIMA.EXE's no longer adds up
+  because the envelope was appended after LINK (postlink.py keeps LINK's value).
+- Library modules: LINK takes them in the order references resolve, in passes (game, then
+  Origin, then the Lattice modules Origin needs), so each EXE has its own order. Data-only
+  modules go where their data lies; a module's code and data must keep the same relative order.
 
 ## How to build and check
 
 ```sh
 python3 tools/setup.py --archives <dir with Karl's .7z/.zip> [--masm3 <MASM 3.0 .img>]
 python3 tools/build.py gen          # -> build/gen/GEN.EXE, compared with gamedata/GEN.EXE
+for e in gen mondain space ultima out; do python3 tools/build.py $e; done   # all five
 ```
+
+Expected sha1: GEN af21ad12..., MONDAIN 9456ed0a..., SPACE fdd68f5b..., ULTIMA 6589c21e...,
+OUT e4048b57... (full values in the table above). build.py fails on assembler errors, LINK
+errors and LINK's "defined more than once"; it runs `src/NAME/postlink.py` when there is one.
+tools/dos.py runs the DOS commands from a batch file (DOSBox 0.74's autoexec overflows at ~4 KB).
 
 Needs `dosbox` (0.74 headless; `apt-get install dosbox p7zip-full` works in the cloud
 workspace) and `7z`. On Karl's Windows machine it runs natively: tools/dos.py falls back to
@@ -78,13 +89,21 @@ python3 tools/genasm.py EXE SYMS OUTDIR NAME CODE0 CODE1 [DATA0 DATA1 [BSS0 BSS1
 ```
 
 It generates MASM with symbols, assembles, compares, and rewrites instructions MASM encodes
-differently as bytes until it matches; force lists are kept in OUTDIR/NAME.force.
+differently as bytes until it matches (force list in OUTDIR/NAME.force). It also reads
+OUTDIR/NAME.imm and NAME.ptr (below). These files were deleted after generation: the .ASM is
+the source, and several have hand edits (OFFSET of code labels, tables of code addresses as DW
+labels, PARA DATA), so regenerating one means redoing those. MASM 3.00 runs out of memory
+somewhere above ~15 KB of code in one module.
 In a .syms file, `C` = code entry, `L` = code label on data (never disassembled from, e.g.
 `L 2FC0 XLOADER`), `D` = DGROUP data.
 
-`xmap.py EXE -o NAME.syms --map` finds GEN's shared modules (src/lclib, src/origin) in another EXE,
-using the fixups of build/gen/*.OBJ as the mask (run `build.py gen` first), names their code and
-data with GEN's names, adds F_/D_ names for the rest and prints the module map.
+`xmap.py EXE -o NAME.syms --map` finds the shared modules (startup, src/lclib, src/origin) in an
+EXE, learning them from every build in its REFS list (gen, mondain, space, ultima, out: build
+them first) with the objects' fixups as the mask. It names their code and data with the names
+they have in their sources (all of a module's data labels move with it), adds F_/D_xxxx names
+for the rest (none inside a placed module's DATA; a clash with a module name gets the EXE's
+initial as suffix, e.g. D_07FA_S) and prints the module map with the gaps. Names it cannot
+know (a data-only module nobody references, such as OR09DA's D_09DA) are added by hand.
 
 `addrimm.py EXE START END OTHER.EXE -o OUT/NAME.imm` finds the 16-bit immediates that are
 addresses (they differ between the two EXEs' copies of the code); genasm.py reads NAME.imm and
@@ -99,16 +118,21 @@ Other tools: `exediff.py` (header, relocations, image), `cmp.py` (object vs EXE)
 ## Conventions
 
 - git author: Karl <30571394+karlclinckspoor@users.noreply.github.com>; commit messages end
-  with the Co-Authored-By/Claude-Session lines. Never commit gamedata or tool archives
-  (`.gitignore` covers `gamedata/`, `build/`, `tools/*.7z`, `tools/*.zip`).
+  with the Co-Authored-By line (and Claude-Session when a session link exists). Never commit
+  gamedata or tool archives (`.gitignore` covers `gamedata/`, `build/`, `tools/*.7z`,
+  `tools/*.zip`, `.claude/settings.local.json`). `.claude/settings.json` (an allowlist) is
+  untracked, Karl's to decide.
+- `.gitattributes` keeps .ASM files byte for byte (`-text`): Karl's global core.autocrlf would
+  otherwise store them LF and break MASM in a fresh checkout.
 - Work now happens directly in `C:\Users\karl9\Downloads\Claude\u1-decompiled\` on Windows (Git
   Bash and PowerShell). From a cloud session, the old route still applies: tar the repo (`.git`
   plus tracked files) into /mnt/user-data/outputs and untar it there with the device shell.
 - Git Bash's `sed -i` drops CRs. MASM 3.00 needs CRLF in .ASM files (the C files are LF), so
   edit .ASM files with Python (binary mode) or the Edit tool.
 - Do not name a tool `dis.py` in tools/: it shadows Python's `dis` module and breaks capstone.
-- Building emu2 or downloading prebuilt binaries was blocked by the safety classifier, so
-  DOSBox from apt is the DOS runner (about 1.5 s per compile).
+- In the cloud, building emu2 or downloading prebuilt binaries was blocked by the safety
+  classifier, so DOSBox from apt is the DOS runner there (about 1.5 s per compile); on Windows
+  it is GOG's DOSBox 0.74 in gamedata/DOSBOX.
 
 ## Code-shape findings worth knowing (full list in docs/MATCHING.md)
 
@@ -126,26 +150,32 @@ Other tools: `exediff.py` (header, relocations, image), `cmp.py` (object vs EXE)
 1. ~~Origin routines to C~~ **done.** Only 4 routines were C (Lattice frame); the rest is
    hand-written assembly. The library is split into its 17 modules in `src/origin/` (method in
    docs/MAP.md). Left for the readable pass: comments in the assembly modules.
-2. ~~Split LCLIB.ASM into Lattice modules~~ **done**: 49 modules in `src/lclib/` (table and
-   method in docs/MAP.md). The other EXEs link different subsets in a different order: write
-   their .lnk from the modules, adding the modules GEN lacks (generate them from that EXE the same
-   way, symbolic addresses included). Open: the 14 modules identical to 3.00g could link the
-   real objects (`LIB LCS *NAME`) instead.
-3. ~~ULTIMA.EXE~~ **done** (identical link with stand-ins, postlink.py). Was: same method; then a post-link step for the protection remnant. The header
-   CS:IP is 088F:0000; at image 0x88F0 a stub restores SS:SP and RETFs to the startup; 0x500
-   encrypted-looking bytes follow. Append the stub and tail from gamedata/ULTIMA.EXE at build
-   time, patch CS:IP/SS:SP/checksum, and never commit the bytes.
-4. **MONDAIN, SPACE, OUT** (OUT is 54 KB of code; split it by subsystem among parallel
-   agents). Identical links are done for all of them; their game code is still generated
-   stand-ins (src/NAME/NAME.ASM; OUT1-3.ASM), to be replaced by C. Suggested order: MONDAIN
-   (7.7 KB), ULTIMA (2.6 KB), SPACE (14.8 KB), OUT (36 KB, in parallel by subsystem). Find the
-   real C module boundaries first (data order, string order, frame style). Per EXE:
-   1. `build.py gen`, then `xmap.py EXE -o src/NAME/NAME.syms --map`: shared modules placed and
-      named, gaps listed. Give each gap a module (generate with genasm.py; new Origin modules are
-      named OM/OS/OO+address after the EXE they were first found in), place data-only modules by
-      their data, and check the data each new module owns from the references (fmap.py).
-   2. Make generated stand-ins and get an identical link first (as was done for GEN).
-   3. Replace the stand-ins with C function by function, re-linking after each.
+2. ~~Split LCLIB.ASM into Lattice modules~~ **done**, and extended with the modules the other
+   EXEs add: 73 in `src/lclib/` (table and method in docs/MAP.md). Open: the modules identical
+   to 3.00g could link the real objects (`LIB LCS *NAME`) instead.
+3. ~~ULTIMA.EXE~~ **done**: identical link with stand-ins; `src/ultima/postlink.py` appends the
+   envelope's remains (filler from image 88E4, the stub at 88F0 that restores SS:SP and jumps to
+   the startup, 0x500 encrypted-looking bytes) from gamedata at build time and sets the header's
+   size, SS:SP 09E1:0064 and CS:IP 088F:0000. The bytes are never committed.
+4. **MONDAIN, SPACE, OUT** (and ULTIMA's game code). Identical links are done for all of them
+   (how: step 4.1-4.2 below); their game code is still generated stand-ins, to be replaced by C.
+   Suggested order: MONDAIN (7.7 KB, 03E9-2230), ULTIMA (2.6 KB, 03E9-0E4D), SPACE (14.8 KB,
+   03E9-3DED), OUT (36 KB, 03E9-908B, in parallel by subsystem; OUT1-3 are split at arbitrary
+   function entries 3430/63B3, not at real module boundaries). First find the real C module
+   boundaries (data and string order, where each function's data lies). The C files take the
+   stand-ins' place in the .lnk; lc.py checks functions against any EXE
+   (`--exe gamedata/NAME.EXE --syms src/NAME/NAME.syms`); build.py checks the whole link.
+   The steps that got each EXE to an identical link, for reference:
+   1. `build.py` for the reference builds, then `xmap.py EXE -o src/NAME/NAME.syms --map`:
+      shared modules placed and named, gaps listed. Give each gap a module (genasm.py; new Origin
+      modules are named OM/OS/OU/OO+address after the EXE they were first found in, library
+      functions get their Lattice names: fmap.py/libmatch.py/libsim.py identify them), place
+      data-only modules by their data, and work out the data each new module owns from the
+      references (fmap.py) and from where the next known module's data starts.
+   2. A module that another EXE also links needs its address immediates (addrimm.py) and data
+      pointers (addrimm.py --data) symbolic; generate it with NAME.imm/NAME.ptr.
+   3. Write the .lnk in code order, data-only modules in data order; watch for PARA DATA
+      (assembly modules, even empty ones like DUNIQUE: it must come before BUFSIZ).
 5. **Readable names**: rename F_/D_ via .syms plus the sources (the U6 readable pass is the
    model); ScummVM's Ultima 1 engine is a naming reference.
 
@@ -178,11 +208,9 @@ and `runtime/port` + `replay` (a port checked against recorded DOS sessions).
 - BSS ownership: each stand-in owns all of its EXE's BSS before _IOB. Some of it is probably
   UDATA of Origin modules (the shared globals D_0DA6.. sit at the start of MONDAIN's BSS but at
   the end of GEN's); sort it out when the game code becomes C.
-- MONDAIN.C defines `_stack` itself (3000 at DGROUP 0124), so the STACK module is not linked
-  there; GEN uses the library's (0800h).
-
-- `GEN.EXE.map.json` in Karl's folder root is a leftover (now untracked; fmap writes to build/).
-  `u1-repo.tgz` there is the transfer archive. Both can be deleted.
-- docs/MAP.md's ULTIMA section and the per-EXE tables need filling as EXEs are done.
-- Project doc `claude/u1-decompilation-plan.md` (claude.ai project "Ultimas") has the same
-  status summary; keep both in step.
+- MONDAIN, SPACE and OUT define `_stack` in their own data (MONDAIN 3000 at 0124, SPACE at 0130,
+  OUT at 0124), so the STACK module is linked only in GEN and ULTIMA (library value 0800h).
+- Uncertain module assignments that give the same bytes either way: OR09DA (the palette) as a
+  data-only module rather than part of OR4071; D477E (ULTIMA, read by _PF) as its own module.
+- Project doc `claude/u1-decompilation-plan.md` (claude.ai project "Ultimas") has a status
+  summary that was not updated in the 2026-11-04 session (no access from it); bring it in step.

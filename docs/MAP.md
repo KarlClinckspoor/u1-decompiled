@@ -57,7 +57,8 @@ push di; push ds` or no frame).
 | OR3EC4 | 3EC4: random number from the DOS clock | | asm | OUT SPACE MONDAIN |
 | OR3EED | 3EED: scroll the message area up a line | | asm | OUT SPACE MONDAIN |
 | OR3F62 | 3F62: play sound n (10 PC-speaker routines) | 0836-084A jump table | asm | OUT SPACE MONDAIN |
-| OR4071 | 4071: fill the 200-line address table | 084A-09EC | asm | OUT (at B231); others unchecked |
+| OR4071 | 4071: fill the 200-line address table | 084A-09DA | asm | all |
+| OR09DA | (data only) a 16-colour palette, linked just before OR40EE | 09DA-09EC | asm | GEN MONDAIN SPACE OUT |
 | OR40EE | 40EE 4115: Tandy mode 9 / EGA mode 0Dh, with palette | 09EC-09FE | asm | all |
 | OR413C | 413C 41D5 4224 4234: key input with cursor | 09FE-0A30 | asm | all |
 
@@ -67,7 +68,7 @@ own C.ASM), so DGROUP starts at paragraph 0x426.
 D_0830 holds the video mode in use: 1 EGA, 2 CGA, 4 Tandy.
 
 ## Lattice library (src/lclib)
-GEN's library code and data split into the 49 modules LINK took from the library, in link order
+GEN's library code and data split into the 48 modules LINK took from the library (plus _IOB), in link order
 (src/gen/gen.lnk). LINK pulls library modules in the order the references resolve, so the order
 differs between the EXEs (EXIT follows EXECV in ULTIMA and OUT); module contents come from
 Lattice 3.00g's LCS.LIB directory (`tools/libdir.py`), split further where the other EXEs show
@@ -90,8 +91,7 @@ all of GEN, OUT, SPACE and MONDAIN, and the zero bytes before it are LINK's padd
 | FWRITE | 1C09-1C75 | FWRITE |  |  |
 | _MAIN | 1C75-1D0B | _MAIN |  | 3.00g |
 | STACK |  |  | 0692-0694 |  |
-| _MNEED |  |  | 0694-0698 |  |
-| _POOL |  |  | 0698-06A0 |  |
+| _MNEED |  |  | 0694-069A (_ENEED, the 4-byte _MNEED) |  |
 | ONERROR | 1D0B-1DA6 | ONERROR, F_1D0D, F_1D65 | 06A0-06C0 PARA | 3.00g |
 | ERROR |  |  | 06C0-06C2 |  |
 | RBRK | 1DA6-1E2C | RBRK |  |  |
@@ -104,7 +104,7 @@ all of GEN, OUT, SPACE and MONDAIN, and the zero bytes before it are LINK's padd
 | _FILBF | 22F7-2491 | _FILBF |  |  |
 | _FLSBF | 2491-2769 | _FLSBF | 06C2-06C6 |  |
 | _FMODE |  |  | 06C6-06C8 |  |
-| D06C8 |  |  | 06C8-06E0 |  |
+| D06C8 |  |  | 06C8-06D6 |  |
 | CXSERR | 2769-27D4 | CXSERR, CXSERZ | 06E0-0738 PARA | 3.00g |
 | GETFC | 27D4-27E8 | GETFC |  | 3.00g |
 | CHKUFB | 27E8-2831 | CHKUFB |  | 3.00g |
