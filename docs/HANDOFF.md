@@ -7,7 +7,8 @@ State as of 2026-11-04. Read this first, then README.md, docs/MAP.md and docs/MA
 | executable | status |
 |---|---|
 | GEN.EXE (character creation) | **Rebuilds byte-identical** (sha1 af21ad12e999d63d36d2e34381c857f55e57c14d) |
-| ULTIMA.EXE, OUT.EXE, SPACE.EXE, MONDAIN.EXE | Not started, apart from the shared startup (below) |
+| MONDAIN.EXE (final battle) | **Rebuilds byte-identical** (sha1 9456ed0ae86a5cd6336de1b670538f1ebe0f8741): shared modules plus generated stand-ins (`src/mondain/`) |
+| ULTIMA.EXE, OUT.EXE, SPACE.EXE | Not started, apart from the shared startup and modules (below) |
 
 What GEN.EXE is built from (link order in `src/gen/gen.lnk`):
 
@@ -22,7 +23,7 @@ What GEN.EXE is built from (link order in `src/gen/gen.lnk`):
 Names are still addresses (`F_xxxx` code, `D_xxxx` DGROUP); `src/gen/gen.syms` maps every
 address to its name. GEN.C functions carry a one-line comment saying what they do.
 
-Steps 1 and 2 of "Next steps" (Origin library, Lattice library modules) are done; the rest is not started.
+Steps 1 and 2 of "Next steps" (Origin library, Lattice library modules) are done, and MONDAIN links identical (step 4, first part).
 
 ## Toolchain facts (proven)
 
@@ -123,8 +124,14 @@ Other tools: `exediff.py` (header, relocations, image), `cmp.py` (object vs EXE)
    encrypted-looking bytes follow. Append the stub and tail from gamedata/ULTIMA.EXE at build
    time, patch CS:IP/SS:SP/checksum, and never commit the bytes.
 4. **MONDAIN, SPACE, OUT** (OUT is 54 KB of code; split it by subsystem among parallel
-   agents). Per EXE:
-   1. `fmap.py` and `libmatch.py` to map it, then write a .syms file.
+   agents). MONDAIN: identical link done (`src/mondain/mondain.lnk`); its game code
+   03E9-2230 is still one generated stand-in, MONDAIN.ASM, to be replaced by C. Suggested order:
+   identical links for SPACE, ULTIMA and OUT first (xmap makes them quick, and each refines the
+   shared modules), then the C. Per EXE:
+   1. `build.py gen`, then `xmap.py EXE -o src/NAME/NAME.syms --map`: shared modules placed and
+      named, gaps listed. Give each gap a module (generate with genasm.py; new Origin modules are
+      named OM/OS/OO+address after the EXE they were first found in), place data-only modules by
+      their data, and check the data each new module owns from the references (fmap.py).
    2. Make generated stand-ins and get an identical link first (as was done for GEN).
    3. Replace the stand-ins with C function by function, re-linking after each.
 5. **Readable names**: rename F_/D_ via .syms plus the sources (the U6 readable pass is the
@@ -145,6 +152,12 @@ No Lattice profile, so not used for matching here. Worth reading when the time c
 and `runtime/port` + `replay` (a port checked against recorded DOS sessions).
 
 ## Loose ends
+
+- The new Origin modules from MONDAIN (src/origin/OM*.ASM) still have address immediates as
+  numbers (string literals, mostly in OM3F58) and the 3F58-4A57 block is one module where there
+  are probably several: fix both when SPACE or OUT links them (the link and xmap will show it).
+- MONDAIN.C defines `_stack` itself (3000 at DGROUP 0124), so the STACK module is not linked
+  there; GEN uses the library's (0800h).
 
 - `GEN.EXE.map.json` in Karl's folder root is a leftover (now untracked; fmap writes to build/).
   `u1-repo.tgz` there is the transfer archive. Both can be deleted.

@@ -30,6 +30,7 @@ Microsoft C 2.03 for LINK 2.40, MASM 3.0 image, MASM 4.0 disk), then:
 ```sh
 python3 tools/setup.py          # unpacks the toolchain into build/tc (needs 7z)
 python3 tools/build.py gen      # builds build/gen/GEN.EXE and compares it with gamedata/GEN.EXE
+python3 tools/build.py mondain  # the same for MONDAIN.EXE
 ```
 
 Builds run the DOS tools in headless DOSBox: `dosbox` on the PATH, or the one named by the
