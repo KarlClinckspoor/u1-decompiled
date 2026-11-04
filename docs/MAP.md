@@ -153,6 +153,21 @@ LINK took the library modules in two passes: what the game code needs, then the 
 then the Lattice modules the Origin modules need (file I/O). The extra Origin modules from 3F58 on
 are C (menus, numbers, game-frame drawing like OR387E), using the game's globals at 2040-2048.
 
+## SPACE.EXE (space flight) - 39824 bytes, sha1 fdd68f5bbeb9abeb7524b385e372daad5a6d02a3
+DGROUP paragraph 0x72D. Link order in src/space/space.lnk.
+
+| code | | data |
+|---|---|---|
+| 0000-03E9 | startup | 0000-0123 |
+| 03E9-3DED | game code (SPACE.ASM, stand-in) | 0124-0FA0 (`_stack` at 0130), BSS 26C0-6002 |
+| 3DED-5284 | Lattice modules, first pass (with MEMSET, PUTS, CXNM8) | 0FA0-10B2 |
+| 5284-6B57 | Origin modules (with OS5643, OS603E, OS68F8, SPACE's own) | 10C0-26B8 |
+| 6B57-72C9 | Lattice modules, second pass (FCLOSE ... DUNIQUE) | 26B8-26C0 |
+| | _IOB | BSS 6002-611A |
+
+The palette module OR09DA sits just before OR40EE in all three EXEs (in GEN that is also just
+after OR4071, which is why GEN alone could not place it); OM3FF9 has two palettes of its own.
+
 ## ULTIMA.EXE
 Header CS:IP 088F:0000 points at a stub after the program (image 0x88F0) that restores SS:SP
 and jumps to the startup at load:0000; 0x500 bytes after it look encrypted and the header

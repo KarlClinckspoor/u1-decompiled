@@ -75,6 +75,7 @@ class Gen:
         self.dbytes = set()
         self.force = force or set()     # instruction offsets to write as bytes
         self.addrimm = set()            # instruction offsets whose 16-bit immediate is a DGROUP offset
+        self.dataptr = set()            # DGROUP offsets of words in DATA that are near pointers
 
     def inmod_data(self, o):
         return any(r and r[0] <= o < r[1] for r in (self.data, self.bss))
@@ -299,9 +300,11 @@ class Gen:
     def data_lines(self, r, bss=False):
         d0, d1 = r
         base = self.ds * 16
+        ptrs = {} if bss else {p: self.dref(struct.unpack('<H', self.img[base + p:base + p + 2])[0])
+                               for p in sorted(self.dataptr) if d0 <= p < d1}
         labs = sorted(o for o in self.dsym if d0 <= o < d1)
         out = []
-        cuts = sorted(set([d0] + labs + [d1]))
+        cuts = sorted(set([d0] + labs + [d1] + list(ptrs) + [p + 2 for p in ptrs]))
         for k in range(len(cuts) - 1):
             a, b = cuts[k], cuts[k + 1]
             nm = self.dsym.get(a)
@@ -310,6 +313,9 @@ class Gen:
                 self.pub.append(nm)
             if bss:
                 out.append('%s\tDB\t%s DUP (?)\t\t; %04X' % (lab, hexm(b - a), a))
+                continue
+            if a in ptrs:
+                out.append('%s\tDW\t%s\t\t\t; %04X' % (lab, ptrs[a], a))
                 continue
             blob = self.img[base + a:base + b]
             first = True

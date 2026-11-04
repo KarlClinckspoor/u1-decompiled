@@ -60,6 +60,7 @@ MONDAIN.ASM		; game code (generated stand-in)
 ../origin/OM40A8.ASM
 ../origin/OM418A.ASM
 ../origin/OM4437.ASM
+../origin/OR09DA.ASM
 ../origin/OR40EE.ASM
 ../origin/OR413C.ASM
 ../lclib/FCLOSE.ASM	; Lattice modules taken in LINK's second pass

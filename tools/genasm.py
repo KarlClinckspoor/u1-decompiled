@@ -7,7 +7,8 @@ Runs tools/modgen.py, assembles with MASM 3.00, compares code and data with the 
 masked) and writes every instruction MASM encodes differently as bytes (keeping symbolic
 operands), until the object matches. Leaves OUTDIR/NAME.ASM and OUTDIR/NAME.OBJ.
 OUTDIR/NAME.imm, if present, lists (hex) the instructions whose 16-bit immediate is a DGROUP
-offset; they are written OFFSET DGROUP:name (tools/addrimm.py finds them).
+offset; they are written OFFSET DGROUP:name (tools/addrimm.py finds them). OUTDIR/NAME.ptr lists
+the DGROUP offsets of near pointers in DATA, written DW name (addrimm.py --data finds them).
 """
 import os, subprocess, sys, struct
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -18,9 +19,10 @@ import capstone
 md = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_16)
 
 
-def build(exe, syms, outdir, name, code, data, bss, force, addrimm=()):
+def build(exe, syms, outdir, name, code, data, bss, force, addrimm=(), dataptr=()):
     g = modgen.Gen(exe, syms, name, code, data, bss, force)
     g.addrimm = set(addrimm)
+    g.dataptr = set(dataptr)
     src = g.emit()
     open(os.path.join(outdir, name + '.ASM'), 'w', newline='').write(src)
     for f in (name + '.OBJ', name + '.LOG'):
@@ -31,6 +33,7 @@ def build(exe, syms, outdir, name, code, data, bss, force, addrimm=()):
     log = open(os.path.join(outdir, name + '.LOG'), 'rb').read().decode('latin1')
     if not os.path.exists(os.path.join(outdir, name + '.OBJ')) or 'Severe' in log and '\n  0 ' not in log:
         pass
+    build.starts = getattr(g, 'starts', None)   # modgen's instruction boundaries
     return log
 
 
@@ -44,7 +47,7 @@ def errors(log):
     return sum(nums) if nums else 1
 
 
-def mismatches(obj, img, ds, code, data):
+def mismatches(obj, img, ds, code, data, gstarts=None):
     bad_code, bad_data = set(), []
     for m in omf.read_obj(obj):
         for k, (sn, cn, ln, attr) in enumerate(m['segs'], 1):
@@ -57,10 +60,10 @@ def mismatches(obj, img, ds, code, data):
                     raise SystemExit('%s: PROG is %d bytes, expected %d' % (obj, ln, code[1] - code[0]))
                 diffs = [i for i in range(ln) if not mask[i] and b[i] != orig[i]]
                 if diffs:
-                    starts = []
-                    a = 0
-                    for ins in md.disasm(bytes(orig), code[0]):
-                        starts.append(ins.address - code[0])
+                    if gstarts:     # the generator's boundaries know about data in the code
+                        starts = sorted(s - code[0] for s in gstarts)
+                    else:
+                        starts = [ins.address - code[0] for ins in md.disasm(bytes(orig), code[0])]
                     import bisect
                     for x in diffs:
                         s = starts[bisect.bisect_right(starts, x) - 1]
@@ -90,12 +93,14 @@ def main():
         force = {int(x, 16) for x in open(ffile).read().split()}
     ifile = os.path.join(outdir, name + '.imm')    # instructions whose immediate is an address
     addrimm = {int(x, 16) for x in open(ifile).read().split()} if os.path.exists(ifile) else set()
+    pfile = os.path.join(outdir, name + '.ptr')    # words in DATA that are near pointers
+    dataptr = {int(x, 16) for x in open(pfile).read().split()} if os.path.exists(pfile) else set()
     for it in range(8):
-        log = build(exe, syms, outdir, name, code, data, bss, force, addrimm)
+        log = build(exe, syms, outdir, name, code, data, bss, force, addrimm, dataptr)
         if errors(log):
             sys.stdout.write(log)
             raise SystemExit('%s: assembly errors' % name)
-        bc, bd = mismatches(os.path.join(outdir, name + '.OBJ'), img, ds, code, data)
+        bc, bd = mismatches(os.path.join(outdir, name + '.OBJ'), img, ds, code, data, build.starts)
         if bd:
             raise SystemExit('%s: data mismatch %s' % (name, bd))
         if not bc:

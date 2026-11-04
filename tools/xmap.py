@@ -121,6 +121,7 @@ def main():
     dlimit = len(img) - ds + h[5] * 16      # DGROUP including BSS (minalloc)
     code, data, notes = {}, {}, []
     placed, seen = [], set()
+    exact = {}                     # name -> address from an exact operand (not name+k)
     import omf
     for ref in REFS:
         if not os.path.isdir(os.path.join(ROOT, 'build', ref)):
@@ -170,11 +171,15 @@ def main():
                         j = bisect.bisect_right(gdkeys, vx) - 1
                         if j >= 0 and vx - gdkeys[j] < 0x200 and vy >= vx - gdkeys[j]:
                             data.setdefault(vy - (vx - gdkeys[j]), gdata[gdkeys[j]])
+                        if vx == gdkeys[j]:
+                            exact.setdefault(gdata[gdkeys[j]], vy)
                             if gdkeys[j] in own:
                                 shift = vy - vx
             if shift is not None:         # every label of the module moves with it
                 for k, v in own.items():
                     data.setdefault(k + shift, v)
+    for adr in [k for k, v in data.items() if v in exact and exact[v] != k]:
+        del data[adr]               # a name+k guess that disagrees with an exact operand
     # the rest: function entries and referenced data
     from rdis import analyse
     _, ce, _, funcs, allins = analyse(exe, sorted(code))
@@ -187,6 +192,10 @@ def main():
                 if not any(dv for dv in [v] if dv in data):
                     data[v] = 'D_%04X' % v
     # drop D_ names that fall inside a named object of another module's data (keep exact names)
+    iob = next((k for k, v in data.items() if v == '_IOB'), None)
+    if iob is not None:               # _IOB is one array of FILEs: its fields are _IOB+n
+        for k in [k for k in data if iob < k < iob + 0x118]:
+            del data[k]
     if out:
         with open(out, 'w', newline='\n') as f:
             f.write('# %s symbols: C = code offset, D = DGROUP offset (hex); names of GEN\'s shared modules from tools/xmap.py\n' % os.path.basename(exe))

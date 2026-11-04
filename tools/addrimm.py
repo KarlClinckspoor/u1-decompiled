@@ -2,6 +2,7 @@
 """Find the 16-bit immediates in a piece of code that are addresses, by comparing two EXEs.
 
     python3 tools/addrimm.py EXE START END OTHER.EXE [-o FILE.imm]
+    python3 tools/addrimm.py EXE --data D0 D1 OTHER.EXE OD0 [-o FILE.ptr]
 
 The code EXE:START-END is looked for in OTHER.EXE with every 16-bit immediate, displacement and
 call/jump target masked. An immediate that differs between the two copies moved with the data
@@ -9,6 +10,9 @@ layout, so it is an address (a string, a table); one that is the same is a const
 instruction offsets (in EXE) of the address immediates; -o writes them in the NAME.imm format
 tools/genasm.py reads. A plain number in an instruction cannot otherwise be told from an address:
 no relocation marks DGROUP offsets in a small-model EXE.
+
+With --data, EXE's DGROUP D0-D1 (a module's data) is compared with OTHER's from OD0: the words
+that differ are near pointers, written in the NAME.ptr format (DGROUP offsets in EXE).
 """
 import os, struct, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -34,10 +38,31 @@ def pattern(code, base):
     return bytes(code), m
 
 
+def data_pointers(exe, d0, d1, other, od0):
+    _, _, img, ds = load(exe)
+    _, _, oimg, ods = load(other)
+    a, b = img[ds + d0:ds + d1], oimg[ods + od0:ods + od0 + d1 - d0]
+    out, k = [], 0
+    while k < len(a) - 1:
+        if a[k:k + 2] != b[k:k + 2] and k % 2 == 0:     # pointers are words at even offsets
+            out.append(d0 + k)
+            k += 2
+        else:
+            k += 1
+    bad = [d0 + k for k in range(len(a)) if a[k] != b[k] and not any(p <= d0 + k < p + 2 for p in out)]
+    return out, bad
+
+
 def main():
     a = sys.argv[1:]
     out = a[a.index('-o') + 1] if '-o' in a else None
     a = [x for x in a if x not in ('-o', out)]
+    if a[1] == '--data':
+        ptrs, bad = data_pointers(a[0], int(a[2], 16), int(a[3], 16), a[4], int(a[5], 16))
+        print('%d pointers%s' % (len(ptrs), ('; bytes that differ outside them: ' + ' '.join('%04X' % x for x in bad[:10])) if bad else ''))
+        if out:
+            open(out, 'w').write(' '.join('%04X' % x for x in ptrs) + '\n')
+        return
     exe, s0, s1, other = a[0], int(a[1], 16), int(a[2], 16), a[3]
     _, _, img, ds = load(exe)
     _, _, oimg, ods = load(other)

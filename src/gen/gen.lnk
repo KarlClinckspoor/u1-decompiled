@@ -64,6 +64,7 @@ GEN.C		; game code
 ../origin/OR3EED.ASM
 ../origin/OR3F62.ASM
 ../origin/OR4071.ASM
+../origin/OR09DA.ASM
 ../origin/OR40EE.ASM
 ../origin/OR413C.ASM
 ../lclib/_IOB.ASM	; Lattice _IOB: must be last (its UDATA ends BSS)

@@ -8,7 +8,8 @@ State as of 2026-11-04. Read this first, then README.md, docs/MAP.md and docs/MA
 |---|---|
 | GEN.EXE (character creation) | **Rebuilds byte-identical** (sha1 af21ad12e999d63d36d2e34381c857f55e57c14d) |
 | MONDAIN.EXE (final battle) | **Rebuilds byte-identical** (sha1 9456ed0ae86a5cd6336de1b670538f1ebe0f8741): shared modules plus generated stand-ins (`src/mondain/`) |
-| ULTIMA.EXE, OUT.EXE, SPACE.EXE | Not started, apart from the shared startup and modules (below) |
+| SPACE.EXE (space flight) | **Rebuilds byte-identical** (sha1 fdd68f5bbeb9abeb7524b385e372daad5a6d02a3): shared modules plus generated stand-ins (`src/space/`) |
+| ULTIMA.EXE, OUT.EXE | Not started, apart from the shared startup and modules (below) |
 
 What GEN.EXE is built from (link order in `src/gen/gen.lnk`):
 
@@ -37,6 +38,8 @@ Steps 1 and 2 of "Next steps" (Origin library, Lattice library modules) are done
 - Assembler: MASM 3.00 (MASM 4.00 gives identical objects).
 - Linker: LINK 3.05 (MASM 4.0) is used. LINK 2.40 and 3.00 give the same GEN.EXE, so the
   original version is still undetermined. LINK 1.10 cannot read Lattice 3 libraries.
+- Lattice 3.1x assembly modules have PARA DATA, even when empty: ONERROR, CXSERR, _EXIT, BUFSIZ
+  and DUNIQUE (empty, it pads SPACE's data to 26C0) show it; the C modules are WORD.
 - DATA is `PARA` aligned in C.ASM (as in Lattice's own C.ASM); LINK then pads the code up to
   DGROUP's paragraph (it used to be 12 explicit zero bytes at the end of ORIGIN.ASM).
 - The header checksums of GEN, OUT, SPACE and MONDAIN are valid MS LINK checksums; ULTIMA.EXE's
@@ -83,6 +86,8 @@ data with GEN's names, adds F_/D_ names for the rest and prints the module map.
 `addrimm.py EXE START END OTHER.EXE -o OUT/NAME.imm` finds the 16-bit immediates that are
 addresses (they differ between the two EXEs' copies of the code); genasm.py reads NAME.imm and
 writes them `OFFSET DGROUP:name` (every target needs a symbol in the .syms file first).
+`addrimm.py EXE --data D0 D1 OTHER.EXE OD0 -o OUT/NAME.ptr` does the same for near pointers in a
+module's data (written `DW name`). A shared module needs both before another EXE can link it.
 
 Other tools: `exediff.py` (header, relocations, image), `cmp.py` (object vs EXE),
 `omf.py` (object/library reader), `fmap.py` (function map), `libmatch.py`, `libfuzzy.py`,
