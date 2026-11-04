@@ -32,13 +32,19 @@ def hexm(v):
     return s + 'H'
 
 
+NOSEED = set()
+
+
 def load_syms(path):
+    """C = code entry point, L = code label on data (not disassembled from), D = DGROUP data"""
     code, data = {}, {}
     for line in open(path):
         p = line.split()
         if len(p) < 3 or line.startswith('#'):
             continue
-        (code if p[0] == 'C' else data)[int(p[1], 16)] = p[2]
+        if p[0] == 'L':
+            NOSEED.add(int(p[1], 16))
+        (code if p[0] in 'CL' else data)[int(p[1], 16)] = p[2]
     return code, data
 
 
@@ -223,7 +229,7 @@ class Gen:
         from rdis import analyse
         c0, c1 = self.code
         if not hasattr(Gen, '_an'):
-            Gen._an = analyse(self.exe, sorted(self.csym))
+            Gen._an = analyse(self.exe, sorted(set(self.csym) - NOSEED))
         allins = Gen._an[4]
         ins = []
         a = c0

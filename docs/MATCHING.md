@@ -4,8 +4,8 @@ How to write C (or assembly) that compiles to the original bytes of an Ultima I 
 Everything here was learned on GEN.EXE.
 
 ## Toolchain
-- Lattice C 3.10 (LC.EXE 3.10, LC1 3.11, LC2 3.10), small model: `lc -ms -v` (-v: no stack-check
-  calls). K&R C only: no prototypes, `f(a, b) int a; char b; { ... }` definitions.
+- Lattice C 3.10 (LC.EXE 3.10, LC1 3.11, LC2 3.10), small model: `lc -ms -v -w` (-v: no
+  stack-check calls; -w: even frames). K&R C only: no prototypes, `f(a, b) int a; char b; { ... }` definitions.
 - MASM 3.00 for assembly. Microsoft LINK 3.05 (LINK 2.40 and 3.00 give the same EXE).
 - `python3 tools/setup.py` unpacks the toolchain into build/tc (once). DOSBox runs headless.
 
@@ -14,7 +14,7 @@ Everything here was learned on GEN.EXE.
    (its DGROUP offset); library functions have their Lattice names (STRCPY, FOPEN, ...).
    `python3 tools/disasm.py gamedata/GEN.EXE 0670 80` disassembles,
    `python3 tools/dump.py gamedata/GEN.EXE 124 60 --ds` dumps data, `--str OFF` prints a string.
-   The generated stand-in `src/gen/GENG.ASM` (or ORIGIN.ASM) shows each function with labels.
+   `tools/modgen.py` prints any range as labelled MASM (see src/gen/ORIGIN.ASM, LCLIB.ASM).
 2. Write C in a work file, one or more functions, named exactly as in gen.syms (`F_0670()`),
    calling other functions and using globals by their gen.syms names, declared `extern`.
 3. `python3 tools/lc.py FILE.C` compiles and compares every function in the file with the
@@ -22,10 +22,17 @@ Everything here was learned on GEN.EXE.
 4. Iterate until every function says MATCH.
 
 ## What the code tells you about the source (observed)
-- Frame: `push bp; sub sp,N; mov bp,sp` ... `mov sp,bp; add sp,N; pop bp; ret`. N is the size
-  of the locals plus 4. Locals are laid out in declaration order upward from `[bp+4]`
-  (first declared at bp+4). Arguments start at `[bp+N+4]`. No frame bytes (`push bp; mov bp,sp`)
-  when there are no locals.
+- GEN.C is compiled with **`-ms -v -w -cs`**: `-w` rounds the frame to an even size (a char as
+  last local otherwise gives `sub sp,3`); `-cs` stores identical string literals once.
+- Frame: `push bp; sub sp,N; mov bp,sp` ... `mov sp,bp; add sp,N; pop bp; ret`. Locals are laid
+  out in declaration order upward from `[bp+2]`; sometimes the compiler adds a 2-byte slot of its
+  own at bp+2 (locals then start at bp+4). A function with arguments but no locals still gets
+  `sub sp,2`; with neither, no `sub`. Arguments start at `[bp+N+4]`.
+- Small switches become compare chains in descending case order; four or more contiguous cases
+  become a jump table.
+- Key codes are `unsigned char` (giving `xor ah,ah`); plain char gives `cbw`.
+- `a[n++] = c;` and `a[n] = c; n++;` compile differently; try both.
+- Each `return` inside a loop gets its own epilogue.
 - After every call: `mov sp,bp` (caller pops with BP). Arguments pushed right to left, often
   through AX/BX/CX; a value already in a register is pushed again (`push ax; push ax`), so
   repeated constants in a call are one source expression each, not a variable.
@@ -48,3 +55,11 @@ and UDATA are word aligned and laid out in link order (src/gen/gen.lnk).
 Functions without a C frame, interrupt handlers and code that uses CS-relative data were
 written in assembly. `tools/genasm.py` generates a matching MASM module for a range
 (see src/gen/ORIGIN.ASM); clean it up by hand and keep it matching.
+
+## Tricks that were needed in GEN
+- A pointer used for a read-modify-write was a block-local `register` copy:
+  `{ register unsigned char *num; num = D_01A8; *num += n; }` (the plain `*D_01A8 += n` reloads
+  the pointer); block-local variables of disjoint blocks share a frame slot.
+- `if (a && b) { if (c) f(); }` and `if (a && b && c) f();` differ: the nested form makes the
+  compiler keep a widened char in a stack temporary at [bp+0].
+- `argv` was `unsigned char **` (`xor bh,bh` rather than `cbw` when passing argv[1][0]).

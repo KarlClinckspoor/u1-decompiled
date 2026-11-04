@@ -39,14 +39,14 @@ DATA	ENDS
 PROG	SEGMENT
 	EXTRN	F_1853:NEAR
 PROG	ENDS
-	PUBLIC	EXECL,EXECV,FCLOSE,FREOPEN,FOPEN,FREAD
+	PUBLIC	EXECL,EXECV,FCLOSE,FOPEN,FREOPEN,FREAD
 	PUBLIC	FWRITE,_MAIN,ONERROR,F_1D0D,F_1D65,RBRK
 	PUBLIC	F_1E2C,F_1EB9,CLOSE,F_1F1D,F_1F4E,EXIT
 	PUBLIC	OPEN,F_22D2,_FILBF,_FLSBF,CXSERR,GETFC
 	PUBLIC	CHKUFB,GETPF,READ,WRITE,F_2A93,_GETBF
 	PUBLIC	F_2C5F,F_2C71,F_2C82,F_2C8F,F_2CA0,F_2CAE
 	PUBLIC	F_2CC2,DUNIQUE,F_2CF7,_EXIT,F_2D3A,F_2D47
-	PUBLIC	F_2DDE,LSEEK,STCGFE,STRMFE,_EXEC,F_3143
+	PUBLIC	F_2DDE,LSEEK,STCGFE,STRMFE,XLOADER,_EXEC
 	PUBLIC	GETFA,STRCPY,STRLEN,STCCPY,F_33F9,F_3407
 	PUBLIC	F_3415,_STACK,_ENEED,_MNEED,D_0698,D_06A0
 	PUBLIC	D_06B3,D_06B5,D_06B6,D_06B8,ERRNO,_FMODE
@@ -133,7 +133,7 @@ L_19E9:
 	ADD	SP, 6                               ; 19EB 83 C4 06
 	POP	BP                                  ; 19EE 5D
 	RET                                     ; 19EF C3
-FREOPEN:
+FOPEN:
 	PUSH	BP                                 ; 19F0 55
 	SUB	SP, 4                               ; 19F1 83 EC 04
 	MOV	BP, SP                              ; 19F4 8B EC
@@ -161,12 +161,12 @@ L_1A27:
 	PUSH	WORD PTR [BP+2]                    ; 1A27 FF 76 02
 	PUSH	WORD PTR [BP+0AH]                  ; 1A2A FF 76 0A
 	PUSH	WORD PTR [BP+8]                    ; 1A2D FF 76 08
-	CALL	FOPEN                              ; 1A30 E8 07 00
+	CALL	FREOPEN                            ; 1A30 E8 07 00
 	MOV	SP, BP                              ; 1A33 8B E5
 	ADD	SP, 4                               ; 1A35 83 C4 04
 	POP	BP                                  ; 1A38 5D
 	RET                                     ; 1A39 C3
-FOPEN:
+FREOPEN:
 	PUSH	BP                                 ; 1A3A 55
 	SUB	SP, 0BH                             ; 1A3B 83 EC 0B
 	MOV	BP, SP                              ; 1A3E 8B EC
@@ -501,7 +501,7 @@ L_1CC3:
 	POP	BP                                  ; 1D09 5D
 	RET                                     ; 1D0A C3
 ONERROR:
-	DB	0,0	; 1D0B
+	ADD	BYTE PTR [BX+SI], AL                ; 1D0B 00 00
 F_1D0D:
 	PUSH	BP                                 ; 1D0D 55
 	MOV	BP, SP                              ; 1D0E 8B EC
@@ -2181,7 +2181,7 @@ L_2BC2:
 	PUSH	WORD PTR [BP+99H]                  ; 2BDB FF B6 99 00
 	PUSH	DS                                 ; 2BDF 1E
 	POP	ES                                  ; 2BE0 07
-	CALL	F_3143                             ; 2BE1 E8 5F 05
+	CALL	_EXEC                              ; 2BE1 E8 5F 05
 	MOV	SP, BP                              ; 2BE4 8B E5
 	PUSH	WORD PTR [BP+93H]                  ; 2BE6 FF B6 93 00
 	PUSH	WORD PTR [BP+0CH]                  ; 2BEA FF 76 0C
@@ -2631,7 +2631,7 @@ L_2FBB:
 	ADD	SP, 7                               ; 2FBB 83 C4 07
 	POP	BP                                  ; 2FBE 5D
 	RET                                     ; 2FBF C3
-_EXEC:
+XLOADER:
 	DB	0,0,0,0,0,0,0,0,0,0,0,0	; 2FC0
 	DB	0,0,0,0,0,0,0,0,0,0,0,0	; 2FCC
 	DB	0,0,0,0,0,0,0,0,0,0,0,0	; 2FD8
@@ -2704,7 +2704,7 @@ L_313F:
 	DB	0,0	; 313F
 L_3141:
 	DB	0,0	; 3141
-F_3143:
+_EXEC:
 	PUSH	BP                                 ; 3143 55
 	MOV	BP, SP                              ; 3144 8B EC
 	PUSH	DS                                 ; 3146 1E

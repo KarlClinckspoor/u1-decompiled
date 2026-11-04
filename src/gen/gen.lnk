@@ -1,6 +1,6 @@
 ; GEN.EXE link order
 ../lattice/C.ASM
-GENG.ASM	; game code (stand-in, to be replaced by C)
+GEN.C		; game code
 LCLIB.ASM	; Lattice C 3.1x library modules
-ORIGIN.ASM	; Origin support routines (stand-in)
+ORIGIN.ASM	; Origin support routines (generated; C in progress in work/origin.c)
 IOB.ASM		; Lattice _IOB (last UDATA)
