@@ -21,7 +21,7 @@ import capstone
 from capstone import x86
 import modgen
 
-REFS = ['gen', 'mondain', 'space', 'ultima']   # builds whose modules are known, in order of trust
+REFS = ['gen', 'mondain', 'space', 'ultima', 'out']   # builds whose modules are known, in order of trust
 
 md = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_16)
 md.detail = True
@@ -122,6 +122,7 @@ def main():
     code, data, notes = {}, {}, []
     placed, seen = [], set()
     exact = {}                     # name -> address from an exact operand (not name+k)
+    objs = {}                      # placed module -> its object (for its DATA span)
     import omf
     for ref in REFS:
         if not os.path.isdir(os.path.join(ROOT, 'build', ref)):
@@ -138,7 +139,8 @@ def main():
                 m = omf.read_obj(obj)[0]
                 k = next(k for k, s in enumerate(m['segs'], 1) if s[1] == 'PROG' and s[2])
                 pat = (bytes(m['data'][k]), bytes(1 - x for x in m['mask'][k]))
-            else:                         # no build yet: guess address operands from the code
+                objs[name] = m
+            else:                        # no build yet: guess address operands from the code
                 pat = masked(gimg[a0:a1], a0)
             a1 = a0 + len(pat[0])          # the module's own length
             f = find(img[:ds], *pat)
@@ -180,6 +182,15 @@ def main():
                     data.setdefault(k + shift, v)
     for adr in [k for k, v in data.items() if v in exact and exact[v] != k]:
         del data[adr]               # a name+k guess that disagrees with an exact operand
+    spans = []                     # DATA of placed modules in this EXE: no new names inside
+    byname = {v: k for k, v in data.items()}
+    for name, m in objs.items():
+        for k, sg in enumerate(m['segs'], 1):
+            if sg[0] == 'DATA' and sg[2]:
+                for nm, si, off in m['pubs']:
+                    if si == k and nm in byname:
+                        spans.append((byname[nm] - off, byname[nm] - off + sg[2]))
+                        break
     # the rest: function entries and referenced data
     from rdis import analyse
     _, ce, _, funcs, allins = analyse(exe, sorted(code))
@@ -193,7 +204,7 @@ def main():
             code[s] = fresh('F_%04X' % s)
     for adr, i in allins.items():
         for k, o, v in operands(i):
-            if k == 'data' and v < dlimit and v not in data:
+            if k == 'data' and v < dlimit and v not in data and not any(s0 <= v < s1 for s0, s1 in spans):
                 if not any(dv for dv in [v] if dv in data):
                     data[v] = fresh('D_%04X' % v)
     # drop D_ names that fall inside a named object of another module's data (keep exact names)

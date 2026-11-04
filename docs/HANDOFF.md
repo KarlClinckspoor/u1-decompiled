@@ -10,7 +10,7 @@ State as of 2026-11-04. Read this first, then README.md, docs/MAP.md and docs/MA
 | MONDAIN.EXE (final battle) | **Rebuilds byte-identical** (sha1 9456ed0ae86a5cd6336de1b670538f1ebe0f8741): shared modules plus generated stand-ins (`src/mondain/`) |
 | SPACE.EXE (space flight) | **Rebuilds byte-identical** (sha1 fdd68f5bbeb9abeb7524b385e372daad5a6d02a3): shared modules plus generated stand-ins (`src/space/`) |
 | ULTIMA.EXE (loader, title) | **Rebuilds byte-identical** (sha1 6589c21ebd80a03dec5b1d0d07068a638f450ee0): shared modules plus stand-ins; `src/ultima/postlink.py` appends the envelope's remains from gamedata at build time |
-| OUT.EXE | Not started, apart from the shared startup and modules (below) |
+| OUT.EXE (the game) | **Rebuilds byte-identical** (sha1 e4048b57ea64c0bdf51c7ec74f939002711a9475): shared modules plus stand-ins (`src/out/OUT1-3.ASM`, split because MASM 3.00 runs out of memory on 36 KB) |
 
 What GEN.EXE is built from (link order in `src/gen/gen.lnk`):
 
@@ -25,7 +25,9 @@ What GEN.EXE is built from (link order in `src/gen/gen.lnk`):
 Names are still addresses (`F_xxxx` code, `D_xxxx` DGROUP); `src/gen/gen.syms` maps every
 address to its name. GEN.C functions carry a one-line comment saying what they do.
 
-Steps 1 and 2 of "Next steps" (Origin library, Lattice library modules) are done, and MONDAIN links identical (step 4, first part).
+Steps 1-3 of "Next steps" are done and all five EXEs link identical (step 4, first part): the
+startup, library and Origin modules are shared sources; each game's own code is still a
+generated stand-in (GEN's is C). Next: the game code in C, EXE by EXE (step 4.3).
 
 ## Toolchain facts (proven)
 
@@ -134,10 +136,10 @@ Other tools: `exediff.py` (header, relocations, image), `cmp.py` (object vs EXE)
    encrypted-looking bytes follow. Append the stub and tail from gamedata/ULTIMA.EXE at build
    time, patch CS:IP/SS:SP/checksum, and never commit the bytes.
 4. **MONDAIN, SPACE, OUT** (OUT is 54 KB of code; split it by subsystem among parallel
-   agents). MONDAIN: identical link done (`src/mondain/mondain.lnk`); its game code
-   03E9-2230 is still one generated stand-in, MONDAIN.ASM, to be replaced by C. Suggested order:
-   identical links for SPACE, ULTIMA and OUT first (xmap makes them quick, and each refines the
-   shared modules), then the C. Per EXE:
+   agents). Identical links are done for all of them; their game code is still generated
+   stand-ins (src/NAME/NAME.ASM; OUT1-3.ASM), to be replaced by C. Suggested order: MONDAIN
+   (7.7 KB), ULTIMA (2.6 KB), SPACE (14.8 KB), OUT (36 KB, in parallel by subsystem). Find the
+   real C module boundaries first (data order, string order, frame style). Per EXE:
    1. `build.py gen`, then `xmap.py EXE -o src/NAME/NAME.syms --map`: shared modules placed and
       named, gaps listed. Give each gap a module (generate with genasm.py; new Origin modules are
       named OM/OS/OO+address after the EXE they were first found in), place data-only modules by
@@ -171,6 +173,11 @@ and `runtime/port` + `replay` (a port checked against recorded DOS sessions).
   meet in one link: build.py now fails on LINK's "defined more than once", and xmap gives a
   clashing address name the EXE's initial as suffix (SPACE's game data D_07FA_S).
 - Unsplit runs: ULTIMA's LU1222 (two functions), LU27B9/LU2846 are probably STCI_H/STCI_O.
+- The OO* Origin modules (OUT only) keep their address immediates as numbers and their data
+  pointers as bytes: fine while only OUT links them. The game stand-ins likewise.
+- BSS ownership: each stand-in owns all of its EXE's BSS before _IOB. Some of it is probably
+  UDATA of Origin modules (the shared globals D_0DA6.. sit at the start of MONDAIN's BSS but at
+  the end of GEN's); sort it out when the game code becomes C.
 - MONDAIN.C defines `_stack` itself (3000 at DGROUP 0124), so the STACK module is not linked
   there; GEN uses the library's (0800h).
 

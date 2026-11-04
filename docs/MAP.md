@@ -168,6 +168,21 @@ DGROUP paragraph 0x72D. Link order in src/space/space.lnk.
 The palette module OR09DA sits just before OR40EE in all three EXEs (in GEN that is also just
 after OR4071, which is why GEN alone could not place it); OM3FF9 has two palettes of its own.
 
+## OUT.EXE (the game) - 69858 bytes, sha1 e4048b57ea64c0bdf51c7ec74f939002711a9475
+DGROUP paragraph 0xD48. Link order in src/out/out.lnk.
+
+| code | | data |
+|---|---|---|
+| 0000-03E9 | startup | 0000-0123 |
+| 03E9-908B | game code (OUT1/OUT2/OUT3.ASM, stand-ins split at 3430 and 63B3) | 0124-17A4 (`_stack` at 0124), BSS 3A70-B124 |
+| 908B-9F69 | Lattice modules, first pass (with RAND/SRAND) | 17A4-18AC |
+| 9F69-C6D4 | Origin modules: the largest set, ten OO* modules of OUT's own | 18B0-3A56 |
+| C6D4-D480 | Lattice modules, second pass (FCLOSE ... LSEEK) | 3A56-3A62 |
+| | _IOB | BSS B124-B23C |
+
+OUT showed that MONDAIN's OM3AE2 is two modules (OM3AE2, OM3B46: OUT has OOAB9D between them).
+OOC47C is Origin C that calls into the game (death and resurrection: ", thou art dead").
+
 ## ULTIMA.EXE (loader, title) - 36880 bytes, sha1 6589c21ebd80a03dec5b1d0d07068a638f450ee0
 DGROUP paragraph 0x3ED. Link order in src/ultima/ultima.lnk.
 

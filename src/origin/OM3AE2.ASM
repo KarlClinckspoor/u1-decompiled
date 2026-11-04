@@ -20,9 +20,8 @@ PROG	SEGMENT
 	EXTRN	F_3599:NEAR
 	EXTRN	F_35CA:NEAR
 	EXTRN	F_39C5:NEAR
-	EXTRN	F_3EED:NEAR
 PROG	ENDS
-	PUBLIC	F_3AE2,F_3B46,D_0A82
+	PUBLIC	F_3AE2,D_0A82
 
 PROG	SEGMENT
 F_3AE2:
@@ -73,22 +72,6 @@ L_3B1D:
 	ADD	SP, 6                               ; 3B41 83 C4 06
 	POP	BP                                  ; 3B44 5D
 	RET                                     ; 3B45 C3
-F_3B46:
-	PUSH	BP                                 ; 3B46 55
-	MOV	BP, SP                              ; 3B47 8B EC
-	PUSH	WORD PTR D_2046                    ; 3B49 FF 36 46 20
-	PUSH	WORD PTR [BP+4]                    ; 3B4D FF 76 04
-	CALL	F_3599                             ; 3B50 E8 9F F5
-	MOV	SP, BP                              ; 3B53 8B E5
-	CALL	F_3EED                             ; 3B55 E8 24 01
-	MOV	AX, 18H                             ; 3B58 B8 18 00
-	PUSH	AX                                 ; 3B5B 50
-	MOV	AX, 1                               ; 3B5C B8 01 00
-	PUSH	AX                                 ; 3B5F 50
-	CALL	F_352C                             ; 3B60 E8 22 F5
-	MOV	SP, BP                              ; 3B63 8B E5
-	POP	BP                                  ; 3B65 5D
-	RET                                     ; 3B66 C3
 PROG	ENDS
 
 DATA	SEGMENT
