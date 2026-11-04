@@ -58,7 +58,7 @@ push di; push ds` or no frame).
 | OR3EED | 3EED: scroll the message area up a line | | asm | OUT SPACE MONDAIN |
 | OR3F62 | 3F62: play sound n (10 PC-speaker routines) | 0836-084A jump table | asm | OUT SPACE MONDAIN |
 | OR4071 | 4071: fill the 200-line address table | 084A-09DA | asm | all |
-| OR09DA | (data only) a 16-colour palette, linked just before OR40EE | 09DA-09EC | asm | GEN MONDAIN SPACE OUT |
+| OR09DA | (data only) a 16-colour palette, linked just before OR40EE | 09DA-09EC | asm | all |
 | OR40EE | 40EE 4115: Tandy mode 9 / EGA mode 0Dh, with palette | 09EC-09FE | asm | all |
 | OR413C | 413C 41D5 4224 4234: key input with cursor | 09FE-0A30 | asm | all |
 
