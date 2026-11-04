@@ -21,8 +21,13 @@ TC = os.path.join(ROOT, 'build', 'tc')
 sys.path.insert(0, HERE)
 
 
+SEVENZ = shutil.which('7z') or next((p for p in (r'C:\Program Files\7-Zip\7z.exe',
+                                                  r'C:\Program Files (x86)\7-Zip\7z.exe')
+                                     if os.path.exists(p)), '7z')
+
+
 def sh7z(archive, out):
-    subprocess.run(['7z', 'x', '-y', '-o' + out, archive], check=True, stdout=subprocess.DEVNULL)
+    subprocess.run([SEVENZ, 'x', '-y', '-o' + out, archive], check=True, stdout=subprocess.DEVNULL)
 
 
 def fat(img, out):

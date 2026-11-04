@@ -6,11 +6,15 @@
 As a module: run(workdir, [cmds]) -> None. PATH holds the Lattice compiler, INCLUDE its headers.
 Each call uses its own config file, so several runs can go at once.
 """
-import os, subprocess, sys, tempfile
+import os, shutil, subprocess, sys, tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 TC = os.path.join(ROOT, 'build', 'tc')
+# DOSBOX overrides; otherwise dosbox on the PATH, else the GOG copy in gamedata/ (Windows)
+DOSBOX = (os.environ.get('DOSBOX') or shutil.which('dosbox') or
+          next((p for p in (os.path.join(ROOT, 'gamedata', 'DOSBOX', 'DOSBox.exe'),)
+                if os.path.exists(p)), 'dosbox'))
 
 CONF = """[sdl]
 fullscreen=false
@@ -46,8 +50,10 @@ def run(workdir, cmds, timeout=300):
         f.write('exit\n')
     env = dict(os.environ, SDL_VIDEODRIVER='dummy', SDL_AUDIODRIVER='dummy')
     try:
-        subprocess.run(['dosbox', '-conf', conf, '-exit'], env=env, timeout=timeout,
-                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        extra = ['-noconsole'] if os.name == 'nt' else []
+        subprocess.run([DOSBOX, '-conf', conf, '-exit'] + extra, env=env, timeout=timeout,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                       cwd=os.path.dirname(conf))   # -noconsole writes stdout.txt/stderr.txt there
     finally:
         os.unlink(conf)
 

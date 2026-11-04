@@ -16,13 +16,13 @@ What GEN.EXE is built from (link order in `src/gen/gen.lnk`):
 | startup CXINIT | `src/lattice/C.ASM` | Hand-written MASM. Matches all five EXEs (only symbol addresses differ) |
 | game code 03E9-1948 | `src/gen/GEN.C` | C, all 29 functions. Data 0124-0692 and BSS 0A30-0DB0 defined in the file |
 | Lattice library 1948-34BF | `src/gen/LCLIB.ASM` | Generated MASM (tools/genasm.py), one module |
-| Origin routines 34BF-4260 | `src/gen/ORIGIN.ASM` | Generated MASM. 4 of about 45 are matched in C in `src/gen/work/origin.c` (387E, 3920, 39C5, 3AD7); not in the build yet |
+| Origin library 34BF-4254 | `src/origin/OR*.ASM`, `OR*.C` | 17 modules in library order (docs/MAP.md). 3 are C (387E/3920, 39C5, 3AD7; `-ms -v -w -cs`), 14 are generated MASM with symbolic data and code addresses |
 | _IOB | `src/gen/IOB.ASM` | Generated; must stay last (its UDATA ends BSS) |
 
 Names are still addresses (`F_xxxx` code, `D_xxxx` DGROUP); `src/gen/gen.syms` maps every
 address to its name. GEN.C functions carry a one-line comment saying what they do.
 
-Karl asked to stop after GEN.EXE; everything below "Next steps" is not started.
+Step 1 of "Next steps" (Origin library) is done; the rest is not started.
 
 ## Toolchain facts (proven)
 
@@ -36,6 +36,8 @@ Karl asked to stop after GEN.EXE; everything below "Next steps" is not started.
 - Assembler: MASM 3.00 (MASM 4.00 gives identical objects).
 - Linker: LINK 3.05 (MASM 4.0) is used. LINK 2.40 and 3.00 give the same GEN.EXE, so the
   original version is still undetermined. LINK 1.10 cannot read Lattice 3 libraries.
+- DATA is `PARA` aligned in C.ASM (as in Lattice's own C.ASM); LINK then pads the code up to
+  DGROUP's paragraph (it used to be 12 explicit zero bytes at the end of ORIGIN.ASM).
 - The header checksums of GEN, OUT, SPACE and MONDAIN are valid MS LINK checksums; ULTIMA.EXE's
   is not (see below).
 
@@ -47,7 +49,10 @@ python3 tools/build.py gen          # -> build/gen/GEN.EXE, compared with gameda
 ```
 
 Needs `dosbox` (0.74 headless; `apt-get install dosbox p7zip-full` works in the cloud
-workspace) and `7z`. py7zr cannot open the archives that use BCJ2 (Lattice 2.12, MS C 1.03/1.04).
+workspace) and `7z`. On Karl's Windows machine it runs natively: tools/dos.py falls back to
+`gamedata/DOSBOX/DOSBox.exe` (or `DOSBOX=...`), setup.py to `C:\Program Files\7-Zip\7z.exe`;
+capstone is in a venv: `build/venv/Scripts/python tools/...` (the system Python refuses pip).
+A GEN build takes about 3 s. py7zr cannot open the archives that use BCJ2 (Lattice 2.12, MS C 1.03/1.04).
 setup.py looks for the MASM 3.0 image in `../u6-decompiled/tools/masm300/`; in the cloud it is
 staged from Karl's u6-decompiled folder. `gamedata/` must hold the GOG EXEs.
 
@@ -79,10 +84,11 @@ Other tools: `exediff.py` (header, relocations, image), `cmp.py` (object vs EXE)
 - git author: Karl <30571394+karlclinckspoor@users.noreply.github.com>; commit messages end
   with the Co-Authored-By/Claude-Session lines. Never commit gamedata or tool archives
   (`.gitignore` covers `gamedata/`, `build/`, `tools/*.7z`, `tools/*.zip`).
-- Work happens in the cloud workspace (`/home/claude/u1-decompiled`): Karl's computer has no
-  DOSBox in its Linux shell. To sync, tar the repo (`.git` plus tracked files) into
-  /mnt/user-data/outputs, commit it to `C:\Users\karl9\Downloads\Claude\u1-decompiled\` and
-  untar it there with the device shell. Deleting files there needs Karl's permission.
+- Work now happens directly in `C:\Users\karl9\Downloads\Claude\u1-decompiled\` on Windows (Git
+  Bash and PowerShell). From a cloud session, the old route still applies: tar the repo (`.git`
+  plus tracked files) into /mnt/user-data/outputs and untar it there with the device shell.
+- Git Bash's `sed -i` drops CRs. MASM 3.00 needs CRLF in .ASM files (the C files are LF), so
+  edit .ASM files with Python (binary mode) or the Edit tool.
 - Do not name a tool `dis.py` in tools/: it shadows Python's `dis` module and breaks capstone.
 - Building emu2 or downloading prebuilt binaries was blocked by the safety classifier, so
   DOSBox from apt is the DOS runner (about 1.5 s per compile).
@@ -100,11 +106,9 @@ Other tools: `exediff.py` (header, relocations, image), `cmp.py` (object vs EXE)
 
 ## Next steps (in order)
 
-1. **Origin routines to C** (`ORIGIN.ASM`, shared with all EXEs, so do them once and well).
-   Frameless routines stay assembly: TIMERISR 3EB2, 3A1D, 3D23, 3D41, 3D61, 3E77, 4071, 41D5,
-   4234. Origin's data is DGROUP 07C0-0A30 (no BSS). The C needs its own options line (check
-   whether `-w -cs` also hold). Splitting ORIGIN into C and asm modules means giving each
-   module its share of 07C0-0A30 in link order; test the split with tools/build.py.
+1. ~~Origin routines to C~~ **done.** Only 4 routines were C (Lattice frame); the rest is
+   hand-written assembly. The library is split into its 17 modules in `src/origin/` (method in
+   docs/MAP.md). Left for the readable pass: comments in the assembly modules.
 2. **Split LCLIB.ASM into Lattice modules** (FOPEN, _FLSBF, CXSERR, ...) with their own data,
    so the other EXEs can link the subsets they use. Data-only modules (STACK, _MNEED, ERROR,
    _FMODE, _POOL, _UFBS) can sit anywhere in the link list. Code+data modules must keep the same
@@ -130,7 +134,6 @@ literals, not D_ references to strings.
 
 - `GEN.EXE.map.json` in Karl's folder root is a leftover (now untracked; fmap writes to build/).
   `u1-repo.tgz` there is the transfer archive. Both can be deleted.
-- `src/gen/work/origin.c` uses `-ms -v` (no -w/-cs); recheck when moving it into the build.
 - docs/MAP.md's ULTIMA section and the per-EXE tables need filling as EXEs are done.
 - Project doc `claude/u1-decompilation-plan.md` (claude.ai project "Ultimas") has the same
   status summary; keep both in step.

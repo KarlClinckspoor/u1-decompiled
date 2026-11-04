@@ -14,7 +14,7 @@ Everything here was learned on GEN.EXE.
    (its DGROUP offset); library functions have their Lattice names (STRCPY, FOPEN, ...).
    `python3 tools/disasm.py gamedata/GEN.EXE 0670 80` disassembles,
    `python3 tools/dump.py gamedata/GEN.EXE 124 60 --ds` dumps data, `--str OFF` prints a string.
-   `tools/modgen.py` prints any range as labelled MASM (see src/gen/ORIGIN.ASM, LCLIB.ASM).
+   `tools/modgen.py` prints any range as labelled MASM (see src/origin/*.ASM, src/gen/LCLIB.ASM).
 2. Write C in a work file, one or more functions, named exactly as in gen.syms (`F_0670()`),
    calling other functions and using globals by their gen.syms names, declared `extern`.
 3. `python3 tools/lc.py FILE.C` compiles and compares every function in the file with the
@@ -54,7 +54,10 @@ and UDATA are word aligned and laid out in link order (src/gen/gen.lnk).
 ## Assembly
 Functions without a C frame, interrupt handlers and code that uses CS-relative data were
 written in assembly. `tools/genasm.py` generates a matching MASM module for a range
-(see src/gen/ORIGIN.ASM); clean it up by hand and keep it matching.
+(see src/origin/); clean it up by hand and keep it matching. Immediates that are
+addresses stay numbers (no relocation marks them in an EXE): make them `OFFSET DGROUP:D_xxxx`
+or `OFFSET label` by hand, and tables of code addresses in DATA `DW label`, or the module only
+fits the one EXE it was generated from.
 
 ## Tricks that were needed in GEN
 - A pointer used for a read-modify-write was a block-local `register` copy:

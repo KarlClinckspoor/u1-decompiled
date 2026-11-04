@@ -2,5 +2,21 @@
 ../lattice/C.ASM
 GEN.C		; game code
 LCLIB.ASM	; Lattice C 3.1x library modules
-ORIGIN.ASM	; Origin support routines (generated; C in progress in work/origin.c)
+../origin/OR34BF.ASM	; Origin support library, in library order
+../origin/OR357C.ASM
+../origin/OR3599.ASM
+../origin/OR3862.ASM
+../origin/OR387E.C
+../origin/OR39C5.C
+../origin/OR39FC.ASM
+../origin/OR3AD7.C
+../origin/OR3C8B.ASM
+../origin/OR3D41.ASM
+../origin/OR3E5E.ASM
+../origin/OR3EC4.ASM
+../origin/OR3EED.ASM
+../origin/OR3F62.ASM
+../origin/OR4071.ASM
+../origin/OR40EE.ASM
+../origin/OR413C.ASM
 IOB.ASM		; Lattice _IOB (last UDATA)

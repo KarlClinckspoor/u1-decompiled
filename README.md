@@ -8,7 +8,7 @@ GOG release, byte for byte.
 
 | executable | what | status |
 |---|---|---|
-| GEN.EXE | character creation | **rebuilds identical**. Game code in C (src/gen/GEN.C, 29 functions); Lattice library and Origin's support routines as generated assembly |
+| GEN.EXE | character creation | **rebuilds identical**. Game code in C (src/gen/GEN.C, 29 functions); Origin's support library as 17 modules (3 in C, 14 in assembly); Lattice library as generated assembly |
 | ULTIMA.EXE | loader, title | not started (has a protection-envelope remnant, see docs/MAP.md) |
 | OUT.EXE | the game | not started |
 | SPACE.EXE | space flight | not started |
@@ -32,13 +32,18 @@ python3 tools/setup.py          # unpacks the toolchain into build/tc (needs 7z)
 python3 tools/build.py gen      # builds build/gen/GEN.EXE and compares it with gamedata/GEN.EXE
 ```
 
-Builds run the DOS tools in headless DOSBox (`dosbox` on the PATH).
+Builds run the DOS tools in headless DOSBox: `dosbox` on the PATH, or the one named by the
+`DOSBOX` environment variable; on Windows the GOG copy in `gamedata/DOSBOX/` is used when
+neither is set (7-Zip is looked for in `Program Files` too). The disassembly tools need
+`capstone` (`pip install capstone`, in a venv if the system Python refuses).
 
 ## Layout
 
 - `src/lattice/C.ASM`: Lattice startup (CXINIT), shared by every executable
-- `src/gen/`: GEN.EXE: `gen.lnk` (link order), `GEN.C`, `LCLIB.ASM`, `ORIGIN.ASM`, `IOB.ASM`,
-  `gen.syms` (names of every function and global by address), `work/` (C in progress)
+- `src/origin/`: Origin's support library (graphics, text, keyboard, sound, timer), one file per
+  module, named after its first function (`OR34BF.ASM`, `OR387E.C`, ...); every EXE links a subset
+- `src/gen/`: GEN.EXE: `gen.lnk` (link order), `GEN.C`, `LCLIB.ASM`, `IOB.ASM`,
+  `gen.syms` (names of every function and global by address)
 - `tools/`: build, compare, disassembly and generation tools (docs/MATCHING.md explains the loop)
 - `docs/HANDOFF.md`: state and next steps; `docs/MAP.md`: layout of the executables;
   `docs/MATCHING.md`: how Lattice C 3.10 code reads
