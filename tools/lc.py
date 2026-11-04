@@ -36,6 +36,48 @@ def compile_c(path, opts=None, keep=None):
     return obj if os.path.exists(obj) else None, log, tmp
 
 
+def check_fixups(m, k, off, end, at, img, ds, csym, dsym, byname, bydname):
+    """Fixups to external symbols must land where the original points: the masked bytes are
+    checked against the symbol tables (code names for self-relative, DGROUP names otherwise).
+    Fixups to the module's own segments (string literals, its own data) are not checked."""
+    import struct
+    bad = []
+    code = m['data'][k]
+    for p, n, lt, mm, frame, target, disp in m['fix'][k]:
+        if not (off <= p < end) or n != 2 or lt not in (1, 5):
+            continue
+        tm, ti = target
+        if tm != 2:                      # only EXTDEF targets
+            continue
+        name = m['exts'][ti - 1].upper()
+        here = at + (p - off)
+        content = struct.unpack('<H', bytes(code[p:p + 2]))[0]
+        orig = struct.unpack('<H', img[here:here + 2])[0]
+        if mm == 0:                      # self-relative (near call/jump)
+            if name not in byname:
+                bad.append('%04X: %s not a code symbol' % (here, name))
+                continue
+            want = (byname[name] + disp + content - (here + 2)) & 0xffff
+            if want != orig:
+                tgt = (orig + here + 2) & 0xffff
+                bad.append('%04X: calls %s, original calls %s' % (here, name, csym.get(tgt, '%04X' % tgt)))
+        else:
+            base = bydname.get(name)
+            if base is None:
+                base = byname.get(name)
+                if base is None:
+                    bad.append('%04X: %s not in the symbol table' % (here, name))
+                    continue
+            want = (base + disp + content) & 0xffff
+            if want != orig:
+                near = max([a for a in dsym if a <= orig] or [0])
+                lab = dsym.get(near, '?')
+                bad.append('%04X: %s%+d = %04X, original %04X (%s%+d)' % (
+                    here, name, (disp + content) if (disp + content) < 0x8000 else (disp + content) - 0x10000,
+                    want, orig, lab, orig - near))
+    return bad
+
+
 def main():
     a = sys.argv[1:]
     def opt(name, default):
@@ -60,6 +102,7 @@ def main():
         sys.exit(2)
     csym, dsym = modgen.load_syms(syms)
     byname = {v.upper(): k for k, v in csym.items()}
+    bydname = {v.upper(): k for k, v in dsym.items()}
     img, ds = cmp.load_exe(exe)
     ok = True
     for m in omf.read_obj(obj):
@@ -75,7 +118,13 @@ def main():
                     continue
                 at = byname[nm.upper()]
                 r, msg = cmp.compare(m['data'][k][off:end], m['mask'][k][off:end], img[at:at + end - off], verbose)
+                bad = check_fixups(m, k, off, end, at, img, ds, csym, dsym, byname, bydname)
+                if r and bad:
+                    r = False
+                    msg = 'WRONG TARGETS (code matches, %d fixup(s) point elsewhere)' % len(bad)
                 print('%-12s %04X %s' % (nm, at, msg.replace('PROG: ', '')))
+                for b in bad[:12 if not verbose else 60]:
+                    print('    ' + b)
                 ok &= r
         if doff:
             for k, s in enumerate(m['segs'], 1):
