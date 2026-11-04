@@ -21,7 +21,7 @@ import capstone
 from capstone import x86
 import modgen
 
-REFS = ['gen', 'mondain']   # builds whose modules are known, in order of trust
+REFS = ['gen', 'mondain', 'space', 'ultima']   # builds whose modules are known, in order of trust
 
 md = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_16)
 md.detail = True
@@ -183,14 +183,19 @@ def main():
     # the rest: function entries and referenced data
     from rdis import analyse
     _, ce, _, funcs, allins = analyse(exe, sorted(code))
+    taken = set(code.values()) | set(data.values())   # names the placed modules define
+    tag = os.path.basename(exe)[0].upper()
+
+    def fresh(nm):                  # an address name of this EXE must not clash with a module's
+        return nm + '_' + tag if nm in taken else nm
     for s in funcs:
         if funcs[s] and s not in code:
-            code[s] = 'F_%04X' % s
+            code[s] = fresh('F_%04X' % s)
     for adr, i in allins.items():
         for k, o, v in operands(i):
             if k == 'data' and v < dlimit and v not in data:
                 if not any(dv for dv in [v] if dv in data):
-                    data[v] = 'D_%04X' % v
+                    data[v] = fresh('D_%04X' % v)
     # drop D_ names that fall inside a named object of another module's data (keep exact names)
     iob = next((k for k, v in data.items() if v == '_IOB'), None)
     if iob is not None:               # _IOB is one array of FILEs: its fields are _IOB+n

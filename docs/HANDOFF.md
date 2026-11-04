@@ -9,7 +9,8 @@ State as of 2026-11-04. Read this first, then README.md, docs/MAP.md and docs/MA
 | GEN.EXE (character creation) | **Rebuilds byte-identical** (sha1 af21ad12e999d63d36d2e34381c857f55e57c14d) |
 | MONDAIN.EXE (final battle) | **Rebuilds byte-identical** (sha1 9456ed0ae86a5cd6336de1b670538f1ebe0f8741): shared modules plus generated stand-ins (`src/mondain/`) |
 | SPACE.EXE (space flight) | **Rebuilds byte-identical** (sha1 fdd68f5bbeb9abeb7524b385e372daad5a6d02a3): shared modules plus generated stand-ins (`src/space/`) |
-| ULTIMA.EXE, OUT.EXE | Not started, apart from the shared startup and modules (below) |
+| ULTIMA.EXE (loader, title) | **Rebuilds byte-identical** (sha1 6589c21ebd80a03dec5b1d0d07068a638f450ee0): shared modules plus stand-ins; `src/ultima/postlink.py` appends the envelope's remains from gamedata at build time |
+| OUT.EXE | Not started, apart from the shared startup and modules (below) |
 
 What GEN.EXE is built from (link order in `src/gen/gen.lnk`):
 
@@ -128,7 +129,7 @@ Other tools: `exediff.py` (header, relocations, image), `cmp.py` (object vs EXE)
    their .lnk from the modules, adding the modules GEN lacks (generate them from that EXE the same
    way, symbolic addresses included). Open: the 14 modules identical to 3.00g could link the
    real objects (`LIB LCS *NAME`) instead.
-3. **ULTIMA.EXE**: same method; then a post-link step for the protection remnant. The header
+3. ~~ULTIMA.EXE~~ **done** (identical link with stand-ins, postlink.py). Was: same method; then a post-link step for the protection remnant. The header
    CS:IP is 088F:0000; at image 0x88F0 a stub restores SS:SP and RETFs to the startup; 0x500
    encrypted-looking bytes follow. Append the stub and tail from gamedata/ULTIMA.EXE at build
    time, patch CS:IP/SS:SP/checksum, and never commit the bytes.
@@ -164,6 +165,12 @@ and `runtime/port` + `replay` (a port checked against recorded DOS sessions).
 
 - MONDAIN's Origin modules (src/origin/OM*.ASM) are split where SPACE/OUT/ULTIMA show a boundary;
   runs that sit together everywhere (OM4437 = 4437-4A57) may still be several modules.
+- Names: library functions first found in MONDAIN/SPACE/ULTIMA carry their Lattice names (CXC33,
+  MEMSET, PUTS, CXNM8, CXD22/CXD33, _PFMT/_PF, FPUTS, FPUTC, STCD_I, STCL_H, STCL_O, STCUL_D,
+  STRUPR, MEMCPY, ISDIGIT, TOUPPER, ISLOWER). Address names (F_/D_xxxx) are per EXE, so two can
+  meet in one link: build.py now fails on LINK's "defined more than once", and xmap gives a
+  clashing address name the EXE's initial as suffix (SPACE's game data D_07FA_S).
+- Unsplit runs: ULTIMA's LU1222 (two functions), LU27B9/LU2846 are probably STCI_H/STCI_O.
 - MONDAIN.C defines `_stack` itself (3000 at DGROUP 0124), so the STACK module is not linked
   there; GEN uses the library's (0800h).
 

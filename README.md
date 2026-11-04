@@ -9,7 +9,7 @@ GOG release, byte for byte.
 | executable | what | status |
 |---|---|---|
 | GEN.EXE | character creation | **rebuilds identical**. Game code in C (src/gen/GEN.C, 29 functions); Origin's support library as 17 modules (3 in C, 14 in assembly); Lattice library as 49 generated assembly modules |
-| ULTIMA.EXE | loader, title | not started (has a protection-envelope remnant, see docs/MAP.md) |
+| ULTIMA.EXE | loader, title | **rebuilds identical** from the shared modules plus a generated stand-in for its game code; the protection envelope's remains are copied from the original at build time (src/ultima/postlink.py) |
 | OUT.EXE | the game | not started |
 | SPACE.EXE | space flight | **rebuilds identical** from the shared modules plus a generated stand-in for its game code (src/space/SPACE.ASM) |
 | MONDAIN.EXE | final battle | **rebuilds identical** from the shared startup, library and Origin modules plus a generated stand-in for its game code (src/mondain/MONDAIN.ASM) |
@@ -30,7 +30,7 @@ Microsoft C 2.03 for LINK 2.40, MASM 3.0 image, MASM 4.0 disk), then:
 ```sh
 python3 tools/setup.py          # unpacks the toolchain into build/tc (needs 7z)
 python3 tools/build.py gen      # builds build/gen/GEN.EXE and compares it with gamedata/GEN.EXE
-python3 tools/build.py mondain  # the same for MONDAIN.EXE (and space)
+python3 tools/build.py mondain  # the same for MONDAIN.EXE (and space, ultima)
 ```
 
 Builds run the DOS tools in headless DOSBox: `dosbox` on the PATH, or the one named by the

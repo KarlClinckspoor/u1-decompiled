@@ -34,7 +34,7 @@ PROG	SEGMENT
 	EXTRN	F_3E2F:NEAR
 	EXTRN	F_3E5E:NEAR
 	EXTRN	F_3E85:NEAR
-	EXTRN	F_3EB8:NEAR
+	EXTRN	MEMSET:NEAR
 	EXTRN	F_3EC4:NEAR
 	EXTRN	F_3EED:NEAR
 	EXTRN	F_3F58:NEAR
@@ -42,7 +42,7 @@ PROG	SEGMENT
 	EXTRN	F_4069:NEAR
 	EXTRN	F_413C:NEAR
 	EXTRN	F_4161:NEAR
-	EXTRN	F_416F:NEAR
+	EXTRN	PUTS:NEAR
 	EXTRN	F_4224:NEAR
 	EXTRN	F_4437:NEAR
 	EXTRN	F_44A2:NEAR
@@ -73,7 +73,7 @@ PROG	ENDS
 	PUBLIC	D_012C,D_012E,_STACK,D_0134,D_0136,D_0138
 	PUBLIC	D_013A,D_013C,D_0166,D_0194,D_01C4,D_01E4
 	PUBLIC	D_01EE,D_01F0,D_01F2,D_01F6,D_0204,D_0212
-	PUBLIC	D_0220,D_022E,D_04DA,D_07FA,D_0AEE,D_0B06
+	PUBLIC	D_0220,D_022E,D_04DA,D_07FA_S,D_0AEE,D_0B06
 	PUBLIC	D_0BD2,D_0C92,D_0C94,D_0C96,D_0C98,D_0C9A
 	PUBLIC	D_0C9C,D_0C9E,D_0DE0,D_0DE2,D_0E18,D_26C0
 	PUBLIC	D_26C2,D_26C4,D_26C6,D_26C8,D_26CA,D_26CC
@@ -268,7 +268,7 @@ L_0572:
 	MOV	AX, WORD PTR [BP+0CH]               ; 057A 8B 46 0C
 	SHL	AX, 1                               ; 057D D1 E0
 	ADD	SI, AX                              ; 057F 03 F0
-	CMP	WORD PTR D_07FA[SI], 1              ; 0581 83 BC FA 07 01
+	CMP	WORD PTR D_07FA_S[SI], 1              ; 0581 83 BC FA 07 01
 	JNE	L_05A1                              ; 0586 75 19
 	MOV	AX, WORD PTR [BP+12H]               ; 0588 8B 46 12
 	ADD	AX, WORD PTR [BP+0CH]               ; 058B 03 46 0C
@@ -288,7 +288,7 @@ L_05A1:
 	MOV	AX, WORD PTR [BP+0CH]               ; 05A9 8B 46 0C
 	SHL	AX, 1                               ; 05AC D1 E0
 	ADD	SI, AX                              ; 05AE 03 F0
-	CMP	WORD PTR D_07FA[SI], 2              ; 05B0 83 BC FA 07 02
+	CMP	WORD PTR D_07FA_S[SI], 2              ; 05B0 83 BC FA 07 02
 	JNE	L_05CF                              ; 05B5 75 18
 	MOV	AX, WORD PTR [BP+12H]               ; 05B7 8B 46 12
 	ADD	AX, WORD PTR [BP+0CH]               ; 05BA 03 46 0C
@@ -307,7 +307,7 @@ L_05CF:
 	MOV	AX, WORD PTR [BP+0CH]               ; 05D7 8B 46 0C
 	SHL	AX, 1                               ; 05DA D1 E0
 	ADD	SI, AX                              ; 05DC 03 F0
-	CMP	WORD PTR D_07FA[SI], 4              ; 05DE 83 BC FA 07 04
+	CMP	WORD PTR D_07FA_S[SI], 4              ; 05DE 83 BC FA 07 04
 	JNE	L_05FD                              ; 05E3 75 18
 	MOV	AX, WORD PTR [BP+12H]               ; 05E5 8B 46 12
 	ADD	AX, WORD PTR [BP+0CH]               ; 05E8 03 46 0C
@@ -326,7 +326,7 @@ L_05FD:
 	MOV	AX, WORD PTR [BP+0CH]               ; 0605 8B 46 0C
 	SHL	AX, 1                               ; 0608 D1 E0
 	ADD	SI, AX                              ; 060A 03 F0
-	CMP	WORD PTR D_07FA[SI], 3              ; 060C 83 BC FA 07 03
+	CMP	WORD PTR D_07FA_S[SI], 3              ; 060C 83 BC FA 07 03
 	JNE	L_0629                              ; 0611 75 16
 	MOV	AX, WORD PTR [BP+12H]               ; 0613 8B 46 12
 	ADD	AX, WORD PTR [BP+0CH]               ; 0616 03 46 0C
@@ -1172,7 +1172,7 @@ F_0D88:
 	PUSH	AX                                 ; 0DA8 50
 	MOV	AX, 26C0H                           ; 0DA9 B8 C0 26
 	PUSH	AX                                 ; 0DAC 50
-	CALL	F_3EB8                             ; 0DAD E8 08 31
+	CALL	MEMSET                             ; 0DAD E8 08 31
 	MOV	SP, BP                              ; 0DB0 8B E5
 	MOV	WORD PTR [BP+2], 0                  ; 0DB2 C7 46 02 00 00
 L_0DB7:
@@ -5662,7 +5662,7 @@ F_3DD6:
 	MOV	BP, SP                              ; 3DD7 8B EC
 	MOV	AX, 0F80H                           ; 3DD9 B8 80 0F
 	PUSH	AX                                 ; 3DDC 50
-	CALL	F_416F                             ; 3DDD E8 8F 03
+	CALL	PUTS                             ; 3DDD E8 8F 03
 	MOV	SP, BP                              ; 3DE0 8B E5
 	MOV	AX, 3                               ; 3DE2 B8 03 00
 	PUSH	AX                                 ; 3DE5 50
@@ -5835,7 +5835,7 @@ D_04DA	DB	0,0,0,0,0,0,0,0,0,0,0,0	; 04DA
 	DB	0,0,0,0,0,0,1,0,1,0,0,0	; 07DA
 	DB	0,0,1,0,1,0,0,0,0,0,0,0	; 07E6
 	DB	0,0,0,0,0,0,0,0	; 07F2
-D_07FA	DB	0,0,0,0,0,0,0,0,0,0,0,0	; 07FA
+D_07FA_S	DB	0,0,0,0,0,0,0,0,0,0,0,0	; 07FA
 	DB	0,0,0,0,4,0,4,0,4,0,4,0	; 0806
 	DB	4,0,0,0,0,0,0,0,0,0,0,0	; 0812
 	DB	0,0,0,0,0,0,0,0,0,0,0,0	; 081E

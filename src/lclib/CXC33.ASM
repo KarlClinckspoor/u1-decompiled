@@ -12,10 +12,10 @@ UDATA	ENDS
 DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
-	PUBLIC	F_22FB
+	PUBLIC	CXC33
 
 PROG	SEGMENT
-F_22FB:
+CXC33:
 	PUSH	AX                                 ; 22FB 50
 	XOR	AX, CX                              ; 22FC 33 C1
 	POP	AX                                  ; 22FE 58

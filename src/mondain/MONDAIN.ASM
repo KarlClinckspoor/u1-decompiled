@@ -22,7 +22,7 @@ DATA	ENDS
 PROG	SEGMENT
 	EXTRN	EXECL:NEAR
 	EXTRN	F_1D0D:NEAR
-	EXTRN	F_22FB:NEAR
+	EXTRN	CXC33:NEAR
 	EXTRN	F_352C:NEAR
 	EXTRN	F_355D:NEAR
 	EXTRN	F_357C:NEAR
@@ -99,7 +99,7 @@ L_03F9:
 	MOV	BX, WORD PTR [BP+4]                 ; 0410 8B 5E 04
 	MOV	CX, 1                               ; 0413 B9 01 00
 	MOV	DX, 24F8H                           ; 0416 BA F8 24
-	CALL	F_22FB                             ; 0419 E8 DF 1E
+	CALL	CXC33                             ; 0419 E8 DF 1E
 	JL	L_03F9                               ; 041C 7C DB
 L_041E:
 	ADD	SP, 8                               ; 041E 83 C4 08

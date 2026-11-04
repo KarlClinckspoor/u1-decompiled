@@ -18,10 +18,10 @@ DATA	ENDS
 PROG	SEGMENT
 	EXTRN	_FLSBF:NEAR
 PROG	ENDS
-	PUBLIC	F_416F
+	PUBLIC	PUTS
 
 PROG	SEGMENT
-F_416F:
+PUTS:
 	PUSH	BP                                 ; 416F 55
 	SUB	SP, 4                               ; 4170 83 EC 04
 	MOV	BP, SP                              ; 4173 8B EC

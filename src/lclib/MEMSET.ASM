@@ -12,10 +12,10 @@ UDATA	ENDS
 DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
-	PUBLIC	F_3EB8
+	PUBLIC	MEMSET
 
 PROG	SEGMENT
-F_3EB8:
+MEMSET:
 	PUSH	BP                                 ; 3EB8 55
 	MOV	BP, SP                              ; 3EB9 8B EC
 	MOV	DI, WORD PTR [BP+4]                 ; 3EBB 8B 7E 04

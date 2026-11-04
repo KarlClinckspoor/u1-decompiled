@@ -168,8 +168,19 @@ DGROUP paragraph 0x72D. Link order in src/space/space.lnk.
 The palette module OR09DA sits just before OR40EE in all three EXEs (in GEN that is also just
 after OR4071, which is why GEN alone could not place it); OM3FF9 has two palettes of its own.
 
-## ULTIMA.EXE
-Header CS:IP 088F:0000 points at a stub after the program (image 0x88F0) that restores SS:SP
-and jumps to the startup at load:0000; 0x500 bytes after it look encrypted and the header
-checksum is wrong: the remains of a removed protection envelope. To be handled by a post-link
-step that appends the stub and tail and patches the header.
+## ULTIMA.EXE (loader, title) - 36880 bytes, sha1 6589c21ebd80a03dec5b1d0d07068a638f450ee0
+DGROUP paragraph 0x3ED. Link order in src/ultima/ultima.lnk.
+
+| code | | data |
+|---|---|---|
+| 0000-03E9 | startup | 0000-0123 |
+| 03E9-0E4D | game code (ULTIMA.ASM, stand-in) | 0124-454A, BSS 4A20-C72C |
+| 0E4D-3478 | Lattice modules (with printf's _PFMT/_PF, number conversions, ctype) | 454A-4792 |
+| 3478-3EC8 | Origin modules (GEN's display and keyboard set; OU3BD5, OU3C6C its own) | 47A0-4A14 |
+| | _IOB | BSS C72C-C844 |
+| image 88E4- | protection envelope remains: filler, stub at 88F0, 0x500 encrypted-looking bytes | |
+
+The header's entry point 088F:0000 is the stub, with its own stack 09E1:0064; the stub restores
+SS:SP and jumps to the startup at 0000. The envelope overlays the program's BSS (which starts at
+DGROUP 4A20 = image 88F0), so it costs no memory. The program part is exactly what LINK makes
+(the header checksum is LINK's); src/ultima/postlink.py appends the rest from the original.

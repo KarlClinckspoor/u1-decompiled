@@ -12,10 +12,20 @@ UDATA	ENDS
 DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
+	PUBLIC	CXNM8
 
 PROG	SEGMENT
-	DB	51H,8BH,0CBH,81H,0E3H,0FH,0,0D1H,0E9H,0D1H,0E9H,0D1H	; 41DB
-	DB	0E9H,0D1H,0E9H,3,0C1H,59H,0C3H	; 41E7
+CXNM8:
+	PUSH	CX                                 ; 41DB 51
+	MOV	CX, BX                              ; 41DC 8B CB
+	AND	BX, 0FH                             ; 41DE 81 E3 0F 00
+	SHR	CX, 1                               ; 41E2 D1 E9
+	SHR	CX, 1                               ; 41E4 D1 E9
+	SHR	CX, 1                               ; 41E6 D1 E9
+	SHR	CX, 1                               ; 41E8 D1 E9
+	ADD	AX, CX                              ; 41EA 03 C1
+	POP	CX                                  ; 41EC 59
+	RET                                     ; 41ED C3
 PROG	ENDS
 
 	END

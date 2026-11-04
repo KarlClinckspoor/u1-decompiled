@@ -7,7 +7,8 @@ Reads src/NAME/NAME.lnk: one module per line, in link order ("file [; comment]")
 relative to src/NAME. .C files are compiled with Lattice C 3.10 (LC, options from their
 "/* opts: */" line, default -ms -v), .ASM files assembled with MASM 3.00; the objects are
 linked with Microsoft LINK 3.05 (MASM 4.0) into build/NAME/NAME.EXE, which is then compared
-with gamedata/NAME.EXE. Exit status 0 when identical.
+with gamedata/NAME.EXE. Exit status 0 when identical. If src/NAME/postlink.py exists it is run on
+the linked EXE first (ULTIMA.EXE: the protection envelope's remains, copied from the original).
 """
 import hashlib, os, re, shutil, subprocess, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -55,7 +56,7 @@ def main():
     bad = []
     for l in log.split('\n'):
         m = re.match(r'^\s*(\d+)\s+(\d+)\s*$', l)
-        if (m and int(m.group(1)) + int(m.group(2))) or re.search(r'Error \d|error L|Unresolved|Undefined', l):
+        if (m and int(m.group(1)) + int(m.group(2))) or re.search(r'Error \d|error L|Unresolved|Undefined|more than once', l):
             bad.append(l)
     for o in objs:
         if not os.path.exists(os.path.join(out, o + '.OBJ')):
@@ -65,6 +66,11 @@ def main():
         print(log)
         print('\n'.join(bad))
         sys.exit(2)
+    post = os.path.join(src, 'postlink.py')     # an EXE-specific step after LINK (ULTIMA)
+    if os.path.exists(post):
+        r = subprocess.run([sys.executable, post, built, os.path.join(ROOT, 'gamedata', exe + '.EXE')])
+        if r.returncode:
+            sys.exit(r.returncode)
     h = hashlib.sha1(open(built, 'rb').read()).hexdigest()
     print('%s.EXE sha1 %s' % (exe, h))
     orig = os.path.join(ROOT, 'gamedata', exe + '.EXE')
