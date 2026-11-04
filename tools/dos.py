@@ -42,12 +42,14 @@ c:
 
 def run(workdir, cmds, timeout=300):
     workdir = os.path.abspath(workdir)
+    # the commands go in a batch file: DOSBox 0.74's [autoexec] overflows at about 4 KB
+    bat = os.path.join(workdir, '_RUN.BAT')
+    with open(bat, 'w', newline='') as f:
+        f.write('@ECHO OFF\r\n' + ''.join(c + '\r\n' for c in cmds))
     fd, conf = tempfile.mkstemp(suffix='.conf')
     with os.fdopen(fd, 'w') as f:
         f.write(CONF.format(c=workdir, d=TC))
-        for c in cmds:
-            f.write(c + '\n')
-        f.write('exit\n')
+        f.write('CALL _RUN.BAT\nexit\n')
     env = dict(os.environ, SDL_VIDEODRIVER='dummy', SDL_AUDIODRIVER='dummy')
     try:
         extra = ['-noconsole'] if os.name == 'nt' else []
@@ -56,6 +58,8 @@ def run(workdir, cmds, timeout=300):
                        cwd=os.path.dirname(conf))   # -noconsole writes stdout.txt/stderr.txt there
     finally:
         os.unlink(conf)
+        if os.path.exists(bat):
+            os.unlink(bat)
 
 
 if __name__ == '__main__':

@@ -39,6 +39,7 @@ MONDAIN.ASM		; game code (generated stand-in)
 ../origin/OR3862.ASM
 ../origin/OR387E.C
 ../origin/OM353A.ASM
+../origin/OM355D.ASM
 ../origin/OR39C5.C
 ../origin/OM37FD.ASM
 ../origin/OR39FC.ASM
@@ -54,6 +55,11 @@ MONDAIN.ASM		; game code (generated stand-in)
 ../origin/OM3E2F.ASM
 ../origin/OR4071.ASM
 ../origin/OM3F58.ASM
+../origin/OM3FF9.ASM
+../origin/OM4069.ASM
+../origin/OM40A8.ASM
+../origin/OM418A.ASM
+../origin/OM4437.ASM
 ../origin/OR40EE.ASM
 ../origin/OR413C.ASM
 ../lclib/FCLOSE.ASM	; Lattice modules taken in LINK's second pass

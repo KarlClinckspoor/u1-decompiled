@@ -145,7 +145,7 @@ DGROUP paragraph 0x597. Link order in src/mondain/mondain.lnk.
 | 0000-03E9 | startup | 0000-0123 |
 | 03E9-2230 | game code (MONDAIN.ASM, stand-in) | 0124-0902 (`_stack` = 3000 at 0124), BSS 2040-48A0 |
 | 2230-3018 | Lattice modules, first pass (EXECL ... L33F9, with CXC33) | 0902-0A02 |
-| 3018-4BBD | Origin modules: GEN's less OR3AD7, plus OM33BB OM353A OM37FD OM3AE2 OM3BF6 OM3CF1 OM3E2F OM3F58 | 0A10-2020 |
+| 3018-4BBD | Origin modules: GEN's less OR3AD7, plus OM33BB OM353A OM355D OM37FD OM3AE2 OM3BF6 OM3CF1 OM3E2F OM3F58 OM3FF9 OM4069 OM40A8 OM418A OM4437 | 0A10-2020 |
 | 4BBD-5969 | Lattice modules, second pass (FCLOSE ... LSEEK) | 2020-2032 |
 | | _IOB | BSS 48A0-49B8 |
 

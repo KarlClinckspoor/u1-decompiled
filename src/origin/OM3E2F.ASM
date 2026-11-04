@@ -22,7 +22,7 @@ PROG	SEGMENT
 	EXTRN	FWRITE:NEAR
 	EXTRN	F_125C:NEAR
 PROG	ENDS
-	PUBLIC	F_3E2F,F_3E85
+	PUBLIC	F_3E2F,F_3E85,D_0AB6,D_0AB9
 
 PROG	SEGMENT
 F_3E2F:
@@ -30,7 +30,7 @@ F_3E2F:
 	SUB	SP, 8                               ; 3E30 83 EC 08
 	MOV	BP, SP                              ; 3E33 8B EC
 L_3E35:
-	MOV	AX, 0AB6H                           ; 3E35 B8 B6 0A
+	MOV	AX, OFFSET DGROUP:D_0AB6            ; 3E35 B8 B6 0A
 	PUSH	AX                                 ; 3E38 50
 	PUSH	WORD PTR [BP+0CH]                  ; 3E39 FF 76 0C
 	CALL	FOPEN                              ; 3E3C E8 F1 0D
@@ -68,7 +68,7 @@ F_3E85:
 	SUB	SP, 8                               ; 3E86 83 EC 08
 	MOV	BP, SP                              ; 3E89 8B EC
 L_3E8B:
-	MOV	AX, 0AB9H                           ; 3E8B B8 B9 0A
+	MOV	AX, OFFSET DGROUP:D_0AB9            ; 3E8B B8 B9 0A
 	PUSH	AX                                 ; 3E8E 50
 	PUSH	WORD PTR [BP+0CH]                  ; 3E8F FF 76 0C
 	CALL	FOPEN                              ; 3E92 E8 9B 0D
@@ -104,7 +104,8 @@ L_3ED0:
 PROG	ENDS
 
 DATA	SEGMENT
-	DB	72H,62H,0,77H,62H,0	; 0AB6
+D_0AB6	DB	72H,62H,0	; 0AB6
+D_0AB9	DB	77H,62H,0	; 0AB9
 DATA	ENDS
 
 	END

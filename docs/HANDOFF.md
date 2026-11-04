@@ -80,6 +80,10 @@ In a .syms file, `C` = code entry, `L` = code label on data (never disassembled 
 using the fixups of build/gen/*.OBJ as the mask (run `build.py gen` first), names their code and
 data with GEN's names, adds F_/D_ names for the rest and prints the module map.
 
+`addrimm.py EXE START END OTHER.EXE -o OUT/NAME.imm` finds the 16-bit immediates that are
+addresses (they differ between the two EXEs' copies of the code); genasm.py reads NAME.imm and
+writes them `OFFSET DGROUP:name` (every target needs a symbol in the .syms file first).
+
 Other tools: `exediff.py` (header, relocations, image), `cmp.py` (object vs EXE),
 `omf.py` (object/library reader), `fmap.py` (function map), `libmatch.py`, `libfuzzy.py`,
 `libsim.py`, `libdir.py` (library identification), `rdis.py` (recursive disassembly).
@@ -153,9 +157,8 @@ and `runtime/port` + `replay` (a port checked against recorded DOS sessions).
 
 ## Loose ends
 
-- The new Origin modules from MONDAIN (src/origin/OM*.ASM) still have address immediates as
-  numbers (string literals, mostly in OM3F58) and the 3F58-4A57 block is one module where there
-  are probably several: fix both when SPACE or OUT links them (the link and xmap will show it).
+- MONDAIN's Origin modules (src/origin/OM*.ASM) are split where SPACE/OUT/ULTIMA show a boundary;
+  runs that sit together everywhere (OM4437 = 4437-4A57) may still be several modules.
 - MONDAIN.C defines `_stack` itself (3000 at DGROUP 0124), so the STACK module is not linked
   there; GEN uses the library's (0800h).
 

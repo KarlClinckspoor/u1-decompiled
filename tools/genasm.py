@@ -6,6 +6,8 @@
 Runs tools/modgen.py, assembles with MASM 3.00, compares code and data with the EXE (fixups
 masked) and writes every instruction MASM encodes differently as bytes (keeping symbolic
 operands), until the object matches. Leaves OUTDIR/NAME.ASM and OUTDIR/NAME.OBJ.
+OUTDIR/NAME.imm, if present, lists (hex) the instructions whose 16-bit immediate is a DGROUP
+offset; they are written OFFSET DGROUP:name (tools/addrimm.py finds them).
 """
 import os, subprocess, sys, struct
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -16,8 +18,9 @@ import capstone
 md = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_16)
 
 
-def build(exe, syms, outdir, name, code, data, bss, force):
+def build(exe, syms, outdir, name, code, data, bss, force, addrimm=()):
     g = modgen.Gen(exe, syms, name, code, data, bss, force)
+    g.addrimm = set(addrimm)
     src = g.emit()
     open(os.path.join(outdir, name + '.ASM'), 'w', newline='').write(src)
     for f in (name + '.OBJ', name + '.LOG'):
@@ -85,8 +88,10 @@ def main():
     ffile = os.path.join(outdir, name + '.force')
     if os.path.exists(ffile):
         force = {int(x, 16) for x in open(ffile).read().split()}
+    ifile = os.path.join(outdir, name + '.imm')    # instructions whose immediate is an address
+    addrimm = {int(x, 16) for x in open(ifile).read().split()} if os.path.exists(ifile) else set()
     for it in range(8):
-        log = build(exe, syms, outdir, name, code, data, bss, force)
+        log = build(exe, syms, outdir, name, code, data, bss, force, addrimm)
         if errors(log):
             sys.stdout.write(log)
             raise SystemExit('%s: assembly errors' % name)

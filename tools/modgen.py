@@ -74,6 +74,7 @@ class Gen:
         self.exe = exe
         self.dbytes = set()
         self.force = force or set()     # instruction offsets to write as bytes
+        self.addrimm = set()            # instruction offsets whose 16-bit immediate is a DGROUP offset
 
     def inmod_data(self, o):
         return any(r and r[0] <= o < r[1] for r in (self.data, self.bss))
@@ -185,6 +186,13 @@ class Gen:
             if re.search(r'\b(cs|ss|es):\[si\]', i.op_str) and 'movs' in m:
                 return None
             return m.upper()
+        if a in self.addrimm and i.imm_size == 2:
+            v = struct.unpack('<H', bytes(i.bytes[i.imm_offset:i.imm_offset + 2]))[0]
+            self.bare = False
+            ops = self.operand(i)
+            k = ops.rfind(hexm(v))
+            if k >= 0:
+                return '%s	%s' % (m.upper(), ops[:k] + 'OFFSET DGROUP:' + self.dref(v) + ops[k + len(hexm(v)):])
         if relo:
             r = relo[0]
             v = self.rel[r]

@@ -21,6 +21,8 @@ import capstone
 from capstone import x86
 import modgen
 
+REFS = ['gen', 'mondain']   # builds whose modules are known, in order of trust
+
 md = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_16)
 md.detail = True
 
@@ -63,13 +65,14 @@ def find(img, code, m):
     return out
 
 
-def gen_modules():
-    """(name, code start, code end) of GEN's shared modules with code, in address order"""
+def ref_modules(ref):
+    """(name, code start, code end) of the shared modules with code in reference build REF
+    (src/REF/REF.lnk), at their addresses in REF.EXE, in address order"""
     mods = []
-    for l in open(os.path.join(ROOT, 'src', 'gen', 'gen.lnk')):
+    for l in open(os.path.join(ROOT, 'src', ref, ref + '.lnk')):
         l = l.split(';')[0].strip()
         if 'lclib' in l or 'origin' in l or 'lattice' in l:
-            mods.append(os.path.normpath(os.path.join(ROOT, 'src', 'gen', l)))
+            mods.append(os.path.normpath(os.path.join(ROOT, 'src', ref, l)))
     first = []
     for p in mods:
         t = open(p, encoding='latin1', newline='').read()
@@ -84,7 +87,7 @@ def gen_modules():
         if a:
             first.append((int(a[0], 16), os.path.splitext(os.path.basename(p))[0]))
     first.sort()
-    gd, gh, gimg, gds = load(os.path.join(ROOT, 'gamedata', 'GEN.EXE'))
+    gd, gh, gimg, gds = load(os.path.join(ROOT, 'gamedata', ref.upper() + '.EXE'))
     end = max(a for a in range(gds) if gimg[a] != 0) + 1     # code end before DGROUP padding
     return [(n, a, first[k + 1][0] if k + 1 < len(first) else end) for k, (a, n) in enumerate(first)]
 
@@ -114,58 +117,64 @@ def main():
     out = a[a.index('-o') + 1] if '-o' in a else None
     showmap = '--map' in a
     exe = [x for x in a if not x.startswith('-') and x != out][0]
-    gd, gh, gimg, gds = load(os.path.join(ROOT, 'gamedata', 'GEN.EXE'))
     d, h, img, ds = load(exe)
     dlimit = len(img) - ds + h[5] * 16      # DGROUP including BSS (minalloc)
-    gcode, gdata = modgen.load_syms(os.path.join(ROOT, 'src', 'gen', 'gen.syms'))
-    gdkeys = sorted(gdata)
     code, data, notes = {}, {}, []
-    placed = []
+    placed, seen = [], set()
     import omf
-    for name, a0, a1 in gen_modules():
-        obj = os.path.join(ROOT, 'build', 'gen', name.upper() + '.OBJ')
-        if os.path.exists(obj):      # exact: the bytes LINK fixes up may differ, nothing else
-            m = omf.read_obj(obj)[0]
-            k = next(k for k, s in enumerate(m['segs'], 1) if s[1] == 'PROG' and s[2])
-            pat = (bytes(m['data'][k]), bytes(1 - x for x in m['mask'][k]))
-        else:                         # no build yet: guess address operands from the code
-            pat = masked(gimg[a0:a1], a0)
-        a1 = a0 + len(pat[0])          # the module's own length
-        f = find(img[:ds], *pat)
-        if len(f) != 1:
-            notes.append('%s (GEN %04X-%04X): found %d times' % (name, a0, a1, len(f)))
+    for ref in REFS:
+        if not os.path.isdir(os.path.join(ROOT, 'build', ref)):
             continue
-        p = f[0]
-        placed.append((p, p + a1 - a0, name))
-        for k, v in gcode.items():
-            if a0 <= k < a1:
-                code[p + k - a0] = v
-        src = [q for q in glob.glob(os.path.join(ROOT, 'src', '*', name + '.*')) if q.upper().endswith(('.ASM', '.C'))]
-        own = {}                       # this module's own data labels: GEN address -> name
-        if src:
-            t = open(src[0], encoding='latin1', newline='').read()
-            for blk in re.findall(r'^DATA\tSEGMENT\r?\n(.*?)^DATA\tENDS', t, re.M | re.S):
-                for nm in re.findall(r'^(\w+)\t(?:DB|DW)', blk, re.M):
-                    own.update({k: v for k, v in gdata.items() if v == nm})
-        shift = None
-        fix = pat[1]                  # 0 where GEN's object has a fixup (an address)
-        gi = list(md.disasm(gimg[a0:a1], a0))
-        ti = list(md.disasm(img[p:p + a1 - a0], p))
-        for x, y in zip(gi, ti):
-            if x.size != y.size:
-                break
-            for (kx, ox, vx), (ky, oy, vy) in zip(operands(x), operands(y)):
-                if kx == 'code' and not (a0 <= vx < a1) and vx in gcode:
-                    code.setdefault(vy, gcode[vx])
-                elif kx in ('data', 'imm') and fix[x.address - a0 + ox] == 0 and vy < dlimit:
-                    j = bisect.bisect_right(gdkeys, vx) - 1
-                    if j >= 0 and vx - gdkeys[j] < 0x200 and vy >= vx - gdkeys[j]:
-                        data.setdefault(vy - (vx - gdkeys[j]), gdata[gdkeys[j]])
-                        if gdkeys[j] in own:
-                            shift = vy - vx
-        if shift is not None:         # every label of the module moves with it
-            for k, v in own.items():
-                data.setdefault(k + shift, v)
+        gd, gh, gimg, gds = load(os.path.join(ROOT, 'gamedata', ref.upper() + '.EXE'))
+        gcode, gdata = modgen.load_syms(os.path.join(ROOT, 'src', ref, ref + '.syms'))
+        gdkeys = sorted(gdata)
+        for name, a0, a1 in ref_modules(ref):
+            if name in seen:
+                continue
+            seen.add(name)
+            obj = os.path.join(ROOT, 'build', ref, name.upper() + '.OBJ')
+            if os.path.exists(obj):      # exact: the bytes LINK fixes up may differ, nothing else
+                m = omf.read_obj(obj)[0]
+                k = next(k for k, s in enumerate(m['segs'], 1) if s[1] == 'PROG' and s[2])
+                pat = (bytes(m['data'][k]), bytes(1 - x for x in m['mask'][k]))
+            else:                         # no build yet: guess address operands from the code
+                pat = masked(gimg[a0:a1], a0)
+            a1 = a0 + len(pat[0])          # the module's own length
+            f = find(img[:ds], *pat)
+            if len(f) != 1:
+                notes.append('%s (%s %04X-%04X): found %d times' % (name, ref.upper(), a0, a1, len(f)))
+                continue
+            p = f[0]
+            placed.append((p, p + a1 - a0, name))
+            for k, v in gcode.items():
+                if a0 <= k < a1:
+                    code[p + k - a0] = v
+            src = [q for q in glob.glob(os.path.join(ROOT, 'src', '*', name + '.*')) if q.upper().endswith(('.ASM', '.C'))]
+            own = {}                       # this module's own data labels: GEN address -> name
+            if src:
+                t = open(src[0], encoding='latin1', newline='').read()
+                for blk in re.findall(r'^DATA\tSEGMENT\r?\n(.*?)^DATA\tENDS', t, re.M | re.S):
+                    for nm in re.findall(r'^(\w+)\t(?:DB|DW)', blk, re.M):
+                        own.update({k: v for k, v in gdata.items() if v == nm})
+            shift = None
+            fix = pat[1]                  # 0 where GEN's object has a fixup (an address)
+            gi = list(md.disasm(gimg[a0:a1], a0))
+            ti = list(md.disasm(img[p:p + a1 - a0], p))
+            for x, y in zip(gi, ti):
+                if x.size != y.size:
+                    break
+                for (kx, ox, vx), (ky, oy, vy) in zip(operands(x), operands(y)):
+                    if kx == 'code' and not (a0 <= vx < a1) and vx in gcode:
+                        code.setdefault(vy, gcode[vx])
+                    elif kx in ('data', 'imm') and fix[x.address - a0 + ox] == 0 and vy < dlimit:
+                        j = bisect.bisect_right(gdkeys, vx) - 1
+                        if j >= 0 and vx - gdkeys[j] < 0x200 and vy >= vx - gdkeys[j]:
+                            data.setdefault(vy - (vx - gdkeys[j]), gdata[gdkeys[j]])
+                            if gdkeys[j] in own:
+                                shift = vy - vx
+            if shift is not None:         # every label of the module moves with it
+                for k, v in own.items():
+                    data.setdefault(k + shift, v)
     # the rest: function entries and referenced data
     from rdis import analyse
     _, ce, _, funcs, allins = analyse(exe, sorted(code))
@@ -192,11 +201,11 @@ def main():
         pos = 0x3E9
         for s, e, n in sorted(placed):
             if s > pos:
-                print('  %04X-%04X  %5d bytes not from GEN' % (pos, s, s - pos))
+                print('  %04X-%04X  %5d bytes not from a known module' % (pos, s, s - pos))
             print('  %04X-%04X  %s' % (s, e, n))
             pos = max(pos, e)
         if pos < ds:
-            print('  %04X-%04X  %5d bytes not from GEN' % (pos, ds, ds - pos))
+            print('  %04X-%04X  %5d bytes not from a known module' % (pos, ds, ds - pos))
 
 
 if __name__ == '__main__':
