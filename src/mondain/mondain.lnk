@@ -1,6 +1,6 @@
 ; MONDAIN.EXE link order
 ../lattice/C.ASM
-MONDAIN.ASM		; game code (generated stand-in)
+MONDAIN.C		; game code
 ../lclib/EXECL.ASM	; Lattice C 3.1x library modules, in link order
 ../lclib/_MAIN.ASM
 ../lclib/CXC33.ASM
