@@ -1,6 +1,76 @@
 # Handoff: Ultima I decompilation (u1-decompiled)
 
-State as of 2026-11-04. Read this first, then README.md, docs/MAP.md and docs/MATCHING.md.
+State as of 2026-11-12. Read this first, then README.md, docs/MAP.md and docs/MATCHING.md.
+
+## Current task (Karl, 2026-11-04) and where it stopped
+
+Karl asked for, in order: (1) push to GitHub, (2) translate the game code of MONDAIN, ULTIMA,
+SPACE and OUT to C, (3) make it readable, (4) write a series of files documenting the game's
+mechanics and internals. Only (1) is done.
+
+1. **Pushed.** Remote `origin` = https://github.com/KarlClinckspoor/u1-decompiled; the local
+   branch was renamed `master` -> `main` and tracks `origin/main`. All commits use Karl's
+   noreply address. Commits after the first push are local until Karl says to push.
+2. **C translation started, then stopped.** 13 agents ran in parallel on the ranges below
+   (brief: docs/AGENT_BRIEF.md); Karl stopped them all after a few minutes (too many at once:
+   next time run two or three at a time, e.g. ULTIMA + MONDAIN, then SPACE, then OUT). What they
+   left is committed in `src/NAME/work/` as work in progress (code checked with lc.py on
+   2026-11-12; data/string layout not checked; files are not in any .lnk yet):
+
+   | file | range covered | lc.py |
+   |---|---|---|
+   | src/mondain/work/mo_03e9.C | F_03E9-F_0944 (17 of the 47 in 03E9-12EC) | all 17 MATCH |
+   | src/mondain/work/mo_12ec.C | F_12EC-F_16E0 (11 of 23 in 12EC-2230) | 6 MATCH; F_12EC, F_1415, F_1447, F_1664, F_16E0 differ |
+   | src/space/work/sp_16d3.C | F_16D3-F_1BE9 (22 of 36 in 16D3-2B7B) | 21 MATCH; F_16D3 differs by 2 bytes |
+   | src/out/work/ou_1769_a.C | F_1769-F_1D35 (7 of 30 in 1769-2B6D) | all 7 MATCH |
+   | src/out/work/ou_2b6d.C | F_2B6D (1 of 36 in 2B6D-4013) | differs (draft) |
+
+   Agent ranges used (balanced by bytes, cut at function entries): ULTIMA 03E9-0E4D (18 fns);
+   MONDAIN 03E9-12EC (47), 12EC-2230 (23); SPACE 03E9-16D3 (38), 16D3-2B7B (36), 2B7B-3DED (18);
+   OUT 03E9-1769 (21), 1769-2B6D (30), 2B6D-4013 (36), 4013-5469 (23), 5469-6823 (37),
+   6823-7C31 (21), 7C31-908B (25). 373 game functions in all. An agent resuming a range
+   continues the existing work file (PREFIX = file stem without _a).
+3. **Readable pass: not started.** An agent was proposing <=8-character names for the Origin
+   library routines (output was to go to build/pilot/origin_names.md); it was stopped before
+   writing anything. Constraint: Lattice C 3.10 keeps 8 significant characters (below).
+4. **Mechanics documentation: not started.** Planned as docs/game/*.md: the five programs and
+   how they chain (ULTIMA -> GEN/OUT -> SPACE/MONDAIN via execl), playerN.u1 save format, data
+   files (MAP.BIN 13104, TCD.BIN 6840, NIF.BIN 6720, CASTLE.4/.16, {CGA,EGA,T1K}{TILES,TOWN,
+   FIGHT,SPACE,MOND}.BIN), character creation, combat, monsters, dungeons, towns/shops/castles,
+   space flight, the final battle, video/sound/keyboard internals. Best written from the
+   readable C; gamedata/Ultima_1_manual.pdf has the player-facing rules.
+
+### New in this session
+
+- `tools/lc.py` now checks fixup targets: calls and global references are resolved through
+  the .syms file and compared with the original (it prints WRONG TARGETS when the code bytes
+  match but a reference points to another symbol or offset). Before, fixup bytes were only
+  masked, so `D_2048` for `D_2046` passed.
+- `tools/cdata.py EXE SYMS D0 D1 [--refs ASM...]` drafts C definitions for a DGROUP range
+  (strings, pointer tables to the strings before them, int/char arrays) for integration.
+- Lattice data layout, proven by experiment (build/exp/T1.C): a module's DATA is emitted in
+  source order: each initialised global where it is defined, each function's new string
+  literals when the function is compiled (an initialised pointer array's strings right before
+  it), `static` data likewise; `-cs` stores a repeated literal once per module. UDATA is in
+  definition order (statics too). So the original DATA tells where global definitions sat
+  between functions, and a literal stored twice means a module boundary.
+- **Lattice C 3.10 keeps only 8 significant characters** of every identifier, locals and
+  members included (`draw_rectangle_filled` and `draw_rectangle_outline` are "duplicate
+  declaration of draw_rec"). Readable names must be unique in their first 8 characters, and
+  names the assembly modules also use must be at most 8 (LC upper-cases and truncates them).
+- Pilot: MONDAIN F_03E9-F_04A2 matched on the first try; six lc.py runs at once do not collide
+  (each uses its own temp dir and DOSBox config). A compile takes ~2.5 s.
+- MONDAIN functions with arguments and no locals have no `sub sp,2` (unlike GEN's note).
+
+### Integration plan for each EXE (after its functions match)
+
+Replace the stand-in in the .lnk by C module(s). Put the function files together in address
+order, add the global definitions so the DATA comes out as in the original (initialised
+globals mostly at the top, then the functions' literals in order of use; look for globals
+defined between functions), define the BSS in address order, then `python3 tools/build.py
+NAME` until IDENTICAL. Use `lc.py --data OFF` to compare a module's DATA. Split into several C
+files where a literal appears twice in the original DATA or where LC runs out of memory.
+Functions that will not match stay as assembly in a small stand-in between the C modules.
 
 ## Where things stand
 
@@ -29,7 +99,7 @@ startup symbols; `src/NAME/NAME.syms` maps every address of NAME.EXE to its name
 carry a one-line comment saying what they do.
 
 Steps 1-3 of "Next steps" are done and all five EXEs link identical (step 4, first part). Next:
-the game code of MONDAIN, ULTIMA, SPACE and OUT in C (step 4.3).
+the game code of MONDAIN, ULTIMA, SPACE and OUT in C (step 4.3; started, see "Current task").
 
 ## Toolchain facts (proven)
 
@@ -117,6 +187,8 @@ Other tools: `exediff.py` (header, relocations, image), `cmp.py` (object vs EXE)
 
 ## Conventions
 
+- Python: on Windows use `build/venv/Scripts/python` for the tools (the system Python has no
+  capstone, and lc.py/cmp.py import it).
 - git author: Karl <30571394+karlclinckspoor@users.noreply.github.com>; commit messages end
   with the Co-Authored-By line (and Claude-Session when a session link exists). Never commit
   gamedata or tool archives (`.gitignore` covers `gamedata/`, `build/`, `tools/*.7z`,
@@ -177,7 +249,9 @@ Other tools: `exediff.py` (header, relocations, image), `cmp.py` (object vs EXE)
    3. Write the .lnk in code order, data-only modules in data order; watch for PARA DATA
       (assembly modules, even empty ones like DUNIQUE: it must come before BUFSIZ).
 5. **Readable names**: rename F_/D_ via .syms plus the sources (the U6 readable pass is the
-   model); ScummVM's Ultima 1 engine is a naming reference.
+   model); ScummVM's Ultima 1 engine is a naming reference. Names unique in 8 characters;
+   shared with assembly: at most 8. Origin library first (shared by all EXEs).
+6. **Mechanics documentation** in docs/game/ (see "Current task").
 
 Running agents in parallel: give each a disjoint address range and its own work file in
 `src/gen/work/` (or the EXE's equivalent), point it to docs/MATCHING.md, and integrate their
@@ -212,5 +286,7 @@ and `runtime/port` + `replay` (a port checked against recorded DOS sessions).
   OUT at 0124), so the STACK module is linked only in GEN and ULTIMA (library value 0800h).
 - Uncertain module assignments that give the same bytes either way: OR09DA (the palette) as a
   data-only module rather than part of OR4071; D477E (ULTIMA, read by _PF) as its own module.
+- build/exp/ and build/pilot/ hold this session's experiments (ignored by git); the agent
+  brief that was in build/pilot is now docs/AGENT_BRIEF.md.
 - Project doc `claude/u1-decompilation-plan.md` (claude.ai project "Ultimas") has a status
   summary that was not updated in the 2026-11-04 session (no access from it); bring it in step.

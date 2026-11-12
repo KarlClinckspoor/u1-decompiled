@@ -66,3 +66,13 @@ fits the one EXE it was generated from.
 - `if (a && b) { if (c) f(); }` and `if (a && b && c) f();` differ: the nested form makes the
   compiler keep a widened char in a stack temporary at [bp+0].
 - `argv` was `unsigned char **` (`xor bh,bh` rather than `cbw` when passing argv[1][0]).
+
+## Learned on the other EXEs (2026-11-04)
+- `lc.py` checks fixup targets as well as bytes: WRONG TARGETS means the code matches but a
+  call or global reference resolves to another symbol/offset than the original's.
+- DATA is emitted in source order: initialised globals where defined, each function's new
+  literals when the function is compiled, statics likewise; UDATA in definition order. With
+  `-cs` a repeated literal is stored once per module (twice in the original = two modules).
+- Identifiers have 8 significant characters (all of them, locals and members too); longer
+  names that agree in the first 8 are a "duplicate declaration".
+- MONDAIN: a function with arguments and no locals has no `sub sp,2`.
