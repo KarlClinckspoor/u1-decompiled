@@ -10,8 +10,12 @@ extern int D_204A, D_204E, D_2046, D_2048, D_2080, D_2082, D_2086, D_2088, D_206
 extern int D_3AAA, D_3AAC, D_3AAE, D_3A94, D_3A9A, D_3B22;
 extern long D_3B24;
 extern int D_3B2C[][8];
-extern int D_16CC[], D_3698[], D_36E8[], D_36F8[], D_368C[], D_20AC[], D_20B8[], D_1DC8[];
-extern int D_8B8E, D_8B90, D_8B92, D_8B9C, D_8B9E, D_8BA0, D_8BA6, D_082C, D_0182;
+extern int D_16CC[], D_0FD8[], D_20AC[], D_20B8[], D_1DC8[];
+#define D_368C (D_0FD8 + 0x654)
+#define D_3698 (D_0FD8 + 0x65A)
+#define D_36E8 (D_0FD8 + 0x682)
+#define D_36F8 (D_0FD8 + 0x68A)
+extern int D_8B8E, D_8B90, D_8B92, D_8B9C, D_8B9E, D_8BA0, D_8BA6, D_082C, D_0180[];
 extern long D_8BA8;
 extern unsigned char *D_8B88, *D_8B8A, *D_8B8C;
 extern unsigned char D_8B31;
@@ -42,22 +46,20 @@ F_7C31()
     if (t != 60 && t != 61) {
         F_3B46(" what?");
         F_0476(1);
-        return;
+    } else {
+        F_3B46("");
+        if (D_8BA0 == 0) {
+            F_3B46("Thou hast not a key!");
+        } else if (t != D_AD4E) {
+            F_3B46("Thou hast not");
+            F_3B46("the correct key!");
+        } else {
+            F_3B46("The door is open!");
+            D_8B9E = 1;
+            D_8BAE[D_AD42][D_AD3E][D_AD40 - 1] = 1;
+            F_B34F(1, D_AD3E, D_AD40 - 1);
+        }
     }
-    F_3B46("");
-    if (D_8BA0 == 0) {
-        F_3B46("Thou hast not a key!");
-        return;
-    }
-    if (t != D_AD4E) {
-        F_3B46("Thou hast not");
-        F_3B46("the correct key!");
-        return;
-    }
-    F_3B46("The door is open!");
-    D_8B9E = 1;
-    D_8BAE[D_AD42][D_AD3E][D_AD40 - 1] = 1;
-    F_B34F(1, D_AD3E, D_AD40 - 1);
 }
 
 /* 'U'nlock command: dungeon -> F_7B63(random), castle -> F_7C31, else "?" / " what?" */
@@ -86,28 +88,26 @@ F_7D6B()
     if (D_204A != 0) {
         F_3B46("X-it?");
         F_0476(1);
-        return;
-    }
-    if (D_2088 == 0) {
+    } else if (D_2088 == 0) {
         F_3B46("X-it what?");
         F_0476(1);
-        return;
+    } else {
+        t = F_C2AF(D_3AAC, D_3AAE, 1);
+        for (i = -2; i <= 2; i++)
+            for (j = -2; j <= 2; j++)
+                if (F_A363(D_3AAC + i, D_3AAE + j))
+                    f = 1;
+        if (t > 2 || f == 0) {
+            F_3B46(D_0172);
+            F_0476(1);
+        } else {
+            F_B502(D_3B2C[0][0], D_8B31, D_3AAC, D_3AAE, 0);
+            D_2088 = 0;
+            D_3B2C[0][1] = D_3B2C[0][0];
+            D_3B2C[0][0] = 10;
+            F_3B46("X-it");
+        }
     }
-    t = F_C2AF(D_3AAC, D_3AAE, 1);
-    for (i = -2; i <= 2; i++)
-        for (j = -2; j <= 2; j++)
-            if (F_A363(D_3AAC + i, D_3AAE + j))
-                f = 1;
-    if (t > 2 || f == 0) {
-        F_3B46(D_0172);
-        F_0476(1);
-        return;
-    }
-    F_B502(D_3B2C[0][0], D_8B31, D_3AAC, D_3AAE, 0);
-    D_2088 = 0;
-    D_3B2C[0][1] = D_3B2C[0][0];
-    D_3B2C[0][0] = 10;
-    F_3B46("X-it");
 }
 
 /* 'Pass' command */
@@ -161,7 +161,7 @@ int a;
 /* maybe spawn a wandering monster near the player on the overworld */
 F_7F0F()
 {
-    int r, n, m, t, x, y, k, ok, z, lvl, id, hp;
+    int m, r, t, x, y, n, k, lvl, id, hp, ok;
 
     r = F_4069(1, 255);
     if (r < D_16CC[D_207E / 1000]) {
@@ -178,8 +178,7 @@ F_7F0F()
         else
             t = 1;
         id = lvl * 2 + 19;
-        z = F_40E9();
-        hp = z + 1 + D_3698[lvl] * 10;
+        hp = F_40E9() + 1 + D_3698[lvl] * 10;
         do {
             x = F_4069(10, 15);
             y = F_4069(5, 15);
@@ -206,8 +205,8 @@ int m, dx, dy;
     int a, b, t, k, x, y, res;
 
     a = 2;
-    res = 0;
     b = 1;
+    res = 0;
     if (F_4069(1, 100) > D_36E8[D_2088])
         return 0;
     t = D_3B2C[m][0];
@@ -230,26 +229,26 @@ int m, dx, dy;
 F_8194(m, dx, dy)
 int m, dx, dy;
 {
-    int v, a, b;
+    int a, b, v;
 
     v = 1;
     if (m == 23 || m == 25 || m == 31 || m == 47)
         v = 3;
     a = dx < 0 ? -dx : dx;
     b = dy < 0 ? -dy : dy;
-    if ((a > b ? a : b) > v)
-        return 0;
-    return v;
+    if ((a > b ? a : b) <= v)
+        return v;
+    return 0;
 }
 
 /* monster m shoots / attacks along (dx,dy): animates the shot and may hit the player */
 F_81FC(m, dx, dy, n)
 int m, dx, dy, n;
 {
-    int r, hit, k, x, y, sx, sy, i, dmg;
+    int dmg, hit, k, x, y, sx, sy, i;
 
-    i = 1;
     sy = sx = 0;
+    i = 1;
     F_355D(D_3B2C[m][0], 9 - dx, 4 - dy);
     if (dx) {
         if (dx > 0)
@@ -277,9 +276,15 @@ int m, dx, dy, n;
         F_355D(k, 9 - x, 4 - y);
         i++;
     } while (i <= n && k != 3 && (x != 0 || y != 0));
-    r = F_4069(1, 255);
-    hit = r < 200 - D_3A94 / 2 - (D_2086 << 3);
-    if (x == 0 && y == 0 && hit) {
+    hit = F_4069(1, 255) < 200 - D_3A94 / 2 - (D_2086 << 3);
+    if (x || y || !hit) {
+        F_355D(D_3B2C[0][0], 9, 4);
+        if (F_353A(F_0742(D_3B2C[m][0])) > 8)
+            F_3B46("");
+        else
+            F_357C(32, D_2046);
+        F_3B46("Missed!");
+    } else {
         F_355D(50, 9, 4);
         dmg = F_4069(1, D_368C[(D_3B2C[m][0] - 19) / 2] * 2 + 1);
         F_0476(2);
@@ -294,13 +299,6 @@ int m, dx, dy, n;
         F_355D(D_3B2C[0][0], 9, 4);
         D_206E -= dmg;
         F_4437();
-    } else {
-        F_355D(D_3B2C[0][0], 9, 4);
-        if (F_353A(F_0742(D_3B2C[m][0])) > 8)
-            F_3B46("");
-        else
-            F_357C(32, D_2046);
-        F_3B46("Missed!");
     }
 }
 
@@ -384,7 +382,8 @@ F_8600()
             dx = D_3AAC - D_3B2C[i][2];
             dy = D_3AAE - D_3B2C[i][3];
             if (F_8194(t, dx, dy)) {
-                q[n++] = i;
+                q[n] = i;
+                n++;
             } else {
                 F_8598(i, dx, dy);
             }
@@ -423,69 +422,64 @@ int dx, dy;
     int t, r, dmg, i, f;
 
     f = 1;
-    if (D_AD56[D_AD3E][D_AD40].a == 8)
-        return;
-    if (D_AD56[D_AD3E - dx][D_AD40 - dy].a == 3) {
-        if (D_AD56[D_AD3E][D_AD40].a == 3)
-            return;
-        if (D_AD56[D_AD3E][D_AD40].a == 1)
-            return;
-        if (D_AD56[D_AD3E][D_AD40].a == 2)
-            return;
-    }
-    t = D_AD56[D_AD3E - dx][D_AD40 - dy].b;
-    F_3599("Attacked by ", D_2046);
-    F_3C31(t);
-    F_3B46("!");
-    F_0476(3);
-    r = D_3A94 / 2 + (D_2086 << 3) + 56;
-    if (F_4069(1, 255) <= r) {
-        F_3B46("Missed!");
-        f = 0;
-    } else {
-        r = F_4069(1, 255);
-        dmg = D_AD50 + t * t;
-        if (dmg > 255)
-            dmg = F_4069(t + 1, 255);
-        if (t == 9 && D_2086) {
-            F_3B46("Armor destroyed!");
-            D_20AC[D_2086]--;
-            D_2086 = 0;
-            f = 0;
-        } else if (t == 16) {
-            F_3B46("A gremlin stole some food!");
-            D_2080 = D_2080 / 2;
-            F_44A2();
-            f = 0;
-        } else if (t == 21 && r < 128) {
-            F_3B46("Mental attack!");
-            D_3A9A = D_3A9A / 2;
-            D_3A9A += 5;
-            f = 0;
-        }
-        if (t == 2) {
-            for (i = 1; i <= 15; i++) {
-                if (D_20B8[i] && i != D_2082) {
-                    F_3599("Thief stole a", D_2046);
-                    if (F_40A8(D_0D72[i][0]))
-                        F_3599("n ", D_2046);
-                    else
-                        F_357C(32, D_2046);
-                    if (F_353A(D_0D72[i]) > 11)
-                        F_3B46("");
-                    F_3B46(D_0D72[i]);
-                    D_20B8[i]--;
-                    i = 16;
+    if (D_AD56[D_AD3E][D_AD40].a != 8) {
+        if (D_AD56[D_AD3E - dx][D_AD40 - dy].a != 3 ||
+            (D_AD56[D_AD3E][D_AD40].a != 3 && D_AD56[D_AD3E][D_AD40].a != 1 &&
+             D_AD56[D_AD3E][D_AD40].a != 2)) {
+            t = D_AD56[D_AD3E - dx][D_AD40 - dy].b;
+            F_3599("Attacked by ", D_2046);
+            F_3C31(t);
+            F_3B46("!");
+            F_0476(3);
+            r = D_3A94 / 2 + (D_2086 << 3) + 56;
+            if (F_4069(1, 255) <= r) {
+                F_3B46("Missed!");
+                f = 0;
+            } else {
+                r = F_4069(1, 255);
+                dmg = D_AD50 + t * t;
+                if (dmg > 255)
+                    dmg = F_4069(t + 1, 255);
+                if (t == 9 && D_2086) {
+                    F_3B46("Armor destroyed!");
+                    D_20AC[D_2086]--;
+                    f = D_2086 = 0;
+                } else if (t == 16) {
+                    F_3B46("A gremlin stole some food!");
+                    D_2080 = D_2080 / 2;
+                    F_44A2();
+                    f = 0;
+                } else if (t == 21 && r < 128) {
+                    F_3B46("Mental attack!");
+                    D_3A9A = D_3A9A / 2;
+                    D_3A9A += 5;
+                    f = 0;
+                }
+                if (t == 2) {
+                    for (i = 1; i <= 15; i++) {
+                        if (D_20B8[i] && i != D_2082) {
+                            F_3599("Thief stole a", D_2046);
+                            if (F_40A8(D_0D72[i][0]))
+                                F_3599("n ", D_2046);
+                            else
+                                F_357C(32, D_2046);
+                            if (F_353A(D_0D72[i]) > 11)
+                                F_3B46("");
+                            F_3B46(D_0D72[i]);
+                            D_20B8[i]--;
+                            i = 16;
+                        }
+                    }
                 }
             }
-        }
-        if (f) {
-            F_0476(2);
-            F_3599("Hit! ", D_2046);
-            F_3C8B(dmg, 1, 32, D_2046, 1);
-            F_3B46(" damage!");
-            D_206E -= dmg;
-            F_4437();
+            if (f) {
+                F_0476(2);
+                F_3599("Hit! ", D_2046);
+                F_3C8B(dmg, 1, 32, D_2046, 1);
+                F_3B46(" damage!");
+                D_206E -= dmg;
+                F_4437();
+            }
         }
     }
 }
@@ -497,9 +491,7 @@ int x, y, dx, dy;
     int t;
 
     t = D_AD56[x + dx][y + dy].a;
-    if (t == 1 || t == 2 || t == 8)
-        return 0;
-    if (D_AD56[x + dx][y + dy].b == -1) {
+    if (t != 1 && t != 2 && t != 8 && D_AD56[x + dx][y + dy].b == -1) {
         D_AD56[x + dx][y + dy].b = D_AD56[x][y].b;
         D_AD56[x][y].b = -1;
         D_AD56[x + dx][y + dy].c += 1000;
@@ -547,19 +539,17 @@ F_8C20()
     int t, k, x, y;
 
     t = F_40FE(D_3AAC, D_3AAE);
-    for (;;) {
-        x = D_3AAC + F_4069(3, 23) - 13;
-        y = D_3AAE + F_4069(3, 23) - 13;
-        if (x < 2 || x > 165)
-            x = D_3AAC;
-        if (y < 2 || y > 153)
-            y = D_3AAE;
-        if (t != F_40FE(x, y))
-            continue;
+    do {
+        do {
+            x = D_3AAC + F_4069(3, 23) - 13;
+            y = D_3AAE + F_4069(3, 23) - 13;
+            if (x < 2 || x > 165)
+                x = D_3AAC;
+            if (y < 2 || y > 153)
+                y = D_3AAE;
+        } while (t != F_40FE(x, y));
         k = F_C2AF(x, y, 1);
-        if (k == 1 || k == 2)
-            break;
-    }
+    } while (k != 1 && k != 2);
     D_3AAC = x;
     D_3AAE = y;
     D_3B2C[0][0] = 10;
@@ -613,12 +603,12 @@ unsigned char **argv;
     F_03E9(argv[2][0]);
     F_0441();
     F_3E2F("map.bin", D_3DAC, 13104);
-    F_3E2F("tcd.bin", D_8BAE, 6840);
+    F_3E2F("tcd.bin", (char *)D_8BAE, 6840);
     F_3E2F(D_1DC8[D_082C + 23], 0xA666, 1632);
     D_8BA6 = D_3B22;
     D_8BA8 = D_3B24;
     D_8B8E = 1;
-    D_8B9C = D_204A = D_204E = 0;
+    D_204E = D_204A = D_8B9C = 0;
     D_8B90 = F_B5E1();
     D_8B92 = F_B617();
     F_37FD(D_3AAA + F_3EC4() % 999);
@@ -725,7 +715,7 @@ unsigned char **argv;
             F_7E5B();
             break;
         case 27:
-            D_0182 = 1;
+            D_0180[1] = 1;
         default:
             F_7E69();
         }
