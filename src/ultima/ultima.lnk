@@ -1,6 +1,6 @@
 ; ULTIMA.EXE link order (the protection remnant is added by postlink.py)
 ../lattice/C.ASM
-ULTIMA.ASM		; game code (generated stand-in)
+ULTIMA.C		; game code
 ../lclib/EXECL.ASM	; Lattice C 3.1x library modules, in link order
 ../lclib/EXIT.ASM
 ../lclib/FCLOSE.ASM
