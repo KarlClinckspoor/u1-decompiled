@@ -24,7 +24,7 @@ extern long D_8BA8;
 extern int D_AD3E, D_AD40, D_AD42, D_AD46, D_AD4C, D_AD50;
 extern char D_2058[];
 extern char *D_0F5C[], *D_0F04[], *D_0FA2[];
-extern char *D_30D0, *D_30D4, *D_30D8, *D_30DC;
+extern char *D_307C[];
 extern unsigned char D_8BAE[][38][18];
 extern struct cell D_AD56[][11];
 
@@ -306,7 +306,7 @@ F_70CF(cmd)
 unsigned char cmd;
 {
     int shop, i, cost, flag;
-    unsigned char x[6];
+    char x[6];
     unsigned char c;
 
     shop = F_2F3B(D_AD42 - 2);
@@ -355,7 +355,7 @@ unsigned char cmd;
             c = F_3862(F_39C5(D_2046));
             if (c < 'A' || c > 'F') {
                 F_3599("nothing", D_2046);
-            } else if (x[c - 'A'] == 0) {
+            } else if (!x[c - 'A']) {
                 F_3599("nothing", D_2046);
             } else {
                 cost = F_7034(c + 1 - 'A');
@@ -388,57 +388,57 @@ F_7377()
     if (D_AD46) {
         F_3B46("");
         F_3B46("None will talk to thee!");
-        return;
-    }
-    t = D_8BAE[D_AD42][D_AD3E][D_AD40];
-    if (t < 54 || t > 62) {
-        F_3B46("");
-        F_3B46("Thou art not by a counter!");
-        F_0476(1);
-        return;
-    }
-    F_3599("-Buy, Sell: ", D_2046);
-    c = F_3862(F_39C5(D_2046));
-    if (c != 'B' && c != 'S') {
-        F_352C(9, 24);
-        F_3B46(" nothing      ");
-        return;
-    }
-    if (c == 'B') {
-        F_352C(13, 24);
-        F_3599("         ", D_2046);
-        F_352C(13, 24);
-        F_3599(": ", D_2046);
     } else {
-        F_352C(10, 24);
-        F_3599("            ", D_2046);
-        F_352C(10, 24);
-        F_3599("Sell: ", D_2046);
+        t = D_8BAE[D_AD42][D_AD3E][D_AD40];
+        if (t < 54 || t > 62) {
+            F_3B46("");
+            F_3B46("Thou art not by a counter!");
+            F_0476(1);
+        } else {
+            F_3599("-Buy, Sell: ", D_2046);
+            c = F_3862(F_39C5(D_2046));
+            if (c != 'B' && c != 'S') {
+                F_352C(9, 24);
+                F_3B46(" nothing      ");
+            } else {
+                if (c == 'B') {
+                    F_352C(13, 24);
+                    F_3599("         ", D_2046);
+                    F_352C(13, 24);
+                    F_3599(": ", D_2046);
+                } else {
+                    F_352C(10, 24);
+                    F_3599("            ", D_2046);
+                    F_352C(10, 24);
+                    F_3599("Sell: ", D_2046);
+                }
+                switch (t) {
+                case 54:
+                case 55:
+                    F_6A77(c);
+                    break;
+                case 56:
+                case 57:
+                    F_6DE3(c);
+                    break;
+                case 58:
+                case 59:
+                    F_665D(c);
+                    break;
+                case 60:
+                    F_6C53(c);
+                    break;
+                case 61:
+                    F_622C(c);
+                    break;
+                case 62:
+                    F_70CF(c);
+                    break;
+                }
+                D_204E = 1;
+            }
+        }
     }
-    switch (t) {
-    case 54:
-    case 55:
-        F_6A77(c);
-        break;
-    case 56:
-    case 57:
-        F_6DE3(c);
-        break;
-    case 58:
-    case 59:
-        F_665D(c);
-        break;
-    case 60:
-        F_6C53(c);
-        break;
-    case 61:
-        F_622C(c);
-        break;
-    case 62:
-        F_70CF(c);
-        break;
-    }
-    D_204E = 1;
 }
 
 /* king's audience, quest given: show the quest text by king (D_AD4C) */
@@ -467,16 +467,16 @@ F_7526()
         F_21E7(11, 6, "Go forth and find");
         switch (D_AD4C) {
         case 7:
-            F_21E7(9, 8, D_30D0);
+            F_21E7(9, 8, D_307C[42]);
             break;
         case 5:
-            F_21E7(9, 8, D_30D4);
+            F_21E7(9, 8, D_307C[44]);
             break;
         case 3:
-            F_21E7(10, 8, D_30D8);
+            F_21E7(10, 8, D_307C[46]);
             break;
         case 1:
-            F_21E7(8, 8, D_30DC);
+            F_21E7(8, 8, D_307C[48]);
             break;
         }
     }
@@ -585,57 +585,52 @@ F_794E()
     F_3B46("Transact with king");
     if (D_8BAE[D_AD42][D_AD3E][D_AD40] != 62) {
         F_3B46("He is not here!");
-        return;
-    }
-    if (D_AD46) {
+    } else if (D_AD46) {
         F_3B46("He rejects thine offer!");
-        return;
-    }
-    if (F_78AF(k))
-        return;
-    F_3B46("Dost thou offer pence");
-    F_3599("or service: ", D_2046);
-    c = F_3862(F_39C5(D_2046));
-    if (c != 'P' && c != 'S') {
-        F_3B46("neither");
-        return;
-    }
-    switch (c) {
-    case 'P':
-        F_3B46("pence");
-        F_3599("How much? ", D_2046);
-        amt = F_B0B5(11, 24);
-        if (amt == 0) {
-            F_352C(11, 24);
-            F_3B46("none");
-            return;
+    } else if (F_78AF(k)) {
+    } else {
+        F_3B46("Dost thou offer pence");
+        F_3599("or service: ", D_2046);
+        c = F_3862(F_39C5(D_2046));
+        if (c != 'P' && c != 'S') {
+            F_3B46("neither");
+        } else {
+            switch (c) {
+            case 'P':
+                F_3B46("pence");
+                F_3599("How much? ", D_2046);
+                amt = F_B0B5(11, 24);
+                if (amt == 0) {
+                    F_352C(11, 24);
+                    F_3B46("none");
+                } else if (amt > D_207C) {
+                    F_3B46("");
+                    F_3B46("Thou hast not that much!");
+                    F_0476(1);
+                } else {
+                    D_207C -= amt;
+                    amt *= 3;
+                    amt /= 2;
+                    F_3B46("");
+                    F_3B46("In return I give unto");
+                    F_3599("thee ", D_2046);
+                    F_3C8B(amt, 1, 32, D_2046, 1);
+                    F_3B46(" hit points");
+                    D_206E += amt;
+                    F_4437();
+                    F_4558();
+                }
+                break;
+            case 'S':
+                if (F_767D()) {
+                    F_3B46("");
+                    F_3B46("Thou art on a quest");
+                    F_3B46("for me already!");
+                } else
+                    F_7526();
+                break;
+            }
         }
-        if (amt > D_207C) {
-            F_3B46("");
-            F_3B46("Thou hast not that much!");
-            F_0476(1);
-            return;
-        }
-        D_207C -= amt;
-        amt *= 3;
-        amt /= 2;
-        F_3B46("");
-        F_3B46("In return I give unto");
-        F_3599("thee ", D_2046);
-        F_3C8B(amt, 1, 32, D_2046, 1);
-        F_3B46(" hit points");
-        D_206E += amt;
-        F_4437();
-        F_4558();
-        break;
-    case 'S':
-        if (F_767D()) {
-            F_3B46("");
-            F_3B46("Thou art on a quest");
-            F_3B46("for me already!");
-        } else
-            F_7526();
-        break;
     }
 }
 
@@ -667,8 +662,7 @@ int lvl;
     if (D_AD56[D_AD3E][D_AD40].c != 4) {
         F_3B46(" - none here!");
         F_0476(1);
-        return;
-    }
+    } else {
     F_3B46("");
     if (lvl > D_3A92 && D_206A != 3) {
         F_3599("Thou hast set off a trap!", D_2046);
@@ -680,5 +674,6 @@ int lvl;
         D_AD56[D_AD3E][D_AD40].c = 0;
         F_3599("Thou dost find: ", D_2046);
         F_0761(F_4069(3, D_AD50 * D_AD50 + 9), 0);
+    }
     }
 }
