@@ -222,8 +222,8 @@ F_31D7()
 }
 
 /* alien ship turn: move it toward the crosshair, redraw, fire */
-/* NONMATCHING: dx/dy computed as `mov ax,[D_013A]; sub ax,[D_0C92]`; original keeps D_0C92/D_0C94 cached in AX/BX
-   (`mov cx,[D_013A]; sub cx,ax; mov ax,[D_013C]; sub ax,bx`): 2 bytes shorter. Rest identical. */
+/* NONMATCHING (11 bytes differ, same length 376): original loads ax=D_0C92 (store D_0C96), bx=D_0C94 (store D_0C98) then
+   `mov cx,[D_013A]; sub cx,ax; mov ax,[D_013C]; sub ax,bx`; here the registers differ (ax=D_0C94, bx/cx swapped). */
 F_3330()
 {
     int r, dx, dy;
@@ -234,10 +234,9 @@ F_3330()
     F_1C2A();
     F_3CF1(D_0C9E[D_0126]);
     if (D_26C0[D_01EE][D_01F0].count != 0) {
-        D_0C96 = D_0C92;
         D_0C98 = D_0C94;
-        dx = D_013A - D_0C96;
-        dy = D_013C - D_0C98;
+        dx = D_013A - (D_0C96 = D_0C92);
+        dy = D_013C - D_0C94;
         D_0C92 -= F_1BBF(dx);
         D_0C94 -= F_1BBF(dy);
         if (D_0C92 > 280 || D_0C92 < 30 || D_0C94 > 125 || D_0C94 < 24) {

@@ -58,3 +58,9 @@ B1E inuse.u1; F73 Shld:; F79 Fuel:; F80 \nAbnormal program termination\n.
   (`case 27: x = 1; default: f();` falls through).
 - Two hidden 2-byte frame slots appear on their own; do not add dummy locals to fill the frame.
 - Statement order `done = n = 0` stores n second (store order is right to left).
+- F_3330 dx/dy (2026-11-12, ~150 variants tried): LC keeps only the LATEST stored variable cached in a register; any later
+  store (even `x = 5`) kills the earlier register cache; loads are never cached; a pending dx/dy is not stored until the call.
+  Left-operand register is the first one without a live cache (ax, bx, cx...). Original needs ax(=D_0C92 copy) AND bx(=D_0C94
+  copy) alive at `dx = D_013A - ax`, which no statement ordering/comma/assignment-expression/type/struct/array form produced.
+  Closest (kept): `D_0C98 = D_0C94; dx = D_013A - (D_0C96 = D_0C92); dy = D_013C - D_0C94;` = right length (376), F_386B MATCHes.
+  Structs/arrays for D_0C92.. disable the cache entirely.
