@@ -12,17 +12,17 @@ UDATA	ENDS
 DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
-	PUBLIC	D_06C8,D_06CA,D_06CC,D_06CE,D_06D0,D_06D2
-	PUBLIC	D_06D4
+	PUBLIC	membase,memtotal,freelist,freebyte,freerov,memgrow
+	PUBLIC	brklvl
 
 DATA	SEGMENT
-D_06C8	DB	0,0	; 06C8
-D_06CA	DB	0,0	; 06CA
-D_06CC	DB	0,0	; 06CC
-D_06CE	DB	0,0	; 06CE
-D_06D0	DW	D_06CC	; 06D0
-D_06D2	DB	0,10H	; 06D2
-D_06D4	DB	0,0	; 06D4
+membase	DB	0,0	; 06C8
+memtotal	DB	0,0	; 06CA
+freelist	DB	0,0	; 06CC
+freebyte	DB	0,0	; 06CE
+freerov	DW	freelist	; 06D0
+memgrow	DB	0,10H	; 06D2
+brklvl	DB	0,0	; 06D4
 DATA	ENDS
 
 	END

@@ -15,10 +15,10 @@ DGROUP	GROUP	DATA,UDATA
 PROG	SEGMENT
 	EXTRN	STCL_O:NEAR
 PROG	ENDS
-	PUBLIC	F_2846
+	PUBLIC	stci_o
 
 PROG	SEGMENT
-F_2846:
+stci_o:
 	PUSH	BP                                 ; 2846 55
 	SUB	SP, 4                               ; 2847 83 EC 04
 	MOV	BP, SP                              ; 284A 8B EC

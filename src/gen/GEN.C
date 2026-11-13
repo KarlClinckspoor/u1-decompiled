@@ -15,7 +15,7 @@ extern fillrect(), drawline(), pixel(), gotoxy(), putstr(), putnum(), putch();
 extern arrowr(), arrowl(), playsnd();
 extern unsigned char waitkey(), upcase();
 /* Lattice library */
-extern F_1D0D();                        /* ONERROR */
+extern erron();                        /* ONERROR */
 
 /*
  * Initialised data (DGROUP 0124-01B2)
@@ -757,7 +757,7 @@ unsigned char **argv;
     int slot;
     unsigned char c;
 
-    F_1D0D(1);
+    erron(1);
     forcecga = upcase(argv[1][0]) == 'C';
     ldnames();
     setvid(0);

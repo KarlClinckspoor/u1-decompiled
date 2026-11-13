@@ -20,7 +20,7 @@ PROG	SEGMENT
 	EXTRN	lineto:NEAR
 	EXTRN	F_3D61:NEAR
 PROG	ENDS
-	PUBLIC	drawdmon,F_AD06,D_2480,D_24BC,D_24C6,D_24C8
+	PUBLIC	drawdmon,unpackxy,D_2480,D_24BC,D_24C6,D_24C8
 
 PROG	SEGMENT
 drawdmon:
@@ -55,7 +55,7 @@ L_ACC5:
 	JE	L_ACFE                               ; ACCA 74 32
 	CMP	AL, 7EH                             ; ACCC 3C 7E
 	JE	L_ACE3                               ; ACCE 74 13
-	CALL	F_AD06                             ; ACD0 E8 33 00
+	CALL	unpackxy                             ; ACD0 E8 33 00
 	PUSH	CX                                 ; ACD3 51
 	PUSH	BX                                 ; ACD4 53
 	MOV	DX, WORD PTR D_24C8                 ; ACD5 8B 16 C8 24
@@ -69,7 +69,7 @@ L_ACC5:
 L_ACE3:
 	MOV	AL, BYTE PTR [BX]                   ; ACE3 8A 07
 	INC	BX                                  ; ACE5 43
-	CALL	F_AD06                             ; ACE6 E8 1D 00
+	CALL	unpackxy                             ; ACE6 E8 1D 00
 	MOV	WORD PTR penx, SI                 ; ACE9 89 36 92 19
 	MOV	WORD PTR peny, DI                 ; ACED 89 3E 94 19
 	MOV	DX, WORD PTR D_24C8                 ; ACF1 8B 16 C8 24
@@ -86,7 +86,7 @@ L_ACFE:
 	POP	SI                                  ; AD01 5E
 	POP	BP                                  ; AD02 5D
 	RET	6                                   ; AD03 C2 06 00
-F_AD06:
+unpackxy:
 	CBW                                     ; AD06 98
 	JCXZ	L_AD0C                             ; AD07 E3 03
 	SHR	AX, CL                              ; AD09 D3 E8

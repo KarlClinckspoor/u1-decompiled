@@ -8,7 +8,7 @@
  */
 
 /* Origin library and Lattice library */
-extern F_1D0D(), gotoxy(), strlen2(), drawtile(), putch(), putstr(), fillrect();
+extern erron(), gotoxy(), strlen2(), drawtile(), putch(), putstr(), fillrect();
 extern seedrnd(), lineto(), arrowr(), arrowl(), drawline(), presskey(), msgline();
 extern botbar(), topbar(), putnum(), readfile(), waittick(), writfile(), clockrnd(), scrlmsg();
 extern vidinit(), playsnd(), rndrange(), isvowel(), getlevel(), quadrant(), readycmd(), showhp();

@@ -139,7 +139,7 @@ extern plotvp(), exhaust0(), msgline(), drawline(), playif(), waittick(), useshl
 extern arrowr(), movestar(), vwait(), drawfite(), newenemy(), drawcros(), starhit(), planhit();
 extern putstr(), gotoxy(), shipfuel(), shipshld(), showfuel(), showshld(), showcoin();
 extern scrlmsg(), putnum(), readfile(), vidinit(), seedrnd(), mkgalaxy(), initstar(), drawtop();
-extern F_1D0D(), cmdarrow(), cmdattk(), cmdboard(), cmdcast(), cmddrop(), cmdenter(), cmdfire();
+extern erron(), cmdarrow(), cmdattk(), cmdboard(), cmdcast(), cmddrop(), cmdenter(), cmdfire();
 extern cmdget(), cmdhyper(), cmdinfo(), cmdklimb(), cmdopen(), cmdquit(), cmdready(), cmdsteal();
 extern cmdtrans(), cmdunlk(), cmdview(), cmdxit(), ztats(), cmdpass(), cmdhuh(), cmdspeed();
 extern exhaust2(), exhaust1(), fightfrm(), alienfir(), crash(), dock(), liftoff(), cmdnoise();

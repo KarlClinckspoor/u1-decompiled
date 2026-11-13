@@ -16,10 +16,10 @@ PROG	SEGMENT
 	EXTRN	CXSERR:NEAR
 	EXTRN	CXSERZ:NEAR
 PROG	ENDS
-	PUBLIC	F_2C5F,DCREAT,DCREATX
+	PUBLIC	ioctlset,DCREAT,DCREATX
 
 PROG	SEGMENT
-F_2C5F:
+ioctlset:
 	PUSH	BP                                 ; 2C5F 55
 	MOV	BP, SP                              ; 2C60 8B EC
 	MOV	DX, WORD PTR [BP+6]                 ; 2C62 8B 56 06

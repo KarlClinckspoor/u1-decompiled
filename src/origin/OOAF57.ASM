@@ -23,7 +23,7 @@ PROG	SEGMENT
 	EXTRN	rndrange:NEAR
 	EXTRN	animwat:NEAR
 PROG	ENDS
-	PUBLIC	drawview,F_B094,readnum,placeval
+	PUBLIC	drawview,isdigch,readnum,placeval
 
 PROG	SEGMENT
 drawview:
@@ -170,7 +170,7 @@ L_B08F:
 	ADD	SP, 0EH                             ; B08F 83 C4 0E
 	POP	BP                                  ; B092 5D
 	RET                                     ; B093 C3
-F_B094:
+isdigch:
 	PUSH	BP                                 ; B094 55
 	SUB	SP, 4                               ; B095 83 EC 04
 	MOV	BP, SP                              ; B098 8B EC
@@ -210,7 +210,7 @@ L_B0C6:
 	MOV	BYTE PTR [BP+0EH], AL               ; B0DE 88 46 0E
 	DB	30H,0E4H                             ; B0E1 xor ah, ah
 	PUSH	AX                                 ; B0E3 50
-	CALL	F_B094                             ; B0E4 E8 AD FF
+	CALL	isdigch                             ; B0E4 E8 AD FF
 	MOV	SP, BP                              ; B0E7 8B E5
 	TEST	AX, AX                             ; B0E9 85 C0
 	JE	L_B116                               ; B0EB 74 29
@@ -250,7 +250,7 @@ L_B131:
 	MOV	AL, BYTE PTR [BP+0EH]               ; B137 8A 46 0E
 	DB	30H,0E4H                             ; B13A xor ah, ah
 	PUSH	AX                                 ; B13C 50
-	CALL	F_B094                             ; B13D E8 54 FF
+	CALL	isdigch                             ; B13D E8 54 FF
 	MOV	SP, BP                              ; B140 8B E5
 	TEST	AX, AX                             ; B142 85 C0
 	JNE	L_B0C6                              ; B144 75 80
@@ -263,7 +263,7 @@ L_B146:
 	MOV	AL, BYTE PTR [BP+SI+0AH]            ; B152 8A 42 0A
 	DB	30H,0E4H                             ; B155 xor ah, ah
 	PUSH	AX                                 ; B157 50
-	CALL	F_B094                             ; B158 E8 39 FF
+	CALL	isdigch                             ; B158 E8 39 FF
 	MOV	SP, BP                              ; B15B 8B E5
 	TEST	AX, AX                             ; B15D 85 C0
 	JE	L_B17D                               ; B15F 74 1C

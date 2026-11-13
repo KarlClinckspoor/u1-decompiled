@@ -19,10 +19,10 @@ PROG	SEGMENT
 	EXTRN	_PF:NEAR
 	EXTRN	FPUTS:NEAR
 PROG	ENDS
-	PUBLIC	F_1222,F_126F
+	PUBLIC	pfchar,F_126F
 
 PROG	SEGMENT
-F_1222:
+pfchar:
 	PUSH	BP                                 ; 1222 55
 	SUB	SP, 2                               ; 1223 83 EC 02
 	MOV	BP, SP                              ; 1226 8B EC
@@ -68,7 +68,7 @@ F_126F:
 	PUSH	BX                                 ; 1285 53
 	PUSH	WORD PTR [BP+10AH]                 ; 1286 FF B6 0A 01
 	PUSH	AX                                 ; 128A 50
-	MOV	BX, OFFSET F_1222                ; 128B BB 22 12
+	MOV	BX, OFFSET pfchar                ; 128B BB 22 12
 	PUSH	BX                                 ; 128E 53
 	CALL	_PF                             ; 128F E8 55 08
 	MOV	SP, BP                              ; 1292 8B E5

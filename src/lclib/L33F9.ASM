@@ -22,10 +22,10 @@ DATA	SEGMENT
 	EXTRN	_XSIZE:BYTE
 	EXTRN	_ZSIZE:BYTE
 DATA	ENDS
-	PUBLIC	F_33F9,F_3407,F_3415
+	PUBLIC	sbrk,lsbrk,parabrk
 
 PROG	SEGMENT
-F_33F9:
+sbrk:
 	PUSH	BP                                 ; 33F9 55
 	MOV	BP, SP                              ; 33FA 8B EC
 	MOV	AX, WORD PTR [BP+4]                 ; 33FC 8B 46 04
@@ -33,7 +33,7 @@ F_33F9:
 	MOV	CX, 0FFFFH                          ; 3401 B9 FF FF
 	JMP	SHORT L_3421                        ; 3404 EB 1B
 	DB	90H	; 3406
-F_3407:
+lsbrk:
 	PUSH	BP                                 ; 3407 55
 	MOV	BP, SP                              ; 3408 8B EC
 	MOV	AX, WORD PTR [BP+4]                 ; 340A 8B 46 04
@@ -41,7 +41,7 @@ F_3407:
 	XOR	CX, CX                              ; 3410 33 C9
 	JMP	SHORT L_3421                        ; 3412 EB 0D
 	DB	90H	; 3414
-F_3415:
+parabrk:
 	PUSH	BP                                 ; 3415 55
 	MOV	BP, SP                              ; 3416 8B EC
 	MOV	AX, WORD PTR [BP+4]                 ; 3418 8B 46 04

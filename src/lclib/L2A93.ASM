@@ -13,15 +13,15 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 PROG	SEGMENT
-	EXTRN	F_1E2C:NEAR
-	EXTRN	F_2D47:NEAR
+	EXTRN	putfree:NEAR
+	EXTRN	getmem:NEAR
 	EXTRN	STRLEN:NEAR
 	EXTRN	_EXEC:NEAR
 PROG	ENDS
-	PUBLIC	F_2A93
+	PUBLIC	doexec
 
 PROG	SEGMENT
-F_2A93:
+doexec:
 	PUSH	BP                                 ; 2A93 55
 	SUB	SP, 95H                             ; 2A94 81 EC 95 00
 	MOV	BP, SP                              ; 2A98 8B EC
@@ -56,7 +56,7 @@ L_2ACB:
 	PUSH	WORD PTR [BP+93H]                  ; 2ADB FF B6 93 00
 	PUSH	DS                                 ; 2ADF 1E
 	POP	ES                                  ; 2AE0 07
-	CALL	F_2D47                             ; 2AE1 E8 63 02
+	CALL	getmem                             ; 2AE1 E8 63 02
 	MOV	SP, BP                              ; 2AE4 8B E5
 	TEST	AX, AX                             ; 2AE6 85 C0
 	MOV	WORD PTR [BP+0CH], AX               ; 2AE8 89 46 0C
@@ -169,7 +169,7 @@ L_2BC2:
 	MOV	WORD PTR [BP+91H], AX               ; 2BED 89 86 91 00
 	PUSH	DS                                 ; 2BF1 1E
 	POP	ES                                  ; 2BF2 07
-	CALL	F_1E2C                             ; 2BF3 E8 36 F2
+	CALL	putfree                             ; 2BF3 E8 36 F2
 	MOV	SP, BP                              ; 2BF6 8B E5
 	MOV	AX, WORD PTR [BP+91H]               ; 2BF8 8B 86 91 00
 	ADD	SP, 95H                             ; 2BFC 81 C4 95 00

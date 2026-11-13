@@ -13,11 +13,11 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_06C8:BYTE
-	EXTRN	D_06CA:BYTE
-	EXTRN	D_06CC:BYTE
-	EXTRN	D_06CE:BYTE
-	EXTRN	D_06D4:BYTE
+	EXTRN	membase:BYTE
+	EXTRN	memtotal:BYTE
+	EXTRN	freelist:BYTE
+	EXTRN	freebyte:BYTE
+	EXTRN	brklvl:BYTE
 	EXTRN	_HBASE:BYTE
 	EXTRN	_HSIZE:BYTE
 	EXTRN	_MNEED:BYTE
@@ -76,11 +76,11 @@ RBRK:
 	MOV	WORD PTR _TSIZE, BX                 ; 1E05 89 1E 12 00
 L_1E09:
 	XOR	AX, AX                              ; 1E09 33 C0
-	MOV	WORD PTR D_06C8, AX                 ; 1E0B A3 C8 06
-	MOV	WORD PTR D_06CA, AX                 ; 1E0E A3 CA 06
-	MOV	WORD PTR D_06CC, AX                 ; 1E11 A3 CC 06
-	MOV	WORD PTR D_06CE, AX                 ; 1E14 A3 CE 06
-	MOV	WORD PTR D_06D4, AX                 ; 1E17 A3 D4 06
+	MOV	WORD PTR membase, AX                 ; 1E0B A3 C8 06
+	MOV	WORD PTR memtotal, AX                 ; 1E0E A3 CA 06
+	MOV	WORD PTR freelist, AX                 ; 1E11 A3 CC 06
+	MOV	WORD PTR freebyte, AX                 ; 1E14 A3 CE 06
+	MOV	WORD PTR brklvl, AX                 ; 1E17 A3 D4 06
 	MOV	WORD PTR _HSIZE, DX                 ; 1E1A 89 16 4E 00
 	MOV	WORD PTR _MSIZE, AX                 ; 1E1E A3 50 00
 	POP	BP                                  ; 1E21 5D

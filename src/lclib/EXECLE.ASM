@@ -13,7 +13,7 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 PROG	SEGMENT
-	EXTRN	F_2A93:NEAR
+	EXTRN	doexec:NEAR
 	EXTRN	GETPF:NEAR
 PROG	ENDS
 	PUBLIC	EXECLE,EXECVE
@@ -62,7 +62,7 @@ L_1F6C:
 	PUSH	WORD PTR [BP+48H]                  ; 1F6F FF 76 48
 	LEA	AX, [BP+2]                          ; 1F72 8D 46 02
 	PUSH	AX                                 ; 1F75 50
-	CALL	F_2A93                             ; 1F76 E8 1A 0B
+	CALL	doexec                             ; 1F76 E8 1A 0B
 	MOV	SP, BP                              ; 1F79 8B E5
 	TEST	AX, AX                             ; 1F7B 85 C0
 	JE	L_1F87                               ; 1F7D 74 08

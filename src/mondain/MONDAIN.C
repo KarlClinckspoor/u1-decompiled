@@ -10,7 +10,7 @@ extern int vidmode;
 extern int wrange[];
 extern char *wnames[], *spellnam[], *dirtab[];
 extern drawline(), lineto(), gotoxy(), fillrect(), putstr(), playsnd(), msgline();
-extern waittick(), drawtile(), F_4031(), putnum(), showhp(), F_3FF9();
+extern waittick(), drawtile(), palflash(), putnum(), showhp(), palnorm();
 extern writfile(), showfood(), scrlmsg(), putch(), presskey(), vwait(), pixel();
 extern readfile(), clockrnd(), vidinit(), seedrnd(), arrowr(), flushkey(), readycmd();
 extern showstat(), ztats();
@@ -18,7 +18,7 @@ extern int rndrange();
 extern char upcase(), waitkey();
 extern unsigned char getkey();
 /* Lattice library */
-extern EXECL(), F_1D0D();
+extern EXECL(), erron();
 
 /*
  * Initialised data (DGROUP 0124-0256)
@@ -213,7 +213,7 @@ unsigned char dir;
         playif(0);
     } else {
         playif(0);
-        F_4031();
+        palflash();
         putstr("Burned! ", coltext);
         t = plstat / 10;
         if (t == 0)
@@ -223,7 +223,7 @@ unsigned char dir;
         playif(2);
         plstat -= t;
         showhp();
-        F_3FF9();
+        palnorm();
     }
     if (gemnear() && gemfrm == 0)
         fighton = gemfrm = 1;
@@ -822,9 +822,9 @@ mondcast()
         break;
     case 2:
         msgline("psionic shock!");
-        F_4031();
+        palflash();
         playif(5);
-        F_3FF9();
+        palnorm();
         if (hit = rndrange(1, 200) > 140) {
             i = plstat / 32;
             if (i > 255)
@@ -1081,7 +1081,7 @@ unsigned char **argv;
     int i, sz;
 
     sz = 64;
-    F_1D0D(1);
+    erron(1);
     forcecga = upcase(argv[1][0]) == 'C';
     argv1 = argv[1];
     argv2 = argv[2];

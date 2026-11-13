@@ -11,7 +11,7 @@ extern char *pictrow1[], *pictrow2[];       /* the picture, rows of '*' (defined
 extern int lfsrtap[];                    /* LFSR taps */
 
 extern gotoxy(), putstr(), fillrect(), drawline(), memcheck(), palcastl(), palnorm(), blittand();
-extern blitcga(), cvtplane(), pixel(), blitega(), waittick(), vidinit(), rndrange(), F_1D0D();
+extern blitcga(), cvtplane(), pixel(), blitega(), waittick(), vidinit(), rndrange(), erron();
 extern F_126F();
 extern int EXECL(), FOPEN(), FREAD(), FCLOSE(), EXIT(), detvid();
 extern unsigned char getkey(), upcase();
@@ -523,7 +523,7 @@ presents()
 /* main: ULTIMA.EXE entry (argv[1] = video mode letter) */
 main(argc, argv) int argc; unsigned char **argv;
 {
-    F_1D0D(1);
+    erron(1);
     argv1 = argv[1];
     forcecga = upcase(argv[1][0]) == 'C';
     chkvideo();

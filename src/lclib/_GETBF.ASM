@@ -17,7 +17,7 @@ DATA	SEGMENT
 	EXTRN	ERRNO:BYTE
 DATA	ENDS
 PROG	SEGMENT
-	EXTRN	F_2D47:NEAR
+	EXTRN	getmem:NEAR
 PROG	ENDS
 	PUBLIC	_GETBF
 
@@ -37,7 +37,7 @@ _GETBF:
 	RET                                     ; 2C20 C3
 L_2C21:
 	PUSH	WORD PTR D_07B0                    ; 2C21 FF 36 B0 07
-	CALL	F_2D47                             ; 2C25 E8 1F 01
+	CALL	getmem                             ; 2C25 E8 1F 01
 	MOV	SP, BP                              ; 2C28 8B E5
 	MOV	SI, WORD PTR [BP+6]                 ; 2C2A 8B 76 06
 	MOV	WORD PTR [SI], AX                   ; 2C2D 89 04

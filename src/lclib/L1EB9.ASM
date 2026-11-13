@@ -13,19 +13,19 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 PROG	SEGMENT
-	EXTRN	F_1E2C:NEAR
+	EXTRN	putfree:NEAR
 PROG	ENDS
-	PUBLIC	F_1EB9
+	PUBLIC	lfree
 
 PROG	SEGMENT
-F_1EB9:
+lfree:
 	PUSH	BP                                 ; 1EB9 55
 	MOV	BP, SP                              ; 1EBA 8B EC
 	CMP	WORD PTR [BP+8], 0                  ; 1EBC 83 7E 08 00
 	JNE	L_1ED0                              ; 1EC0 75 0E
 	PUSH	WORD PTR [BP+4]                    ; 1EC2 FF 76 04
 	PUSH	WORD PTR [BP+6]                    ; 1EC5 FF 76 06
-	CALL	F_1E2C                             ; 1EC8 E8 61 FF
+	CALL	putfree                             ; 1EC8 E8 61 FF
 	ADD	SP, 4                               ; 1ECB 83 C4 04
 	POP	BP                                  ; 1ECE 5D
 	RET                                     ; 1ECF C3

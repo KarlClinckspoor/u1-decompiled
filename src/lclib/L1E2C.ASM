@@ -13,14 +13,14 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_06CC:BYTE
-	EXTRN	D_06CE:BYTE
-	EXTRN	D_06D0:BYTE
+	EXTRN	freelist:BYTE
+	EXTRN	freebyte:BYTE
+	EXTRN	freerov:BYTE
 DATA	ENDS
-	PUBLIC	F_1E2C
+	PUBLIC	putfree
 
 PROG	SEGMENT
-F_1E2C:
+putfree:
 	PUSH	BP                                 ; 1E2C 55
 	MOV	BP, SP                              ; 1E2D 8B EC
 	ADD	WORD PTR [BP+6], 3                  ; 1E2F 83 46 06 03
@@ -33,12 +33,12 @@ L_1E3F:
 	MOV	AX, WORD PTR [BP+6]                 ; 1E3F 8B 46 06
 	MOV	BX, WORD PTR [BP+4]                 ; 1E42 8B 5E 04
 	MOV	WORD PTR [BX+2], AX                 ; 1E45 89 47 02
-	LEA	SI, D_06CC                          ; 1E48 8D 36 CC 06
-	CMP	SI, WORD PTR D_06D0                 ; 1E4C 3B 36 D0 06
+	LEA	SI, freelist                          ; 1E48 8D 36 CC 06
+	CMP	SI, WORD PTR freerov                 ; 1E4C 3B 36 D0 06
 	JE	L_1E5C                               ; 1E50 74 0A
-	CMP	BX, WORD PTR D_06D0                 ; 1E52 3B 1E D0 06
+	CMP	BX, WORD PTR freerov                 ; 1E52 3B 1E D0 06
 	JB	L_1E5C                               ; 1E56 72 04
-	MOV	SI, WORD PTR D_06D0                 ; 1E58 8B 36 D0 06
+	MOV	SI, WORD PTR freerov                 ; 1E58 8B 36 D0 06
 L_1E5C:
 	MOV	DI, WORD PTR [SI]                   ; 1E5C 8B 3C
 	OR	DI, DI                               ; 1E5E 0B FF
@@ -48,7 +48,7 @@ L_1E5C:
 	MOV	SI, DI                              ; 1E66 8B F7
 	JMP	SHORT L_1E5C                        ; 1E68 EB F2
 L_1E6A:
-	CMP	SI, OFFSET DGROUP:D_06CC            ; 1E6A 81 FE CC 06
+	CMP	SI, OFFSET DGROUP:freelist            ; 1E6A 81 FE CC 06
 	JE	L_1E90                               ; 1E6E 74 20
 	MOV	CX, SI                              ; 1E70 8B CE
 	ADD	CX, WORD PTR [SI+2]                 ; 1E72 03 4C 02
@@ -58,7 +58,7 @@ L_1E6A:
 	JAE	L_1E90                              ; 1E7C 73 12
 	ADD	DX, WORD PTR [BP+6]                 ; 1E7E 03 56 06
 	ADD	WORD PTR [SI+2], DX                 ; 1E81 01 54 02
-	ADD	WORD PTR D_06CE, DX                 ; 1E84 01 16 CE 06
+	ADD	WORD PTR freebyte, DX                 ; 1E84 01 16 CE 06
 	MOV	AX, WORD PTR [SI+2]                 ; 1E88 8B 44 02
 	MOV	BX, SI                              ; 1E8B 8B DE
 	JMP	SHORT L_1E9C                        ; 1E8D EB 0D
@@ -66,7 +66,7 @@ L_1E6A:
 L_1E90:
 	MOV	WORD PTR [BX], DI                   ; 1E90 89 3F
 	MOV	WORD PTR [SI], BX                   ; 1E92 89 1C
-	ADD	WORD PTR D_06CE, AX                 ; 1E94 01 06 CE 06
+	ADD	WORD PTR freebyte, AX                 ; 1E94 01 06 CE 06
 	OR	DI, DI                               ; 1E98 0B FF
 	JE	L_1EB1                               ; 1E9A 74 15
 L_1E9C:
@@ -80,7 +80,7 @@ L_1E9C:
 	MOV	AX, WORD PTR [DI]                   ; 1EAD 8B 05
 	MOV	WORD PTR [BX], AX                   ; 1EAF 89 07
 L_1EB1:
-	MOV	WORD PTR D_06D0, SI                 ; 1EB1 89 36 D0 06
+	MOV	WORD PTR freerov, SI                 ; 1EB1 89 36 D0 06
 	XOR	AX, AX                              ; 1EB5 33 C0
 	POP	BP                                  ; 1EB7 5D
 	RET                                     ; 1EB8 C3

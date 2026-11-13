@@ -26,7 +26,7 @@ PROG	SEGMENT
 	EXTRN	DCREATX:NEAR
 	EXTRN	DOPEN:NEAR
 	EXTRN	DUNIQUE:NEAR
-	EXTRN	F_2C5F:NEAR
+	EXTRN	ioctlset:NEAR
 	EXTRN	GETFC:NEAR
 PROG	ENDS
 	PUBLIC	OPEN,CREAT
@@ -256,7 +256,7 @@ L_228F:
 	OR	AX, 20H                              ; 22B3 0D 20 00
 	PUSH	AX                                 ; 22B6 50
 	PUSH	WORD PTR [BP+7]                    ; 22B7 FF 76 07
-	CALL	F_2C5F                             ; 22BA E8 A2 09
+	CALL	ioctlset                             ; 22BA E8 A2 09
 	MOV	SP, BP                              ; 22BD 8B E5
 L_22BF:
 	MOV	AX, WORD PTR [BP+3]                 ; 22BF 8B 46 03

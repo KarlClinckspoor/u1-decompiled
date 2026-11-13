@@ -15,10 +15,10 @@ DGROUP	GROUP	DATA,UDATA
 PROG	SEGMENT
 	EXTRN	STCL_H:NEAR
 PROG	ENDS
-	PUBLIC	F_27B9
+	PUBLIC	stci_h
 
 PROG	SEGMENT
-F_27B9:
+stci_h:
 	PUSH	BP                                 ; 27B9 55
 	SUB	SP, 8                               ; 27BA 83 EC 08
 	MOV	BP, SP                              ; 27BD 8B EC

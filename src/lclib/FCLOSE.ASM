@@ -14,7 +14,7 @@ DGROUP	GROUP	DATA,UDATA
 
 PROG	SEGMENT
 	EXTRN	CLOSE:NEAR
-	EXTRN	F_1E2C:NEAR
+	EXTRN	putfree:NEAR
 	EXTRN	_FLSBF:NEAR
 PROG	ENDS
 	PUBLIC	FCLOSE
@@ -45,7 +45,7 @@ L_19A1:
 	JE	L_19BB                               ; 19B0 74 09
 	PUSH	AX                                 ; 19B2 50
 	PUSH	WORD PTR [SI+6]                    ; 19B3 FF 74 06
-	CALL	F_1E2C                             ; 19B6 E8 73 04
+	CALL	putfree                             ; 19B6 E8 73 04
 	MOV	SP, BP                              ; 19B9 8B E5
 L_19BB:
 	XOR	AX, AX                              ; 19BB 33 C0

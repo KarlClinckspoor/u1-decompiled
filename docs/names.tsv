@@ -858,3 +858,41 @@ out	D_0D13	sopen	Open
 out	D_0D18	scoffin2	coffin
 out	D_0D20	snonehr	none here
 space	D_5FFA	starquad	star quadrant
+# stage 4: leftovers (Lattice library internals, Origin stragglers)
+shared	F_1D0D	erron	Lattice: install the INT 24h critical-error handler (ONERROR)
+shared	F_1D65	int24h	Lattice: INT 24h handler, saves error code
+shared	D_06A0	errcode	INT 24h: error code (DI low byte)
+shared	D_06B3	errax	INT 24h: AX at the error
+shared	D_06B5	errhook	INT 24h handler installed flag
+shared	D_06B6	oldint24	saved INT 24h vector (offset; segment follows)
+shared	D_06C8	membase	malloc: first block
+shared	D_06CA	memtotal	malloc: bytes obtained from DOS
+shared	D_06CC	freelist	malloc: free-list head node
+shared	D_06CE	freebyte	malloc: free bytes
+shared	D_06D0	freerov	malloc: rover into the free list
+shared	D_06D2	memgrow	malloc: minimum growth step
+shared	D_06D4	brklvl	break level set by rbrk
+shared	D_06E0	dosclass	DOS extended error: class
+shared	D_06E1	dosactn	DOS extended error: suggested action
+shared	D_06E2	dosloc	DOS extended error: locus
+shared	D_06E3	dosflags	CXSERR flags
+shared	D_06E4	errmap	DOS error to errno table
+shared	F_1E2C	putfree	Lattice: return a block to the free list
+shared	F_1EB9	lfree	Lattice: free wrapper (size must be 0 in high word)
+shared	F_2D47	getmem	Lattice: allocate a block (first fit)
+shared	F_2DDE	lgetmem	Lattice: getmem with a long size
+shared	F_2A93	doexec	Lattice: build command line and environment, call _EXEC
+shared	F_2C5F	ioctlset	Lattice: DOS IOCTL set device data (4401h)
+shared	F_33F9	sbrk	Lattice: grow the heap, int bytes
+shared	F_3407	lsbrk	Lattice: grow the heap, long bytes
+shared	F_3415	parabrk	Lattice: grow the heap, paragraphs
+shared	F_27B9	stci_h	Lattice: int to hex string
+shared	F_2846	stci_o	Lattice: int to octal string
+shared	F_1222	pfchar	Lattice: put one char into the printf buffer, flush to stdout when full
+shared	F_3FF9	palnorm	set the CGA/EGA palette to the normal colours
+shared	F_4031	palflash	set the CGA/EGA palette to the flash colours (white background)
+shared	F_41D5	drawcurs	draw the text cursor glyph
+shared	F_4234	kbdsync	sync the BIOS keyboard buffer head and tail
+shared	D_09FE	curglyph	cursor glyphs (8x8 bitmaps)
+shared	F_AD06	unpackxy	unpack a pair of nibble coordinates into SI/DI
+shared	F_B094	isdigch	is the character a digit

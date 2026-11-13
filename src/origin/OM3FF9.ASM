@@ -15,10 +15,10 @@ DGROUP	GROUP	DATA,UDATA
 DATA	SEGMENT
 	EXTRN	vidmode:BYTE
 DATA	ENDS
-	PUBLIC	F_3FF9,F_4031,D_0C4C,D_0C5E
+	PUBLIC	palnorm,palflash,D_0C4C,D_0C5E
 
 PROG	SEGMENT
-F_3FF9:
+palnorm:
 	PUSH	BP                                 ; 3FF9 55
 	MOV	BP, SP                              ; 3FFA 8B EC
 	PUSH	SI                                 ; 3FFC 56
@@ -54,7 +54,7 @@ L_401D:
 	POP	SI                                  ; 402E 5E
 	POP	BP                                  ; 402F 5D
 	RET                                     ; 4030 C3
-F_4031:
+palflash:
 	PUSH	BP                                 ; 4031 55
 	MOV	BP, SP                              ; 4032 8B EC
 	PUSH	SI                                 ; 4034 56

@@ -17,17 +17,17 @@ DATA	SEGMENT
 	EXTRN	_DOS:BYTE
 	EXTRN	_OSERR:BYTE
 DATA	ENDS
-	PUBLIC	CXSERR,CXSERZ,D_06E0,D_06E1,D_06E2,D_06E3
-	PUBLIC	D_06E4
+	PUBLIC	CXSERR,CXSERZ,dosclass,dosactn,dosloc,dosflags
+	PUBLIC	errmap
 
 PROG	SEGMENT
 CXSERR:
 	JAE	L_27B7                              ; 2769 73 4C
 L_276B:
-	TEST	BYTE PTR D_06E3, 2                 ; 276B F6 06 E3 06 02
+	TEST	BYTE PTR dosflags, 2                 ; 276B F6 06 E3 06 02
 	JE	L_277A                               ; 2770 74 08
 	MOV	AX, 53H                             ; 2772 B8 53 00
-	AND	BYTE PTR D_06E3, 1                  ; 2775 80 26 E3 06 01
+	AND	BYTE PTR dosflags, 1                  ; 2775 80 26 E3 06 01
 L_277A:
 	MOV	WORD PTR _OSERR, AX                 ; 277A A3 71 00
 	CMP	BYTE PTR _DOS, 3                    ; 277D 80 3E 02 00 03
@@ -39,16 +39,16 @@ L_277A:
 	INT	21H                                 ; 278A CD 21
 	POP	DS                                  ; 278C 1F
 	POP	ES                                  ; 278D 07
-	MOV	BYTE PTR D_06E0, BH                 ; 278E 88 3E E0 06
-	MOV	BYTE PTR D_06E1, BL                 ; 2792 88 1E E1 06
-	MOV	BYTE PTR D_06E2, CH                 ; 2796 88 2E E2 06
+	MOV	BYTE PTR dosclass, BH                 ; 278E 88 3E E0 06
+	MOV	BYTE PTR dosactn, BL                 ; 2792 88 1E E1 06
+	MOV	BYTE PTR dosloc, CH                 ; 2796 88 2E E2 06
 L_279A:
 	MOV	AX, WORD PTR _OSERR                 ; 279A A1 71 00
 	CMP	AL, 53H                             ; 279D 3C 53
 	JLE	L_27A3                              ; 279F 7E 02
 	XOR	AL, AL                              ; 27A1 32 C0
 L_27A3:
-	MOV	BX, OFFSET DGROUP:D_06E4            ; 27A3 BB E4 06
+	MOV	BX, OFFSET DGROUP:errmap            ; 27A3 BB E4 06
 	XLAT                                    ; 27A6 D7
 	XOR	AH, AH                              ; 27A7 32 E4
 	OR	AX, AX                               ; 27A9 0B C0
@@ -60,13 +60,13 @@ L_27AE:
 	MOV	BX, AX                              ; 27B4 8B D8
 	RET                                     ; 27B6 C3
 L_27B7:
-	TEST	BYTE PTR D_06E3, 2                 ; 27B7 F6 06 E3 06 02
+	TEST	BYTE PTR dosflags, 2                 ; 27B7 F6 06 E3 06 02
 	JNE	L_276B                              ; 27BC 75 AD
 	MOV	WORD PTR _OSERR, 0                  ; 27BE C7 06 71 00 00 00
 	RET                                     ; 27C4 C3
 CXSERZ:
 	JB	L_276B                               ; 27C5 72 A4
-	TEST	BYTE PTR D_06E3, 2                 ; 27C7 F6 06 E3 06 02
+	TEST	BYTE PTR dosflags, 2                 ; 27C7 F6 06 E3 06 02
 	JNE	L_276B                              ; 27CC 75 9D
 	XOR	AX, AX                              ; 27CE 33 C0
 	XOR	BX, BX                              ; 27D0 33 DB
@@ -74,11 +74,11 @@ CXSERZ:
 PROG	ENDS
 
 DATA	SEGMENT
-D_06E0	DB	0	; 06E0
-D_06E1	DB	0	; 06E1
-D_06E2	DB	0	; 06E2
-D_06E3	DB	0	; 06E3
-D_06E4	DB	0,16H,2,2,17H,0DH,9,0,0CH,16H,16H,16H	; 06E4
+dosclass	DB	0	; 06E0
+dosactn	DB	0	; 06E1
+dosloc	DB	0	; 06E2
+dosflags	DB	0	; 06E3
+errmap	DB	0,16H,2,2,17H,0DH,9,0,0CH,16H,16H,16H	; 06E4
 	DB	16H,16H,0,13H,0DH,0DH,18H,1EH,13H,6,6,5	; 06F0
 	DB	0,5,5,5,5,5,5,5,0DH,0DH,5,5	; 06FC
 	DB	0,0,0,0,0,0,0,0,0,0,0,0	; 0708

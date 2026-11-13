@@ -15,7 +15,7 @@ DGROUP	GROUP	DATA,UDATA
 PROG	SEGMENT
 	EXTRN	F_3D61:NEAR
 PROG	ENDS
-	PUBLIC	getkey,F_41D5,flushkey,F_4234,D_09FE,D_0A26
+	PUBLIC	getkey,drawcurs,flushkey,kbdsync,curglyph,D_0A26
 	PUBLIC	D_0A28,D_0A2A,D_0A2E
 
 PROG	SEGMENT
@@ -43,7 +43,7 @@ getkey:
 	SHL	AX, 1                               ; 4162 D1 E0
 	SHL	AX, 1                               ; 4164 D1 E0
 	MOV	WORD PTR D_0A28, AX                 ; 4166 A3 28 0A
-	CALL	F_41D5                             ; 4169 E8 69 00
+	CALL	drawcurs                             ; 4169 E8 69 00
 	MOV	AH, 6                               ; 416C B4 06
 	MOV	DL, 0FFH                            ; 416E B2 FF
 	INT	21H                                 ; 4170 CD 21
@@ -92,9 +92,9 @@ L_41BB:
 	OR	AX, AX                               ; 41BB 0B C0
 	JE	L_41CD                               ; 41BD 74 0E
 	PUSH	AX                                 ; 41BF 50
-	CALL	F_4234                             ; 41C0 E8 71 00
+	CALL	kbdsync                             ; 41C0 E8 71 00
 	MOV	WORD PTR D_0A2A, 4                  ; 41C3 C7 06 2A 0A 04 00
-	CALL	F_41D5                             ; 41C9 E8 09 00
+	CALL	drawcurs                             ; 41C9 E8 09 00
 	POP	AX                                  ; 41CC 58
 L_41CD:
 	POP	ES                                  ; 41CD 07
@@ -103,7 +103,7 @@ L_41CD:
 	POP	SI                                  ; 41D0 5E
 	POP	BP                                  ; 41D1 5D
 	RET	2                                   ; 41D2 C2 02 00
-F_41D5:
+drawcurs:
 	CMP	WORD PTR D_0A2E, 0                  ; 41D5 83 3E 2E 0A 00
 	JNE	L_41DD                              ; 41DA 75 01
 	RET                                     ; 41DC C3
@@ -115,7 +115,7 @@ L_41DD:
 	SHL	BX, 1                               ; 41E8 D1 E3
 	MOV	DI, WORD PTR D_0A28                 ; 41EA 8B 3E 28 0A
 L_41EE:
-	MOV	AL, BYTE PTR D_09FE[BX]             ; 41EE 8A 87 FE 09
+	MOV	AL, BYTE PTR curglyph[BX]             ; 41EE 8A 87 FE 09
 	INC	BX                                  ; 41F2 43
 	PUSH	BX                                 ; 41F3 53
 	PUSH	CX                                 ; 41F4 51
@@ -154,14 +154,14 @@ flushkey:
 	PUSH	DI                                 ; 4228 57
 	PUSH	DS                                 ; 4229 1E
 	PUSH	ES                                 ; 422A 06
-	CALL	F_4234                             ; 422B E8 06 00
+	CALL	kbdsync                             ; 422B E8 06 00
 	POP	ES                                  ; 422E 07
 	POP	DS                                  ; 422F 1F
 	POP	DI                                  ; 4230 5F
 	POP	SI                                  ; 4231 5E
 	POP	BP                                  ; 4232 5D
 	RET                                     ; 4233 C3
-F_4234:
+kbdsync:
 	MOV	AX, 0F000H                          ; 4234 B8 00 F0
 	MOV	ES, AX                              ; 4237 8E C0
 	MOV	DI, 0FFFEH                          ; 4239 BF FE FF
@@ -179,7 +179,7 @@ L_4253:
 PROG	ENDS
 
 DATA	SEGMENT
-D_09FE	DB	66H,3CH,18H,66H,66H,18H,3CH,66H,3CH,18H,66H,24H	; 09FE
+curglyph	DB	66H,3CH,18H,66H,66H,18H,3CH,66H,3CH,18H,66H,24H	; 09FE
 	DB	24H,66H,18H,3CH,18H,66H,24H,3CH,3CH,24H,66H,18H	; 0A0A
 	DB	66H,24H,18H,18H,18H,18H,3CH,66H,0,0,0,0	; 0A16
 	DB	0,0,0,0	; 0A22
