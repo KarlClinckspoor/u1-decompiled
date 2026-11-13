@@ -34,6 +34,7 @@ out, workdir = ktest.run('out', s, files=['PLAYER1.U1'], prefix='C 1')   # out[0
 | OUT: food on foot goes down by one every two turns (`foodtick`: counter reaches `foodper[veh]`) | confirmed (200 -> 185 after 30 turns) |
 | OUT: Quit saves the file and the game continues | confirmed: file rewritten, program keeps running, Quit costs a turn; the saved record has the state before that turn's food use |
 | OUT: death (hit points 0): 99 hit points, 99 food, pence 0, all weapons lost, moved to a new square (combat.md section 9) | confirmed (position (60,155) -> (70,146); weapon counts 0; hands kept) |
+| SPACE: the galaxy depends only on the character's seed (record offset 0x32): two runs with the same record give the same sector table (26C0..), a different seed gives a different one (space-flight.md) | confirmed |
 
 ## Not confirmable
 
