@@ -1,8 +1,10 @@
 ; OUT.EXE link order
 ../lattice/C.ASM
-OUT1.ASM		; game code (generated stand-ins, split for MASM's memory)
-OUT2.ASM
-OUT3.ASM
+OUTA.C		; game code in C (split for LC's memory)
+OUTB.C
+OUTC.C
+OUTBSS.C		; the game's uninitialised data
+OUTSYM.ASM		; names of unlabelled tables in the Origin text module
 ../lclib/EXECL.ASM	; Lattice C 3.1x library modules, in link order
 ../lclib/EXIT.ASM
 ../lclib/RAND.ASM
