@@ -32,6 +32,8 @@ an eventual `runtime/port` comparison with recorded DOS sessions (see "Elsewhere
 
 ## Where things stand
 
+**Note: the tables below predate the C integration; the "stand-in" game code of MONDAIN/SPACE/ULTIMA/OUT is now C (see "Current task").**
+
 | executable | status |
 |---|---|
 | GEN.EXE (character creation) | **Rebuilds byte-identical** (sha1 af21ad12e999d63d36d2e34381c857f55e57c14d) |
