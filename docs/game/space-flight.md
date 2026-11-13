@@ -1,4 +1,4 @@
-# SPACE.EXE: space flight and combat (src/space/SPACEA.C, SPACE4.C, SPACE5.C, SP3330.ASM)
+# SPACE.EXE: space flight and combat (src/space/SPACE.C, SPACE.C, SPACE5.C, SPACE.C (`fightfrm`))
 
 SPACE.EXE is started by OUT.EXE when the player boards a Space Shuttle on the overworld (map tile 17). It
 is a self-contained flight game: a 7x7 galaxy of sectors (the manual: "The starways are divided into 49
@@ -334,7 +334,7 @@ apparent size, growing as it nears; the Fight bank sprite number), frame counter
 
 F_254B places a new enemy: `x = rnd(40,280)`, `y = rnd(40,120)`, kind 0 (or nothing while hyperjumping).
 
-F_3330 (assembly, from SP3330.ASM; SP3330.ASM is the only authority) each frame:
+F_3330 (assembly, from SPACE.C (`fightfrm`); SPACE.C (`fightfrm`) is the only authority) each frame:
 
 ```
 if (D_012C) D_012C--;  D_0DE0 = 0;
@@ -408,12 +408,12 @@ diskette", "Thou hast lifted off!". Fuel is spent by: turn 2, thrust/retro 5, fr
 
 ## 9. Notes on the sources
 
-* The C comments in SPACEA.C that mislabel things: `f6`/`f8` (fuel/shield reversed), F_03E9 ("largest square" =
+* The C comments in SPACE.C that mislabel things: `f6`/`f8` (fuel/shield reversed), F_03E9 ("largest square" =
   ceil sqrt), F_3109 / F_281F / F_2B7B / F_2EC1 ("alien ship" = exhaust), F_0425 "19x18" is 18 rows x 19
   columns (the star).
 * F_3330 is the only function not in C. 376 bytes; the register allocation of the compiler could not be
-  reproduced (docs/ notes in src/space/work/sp_2b7b.notes.md). SP3330.ASM is byte-exact.
-* Text literals reused through address casts in SPACE4.C: `(char *)0xC07` = "Crunch!", `0xC0F` = "Thy shield is
+  reproduced (docs/ notes in src/space/work/sp_2b7b.notes.md). SPACE.C (`fightfrm`) is byte-exact.
+* Text literals reused through address casts in SPACE.C: `(char *)0xC07` = "Crunch!", `0xC0F` = "Thy shield is
   drained!", `0x19A` = "".
 * `D_5E14` is the index of the player's ship; `D_6000` the facing last drawn (so a turn causes a redraw);
   `D_0134` redraw flag; `D_012E` "exhaust toggle" flag; `D_0DE0` exhaust drawn flag.

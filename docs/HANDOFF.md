@@ -9,11 +9,8 @@ All four parts are done except the polish items below.
 1. **Pushed** (first commit set). Commits since then are local until Karl says to push.
 2. **C translation: done and integrated.** All five EXEs are built from C game code and rebuild
    byte-identical: src/gen/GEN.C, src/ultima/ULTIMA.C, src/mondain/MONDAIN.C,
-   src/space/SPACEA.C+SPACE4.C+SPACE5.C+SPBSS.C, src/out/OUTA/B/C.C+OUTBSS.C (+OUTSYM.ASM,
-   absolute names for tables that live in the Origin library's data). Only exception: SPACE's
-   F_3330 (alien turn, now named in space.syms) stays as assembly, src/space/SP3330.ASM: the C
-   in src/space/work/sp_2b7b.C is the right length but 11 bytes differ (register choice; ~150
-   variants tried). Each src/NAME/INTEGRATION.md says how the modules were cut (LC1 runs out of
+   src/space/SPACE.C+SPACE5.C+SPBSS.C, src/out/OUTA/B/C.C+OUTBSS.C (+OUTSYM.ASM,
+   absolute names for tables that live in the Origin library's data). All game functions are C (SPACE's F_3330, now `fightfrm`, was matched last: copy into locals first, see src/space/INTEGRATION.md). Each src/NAME/INTEGRATION.md says how the modules were cut (LC1 runs out of
    memory at ~2250 lines, so OUT is three modules). src/*/work/ keep the per-range drafts and
    .notes.md (compiler lessons); they still use the old address names.
 3. **Readable names: done for what could be justified.** tools/rename.py + docs/names.tsv (855

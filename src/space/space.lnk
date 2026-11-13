@@ -1,8 +1,6 @@
 ; SPACE.EXE link order
 ../lattice/C.ASM
-SPACEA.C		; game code 03E9-3330 (F_03E9..F_31D7) and its data 0124-0E02
-SP3330.ASM		; F_3330, original bytes (the C version does not match)
-SPACE4.C		; F_34A8-F_1853, data 0E02-0F7E
+SPACE.C			; game code 03E9-3DED (F_03E9..F_1853, incl. fightfrm) and its data 0124-0F7E
 SPACE5.C		; F_3DD6, data 0F80-0FA0
 SPBSS.C			; BSS 26C0-6002
 ../lclib/EXECL.ASM	; Lattice C 3.1x library modules, in link order

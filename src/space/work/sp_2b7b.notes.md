@@ -12,7 +12,7 @@ program's main). lc.py 2026-11-12: 16 MATCH, F_3330 NONMATCHING, F_386B differs 
 | F_3109 | MATCH | draw/erase alien ship object p by type 0/1/2 (F_281F/F_2EC1/F_2B7B), toggles D_0DE0 |
 | F_319F | MATCH | random -1/0/1 (F_4069(1,255) vs 125/129) |
 | F_31D7 | MATCH | alien fires: laser line, "You've been hit!", shield loss |
-| F_3330 | NONMATCHING | alien ship turn in combat: move toward crosshair, redraw, fire (2 bytes longer) |
+| F_3330 | MATCH (2026-11-13, now fightfrm in SPACE.C; see sp_3330_match.C) | alien ship turn in combat: move toward crosshair, redraw, fire (2 bytes longer) |
 | F_34A8 / F_34D9 | MATCH | x += D_0128 wrap 20..275 / y += D_012A wrap 10..130 |
 | F_350A | MATCH | collision: "Crunch!", shield loss, reverse speeds |
 | F_3567 | MATCH | dock at a base: 500p fee, choose ship 1..4 |
@@ -64,3 +64,5 @@ B1E inuse.u1; F73 Shld:; F79 Fuel:; F80 \nAbnormal program termination\n.
   copy) alive at `dx = D_013A - ax`, which no statement ordering/comma/assignment-expression/type/struct/array form produced.
   Closest (kept): `D_0C98 = D_0C94; dx = D_013A - (D_0C96 = D_0C92); dy = D_013C - D_0C94;` = right length (376), F_386B MATCHes.
   Structs/arrays for D_0C92.. disable the cache entirely.
+
+- F_3330 resolved: matched in C (sp_3330_match.C) and merged into src/space/SPACE.C; SP3330.ASM retired. Superseded notes above about F_3330 register choice.
