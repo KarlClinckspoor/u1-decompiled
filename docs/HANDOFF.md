@@ -23,7 +23,7 @@ All four parts are done except the polish items below.
    the code, never run; uncertain readings are marked. Known oddities from the code are listed
    in the files (e.g. Quit saves without exiting, buying uses Intelligence).
 
-Open polish: match F_3330 in C; name the leftover addresses; the BSS in OUTBSS.C/SPBSS.C is
+Open polish: name the leftover addresses; the BSS in OUTBSS.C/SPBSS.C is
 small char arrays, not the real struct/array types; replace work-file comments' old names;
 an eventual `runtime/port` comparison with recorded DOS sessions (see "Elsewhere").
 
