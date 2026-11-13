@@ -13,18 +13,18 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_2046:BYTE
+	EXTRN	coltext:BYTE
 DATA	ENDS
 PROG	SEGMENT
-	EXTRN	F_352C:NEAR
-	EXTRN	F_3599:NEAR
-	EXTRN	F_35CA:NEAR
-	EXTRN	F_39C5:NEAR
+	EXTRN	gotoxy:NEAR
+	EXTRN	putstr:NEAR
+	EXTRN	fillrect:NEAR
+	EXTRN	waitkey:NEAR
 PROG	ENDS
-	PUBLIC	F_3AE2,D_0A82
+	PUBLIC	presskey,strpress
 
 PROG	SEGMENT
-F_3AE2:
+presskey:
 	PUSH	BP                                 ; 3AE2 55
 	SUB	SP, 6                               ; 3AE3 83 EC 06
 	MOV	BP, SP                              ; 3AE6 8B EC
@@ -32,16 +32,16 @@ F_3AE2:
 	PUSH	AX                                 ; 3AEB 50
 	MOV	AX, 1                               ; 3AEC B8 01 00
 	PUSH	AX                                 ; 3AEF 50
-	CALL	F_352C                             ; 3AF0 E8 92 F5
+	CALL	gotoxy                             ; 3AF0 E8 92 F5
 	MOV	SP, BP                              ; 3AF3 8B E5
-	PUSH	WORD PTR D_2046                    ; 3AF5 FF 36 46 20
-	MOV	AX, OFFSET DGROUP:D_0A82            ; 3AF9 B8 82 0A
+	PUSH	WORD PTR coltext                    ; 3AF5 FF 36 46 20
+	MOV	AX, OFFSET DGROUP:strpress            ; 3AF9 B8 82 0A
 	PUSH	AX                                 ; 3AFC 50
-	CALL	F_3599                             ; 3AFD E8 F2 F5
+	CALL	putstr                             ; 3AFD E8 F2 F5
 	MOV	SP, BP                              ; 3B00 8B E5
 L_3B02:
-	PUSH	WORD PTR D_2046                    ; 3B02 FF 36 46 20
-	CALL	F_39C5                             ; 3B06 E8 BD FC
+	PUSH	WORD PTR coltext                    ; 3B02 FF 36 46 20
+	CALL	waitkey                             ; 3B06 E8 BD FC
 	MOV	SP, BP                              ; 3B09 8B E5
 	MOV	BYTE PTR [BP+4], AL                 ; 3B0B 88 46 04
 	MOV	AL, BYTE PTR [BP+4]                 ; 3B0E 8A 46 04
@@ -61,13 +61,13 @@ L_3B1D:
 	PUSH	AX                                 ; 3B2B 50
 	XOR	AX, AX                              ; 3B2C 33 C0
 	PUSH	AX                                 ; 3B2E 50
-	CALL	F_35CA                             ; 3B2F E8 F1 F5
+	CALL	fillrect                             ; 3B2F E8 F1 F5
 	MOV	SP, BP                              ; 3B32 8B E5
 	MOV	AX, 18H                             ; 3B34 B8 18 00
 	PUSH	AX                                 ; 3B37 50
 	MOV	AX, 1                               ; 3B38 B8 01 00
 	PUSH	AX                                 ; 3B3B 50
-	CALL	F_352C                             ; 3B3C E8 46 F5
+	CALL	gotoxy                             ; 3B3C E8 46 F5
 	MOV	SP, BP                              ; 3B3F 8B E5
 	ADD	SP, 6                               ; 3B41 83 C4 06
 	POP	BP                                  ; 3B44 5D
@@ -75,7 +75,7 @@ L_3B1D:
 PROG	ENDS
 
 DATA	SEGMENT
-D_0A82	DB	50H,72H,65H,73H,73H,20H,53H,70H,61H,63H,65H,20H	; 0A82
+strpress	DB	50H,72H,65H,73H,73H,20H,53H,70H,61H,63H,65H,20H	; 0A82
 	DB	74H,6FH,20H,63H,6FH,6EH,74H,69H,6EH,75H,65H,3AH	; 0A8E
 	DB	20H,0	; 0A9A
 DATA	ENDS

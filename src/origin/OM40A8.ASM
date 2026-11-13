@@ -13,25 +13,25 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_2046:BYTE
-	EXTRN	D_207E:BYTE
+	EXTRN	coltext:BYTE
+	EXTRN	plexp:BYTE
 DATA	ENDS
 PROG	SEGMENT
-	EXTRN	F_3862:NEAR
-	EXTRN	F_3E5E:NEAR
-	EXTRN	F_413C:NEAR
+	EXTRN	upcase:NEAR
+	EXTRN	waittick:NEAR
+	EXTRN	getkey:NEAR
 PROG	ENDS
-	PUBLIC	F_40A8,F_40E9,F_40FE,F_4127,F_4161
+	PUBLIC	isvowel,getlevel,quadrant,keyup,keywait
 
 PROG	SEGMENT
-F_40A8:
+isvowel:
 	PUSH	BP                                 ; 40A8 55
 	SUB	SP, 4                               ; 40A9 83 EC 04
 	MOV	BP, SP                              ; 40AC 8B EC
 	MOV	AL, BYTE PTR [BP+8]                 ; 40AE 8A 46 08
 	DB	30H,0E4H                             ; 40B1 xor ah, ah
 	PUSH	AX                                 ; 40B3 50
-	CALL	F_3862                             ; 40B4 E8 20 F3
+	CALL	upcase                             ; 40B4 E8 20 F3
 	MOV	SP, BP                              ; 40B7 8B E5
 	MOV	BYTE PTR [BP+8], AL                 ; 40B9 88 46 08
 	DB	30H,0E4H                             ; 40BC xor ah, ah
@@ -55,11 +55,11 @@ L_40E2:
 	ADD	SP, 4                               ; 40E4 83 C4 04
 	POP	BP                                  ; 40E7 5D
 	RET                                     ; 40E8 C3
-F_40E9:
+getlevel:
 	PUSH	BP                                 ; 40E9 55
 	SUB	SP, 2                               ; 40EA 83 EC 02
 	MOV	BP, SP                              ; 40ED 8B EC
-	MOV	AX, WORD PTR D_207E                 ; 40EF A1 7E 20
+	MOV	AX, WORD PTR plexp                 ; 40EF A1 7E 20
 	MOV	BX, 3E8H                            ; 40F2 BB E8 03
 	CWD                                     ; 40F5 99
 	IDIV	BX                                 ; 40F6 F7 FB
@@ -67,7 +67,7 @@ F_40E9:
 	ADD	SP, 2                               ; 40F9 83 C4 02
 	POP	BP                                  ; 40FC 5D
 	RET                                     ; 40FD C3
-F_40FE:
+quadrant:
 	PUSH	BP                                 ; 40FE 55
 	SUB	SP, 4                               ; 40FF 83 EC 04
 	MOV	BP, SP                              ; 4102 8B EC
@@ -92,42 +92,42 @@ L_4120:
 	ADD	SP, 4                               ; 4122 83 C4 04
 	POP	BP                                  ; 4125 5D
 	RET                                     ; 4126 C3
-F_4127:
+keyup:
 	PUSH	BP                                 ; 4127 55
 	SUB	SP, 4                               ; 4128 83 EC 04
 	MOV	BP, SP                              ; 412B 8B EC
-	PUSH	WORD PTR D_2046                    ; 412D FF 36 46 20
-	CALL	F_413C                             ; 4131 E8 71 09
+	PUSH	WORD PTR coltext                    ; 412D FF 36 46 20
+	CALL	getkey                             ; 4131 E8 71 09
 	MOV	SP, BP                              ; 4134 8B E5
 	DB	30H,0E4H                             ; 4136 xor ah, ah
 	PUSH	AX                                 ; 4138 50
-	CALL	F_3862                             ; 4139 E8 9B F2
+	CALL	upcase                             ; 4139 E8 9B F2
 	MOV	SP, BP                              ; 413C 8B E5
 	TEST	AL, AL                             ; 413E 84 C0
 	MOV	BYTE PTR [BP+2], AL                 ; 4140 88 46 02
 	JNE	L_4150                              ; 4143 75 0B
 	MOV	AX, 3                               ; 4145 B8 03 00
 	PUSH	AX                                 ; 4148 50
-	CALL	F_3E5E                             ; 4149 E8 1B FA
+	CALL	waittick                             ; 4149 E8 1B FA
 	MOV	SP, BP                              ; 414C 8B E5
 	JMP	SHORT L_4159                        ; 414E EB 09
 L_4150:
 	MOV	AX, 1                               ; 4150 B8 01 00
 	PUSH	AX                                 ; 4153 50
-	CALL	F_3E5E                             ; 4154 E8 10 FA
+	CALL	waittick                             ; 4154 E8 10 FA
 	MOV	SP, BP                              ; 4157 8B E5
 L_4159:
 	MOV	AL, BYTE PTR [BP+2]                 ; 4159 8A 46 02
 	ADD	SP, 4                               ; 415C 83 C4 04
 	POP	BP                                  ; 415F 5D
 	RET                                     ; 4160 C3
-F_4161:
+keywait:
 	PUSH	BP                                 ; 4161 55
 	SUB	SP, 6                               ; 4162 83 EC 06
 	MOV	BP, SP                              ; 4165 8B EC
 	MOV	WORD PTR [BP+4], 0                  ; 4167 C7 46 04 00 00
 L_416C:
-	CALL	F_4127                             ; 416C E8 B8 FF
+	CALL	keyup                             ; 416C E8 B8 FF
 	INC	WORD PTR [BP+4]                     ; 416F FF 46 04
 	MOV	BYTE PTR [BP+2], AL                 ; 4172 88 46 02
 	DB	82H,7EH,2,0                          ; 4175 cmp byte ptr [bp + 2], 0

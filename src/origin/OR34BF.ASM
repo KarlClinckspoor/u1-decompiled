@@ -13,13 +13,13 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_082C:BYTE
-	EXTRN	D_0830:BYTE
+	EXTRN	vidmode:BYTE
+	EXTRN	vidmarg:BYTE
 DATA	ENDS
-	PUBLIC	F_34BF,F_352C,F_3547,D_07C0
+	PUBLIC	detvid,gotoxy,modecga,tandystr
 
 PROG	SEGMENT
-F_34BF:
+detvid:
 	PUSH	BP                                 ; 34BF 55
 	MOV	BP, SP                              ; 34C0 8B EC
 	PUSH	SI                                 ; 34C2 56
@@ -43,7 +43,7 @@ L_34DF:
 	PUSH	DI                                 ; 34E5 57
 	PUSH	CX                                 ; 34E6 51
 	MOV	CX, 5                               ; 34E7 B9 05 00
-	MOV	SI, OFFSET DGROUP:D_07C0            ; 34EA BE C0 07
+	MOV	SI, OFFSET DGROUP:tandystr            ; 34EA BE C0 07
 	DEC	DI                                  ; 34ED 4F
 	REPE CMPSB                              ; 34EE F3 A6
 	POP	CX                                  ; 34F0 59
@@ -75,14 +75,14 @@ L_351C:
 L_3521:
 	XOR	AX, AX                              ; 3521 33 C0
 L_3523:
-	MOV	WORD PTR D_082C, AX                 ; 3523 A3 2C 08
+	MOV	WORD PTR vidmode, AX                 ; 3523 A3 2C 08
 	POP	ES                                  ; 3526 07
 	POP	DS                                  ; 3527 1F
 	POP	DI                                  ; 3528 5F
 	POP	SI                                  ; 3529 5E
 	POP	BP                                  ; 352A 5D
 	RET                                     ; 352B C3
-F_352C:
+gotoxy:
 	PUSH	BP                                 ; 352C 55
 	MOV	BP, SP                              ; 352D 8B EC
 	PUSH	SI                                 ; 352F 56
@@ -100,14 +100,14 @@ F_352C:
 	POP	SI                                  ; 3542 5E
 	POP	BP                                  ; 3543 5D
 	RET	4                                   ; 3544 C2 04 00
-F_3547:
+modecga:
 	PUSH	BP                                 ; 3547 55
 	MOV	BP, SP                              ; 3548 8B EC
 	PUSH	SI                                 ; 354A 56
 	PUSH	DI                                 ; 354B 57
 	PUSH	DS                                 ; 354C 1E
 	PUSH	ES                                 ; 354D 06
-	MOV	WORD PTR D_0830, 2                  ; 354E C7 06 30 08 02 00
+	MOV	WORD PTR vidmarg, 2                  ; 354E C7 06 30 08 02 00
 	XOR	AL, AL                              ; 3554 32 C0
 	MOV	DX, 3D8H                            ; 3556 BA D8 03
 	OUT	DX, AL                              ; 3559 EE
@@ -134,7 +134,7 @@ F_3547:
 PROG	ENDS
 
 DATA	SEGMENT
-D_07C0	DB	54H,61H,6EH,64H,79H,0	; 07C0
+tandystr	DB	54H,61H,6EH,64H,79H,0	; 07C0
 DATA	ENDS
 
 	END

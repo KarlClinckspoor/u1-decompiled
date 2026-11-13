@@ -12,10 +12,10 @@ UDATA	ENDS
 DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
-	PUBLIC	F_3BD5,D_4994,D_4996
+	PUBLIC	memcheck,tandyseg,freeparg
 
 PROG	SEGMENT
-F_3BD5:
+memcheck:
 	PUSH	BP                                 ; 3BD5 55
 	MOV	BP, SP                              ; 3BD6 8B EC
 	PUSH	SI                                 ; 3BD8 56
@@ -27,18 +27,18 @@ F_3BD5:
 	INT	21H                                 ; 3BE1 CD 21
 	CMP	WORD PTR [BP+4], 0                  ; 3BE3 83 7E 04 00
 	JNE	L_3BEF                              ; 3BE7 75 06
-	MOV	WORD PTR D_4996, BX                 ; 3BE9 89 1E 96 49
+	MOV	WORD PTR freeparg, BX                 ; 3BE9 89 1E 96 49
 	JMP	SHORT L_3C16                        ; 3BED EB 27
 L_3BEF:
 	SUB	BX, 401H                            ; 3BEF 81 EB 01 04
-	MOV	WORD PTR D_4996, BX                 ; 3BF3 89 1E 96 49
+	MOV	WORD PTR freeparg, BX                 ; 3BF3 89 1E 96 49
 	MOV	AH, 48H                             ; 3BF7 B4 48
 	INT	21H                                 ; 3BF9 CD 21
 	PUSH	AX                                 ; 3BFB 50
 	MOV	AH, 48H                             ; 3BFC B4 48
 	MOV	BX, 400H                            ; 3BFE BB 00 04
 	INT	21H                                 ; 3C01 CD 21
-	MOV	WORD PTR D_4994, AX                 ; 3C03 A3 94 49
+	MOV	WORD PTR tandyseg, AX                 ; 3C03 A3 94 49
 	MOV	BX, 50H                             ; 3C06 BB 50 00
 	MOV	ES, BX                              ; 3C09 8E C3
 	MOV	BX, 10H                             ; 3C0B BB 10 00
@@ -56,8 +56,8 @@ L_3C16:
 PROG	ENDS
 
 DATA	SEGMENT
-D_4994	DB	0,0	; 4994
-D_4996	DB	0,0	; 4996
+tandyseg	DB	0,0	; 4994
+freeparg	DB	0,0	; 4996
 DATA	ENDS
 
 	END

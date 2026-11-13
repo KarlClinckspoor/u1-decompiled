@@ -3,18 +3,18 @@
 ; Names for tables inside the Origin text module (src/origin/OM4437.ASM, DGROUP 267C-39E8)
 ; that the game code uses but that have no label there: absolute DGROUP offsets.
 ;
-	PUBLIC	D_307C,D_3174,D_31CC,D_31DC,D_368C,D_3698,D_36E8,D_36F8,D_3708,D_37AE,D_3808,D_3814,D_3930
-D_307C	EQU	307CH
-D_3174	EQU	3174H
-D_31CC	EQU	31CCH
-D_31DC	EQU	31DCH
-D_368C	EQU	368CH
-D_3698	EQU	3698H
-D_36E8	EQU	36E8H
-D_36F8	EQU	36F8H
-D_3708	EQU	3708H
-D_37AE	EQU	37AEH
-D_3808	EQU	3808H
-D_3814	EQU	3814H
-D_3930	EQU	3930H
+	PUBLIC	placenam,landnam,princnam,enttmpl,dmgfact,hpfact,movechan,foodper,mntattr,blockmsg,persp1,persp2,dmonname
+placenam	EQU	307CH
+landnam	EQU	3174H
+princnam	EQU	31CCH
+enttmpl	EQU	31DCH
+dmgfact	EQU	368CH
+hpfact	EQU	3698H
+movechan	EQU	36E8H
+foodper	EQU	36F8H
+mntattr	EQU	3708H
+blockmsg	EQU	37AEH
+persp1	EQU	3808H
+persp2	EQU	3814H
+dmonname	EQU	3930H
 	END

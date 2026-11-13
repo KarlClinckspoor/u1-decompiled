@@ -13,15 +13,15 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_082C:BYTE
-	EXTRN	D_084A:BYTE
+	EXTRN	vidmode:BYTE
+	EXTRN	rowtab:BYTE
 DATA	ENDS
-	PUBLIC	F_603E,F_6136,F_614E,D_12FE,D_1304,D_1306
+	PUBLIC	drawship,F_6136,drawfite,D_12FE,D_1304,D_1306
 	PUBLIC	D_1308,D_130A,D_1310,D_1318,D_131E,D_1320
 	PUBLIC	D_1322,D_1324,D_132A
 
 PROG	SEGMENT
-F_603E:
+drawship:
 	PUSH	BP                                 ; 603E 55
 	MOV	BP, SP                              ; 603F 8B EC
 	PUSH	SI                                 ; 6041 56
@@ -29,7 +29,7 @@ F_603E:
 	PUSH	DS                                 ; 6043 1E
 	PUSH	ES                                 ; 6044 06
 	MOV	WORD PTR D_1308, 0                  ; 6045 C7 06 08 13 00 00
-	MOV	BX, WORD PTR D_082C                 ; 604B 8B 1E 2C 11
+	MOV	BX, WORD PTR vidmode                 ; 604B 8B 1E 2C 11
 	SHL	BX, 1                               ; 604F D1 E3
 	MOV	AX, WORD PTR D_12FE[BX]             ; 6051 8B 87 FE 12
 	MOV	WORD PTR D_1304, AX                 ; 6055 A3 04 13
@@ -47,7 +47,7 @@ F_603E:
 	ADD	SI, AX                              ; 6076 03 F0
 	ADD	SI, 31DAH                           ; 6078 81 C6 DA 31
 	MOV	AX, 0B800H                          ; 607C B8 00 B8
-	CMP	WORD PTR D_082C, 1                  ; 607F 83 3E 2C 11 01
+	CMP	WORD PTR vidmode, 1                  ; 607F 83 3E 2C 11 01
 	JNE	L_6089                              ; 6084 75 03
 	MOV	AX, 0A000H                          ; 6086 B8 00 A0
 L_6089:
@@ -55,10 +55,10 @@ L_6089:
 	MOV	WORD PTR D_1306, 13H                ; 608B C7 06 06 13 13 00
 	MOV	BX, WORD PTR [BP+8]                 ; 6091 8B 5E 08
 	SHR	BX, 1                               ; 6094 D1 EB
-	CMP	WORD PTR D_082C, 2                  ; 6096 83 3E 2C 11 02
+	CMP	WORD PTR vidmode, 2                  ; 6096 83 3E 2C 11 02
 	JE	L_60BC                               ; 609B 74 1F
 	SHR	BX, 1                               ; 609D D1 EB
-	CMP	WORD PTR D_082C, 0                  ; 609F 83 3E 2C 11 00
+	CMP	WORD PTR vidmode, 0                  ; 609F 83 3E 2C 11 00
 	JE	L_60BC                               ; 60A4 74 16
 	SHR	BX, 1                               ; 60A6 D1 EB
 	MOV	DX, 3CEH                            ; 60A8 BA CE 03
@@ -83,14 +83,14 @@ L_60BF:
 	MOV	CX, WORD PTR D_1304                 ; 60CA 8B 0E 04 13
 	MOV	DI, DX                              ; 60CE 8B FA
 	SHL	DI, 1                               ; 60D0 D1 E7
-	MOV	DI, WORD PTR D_084A[DI]             ; 60D2 8B BD 6C 11
+	MOV	DI, WORD PTR rowtab[DI]             ; 60D2 8B BD 6C 11
 	ADD	DI, BX                              ; 60D6 03 FB
 L_60D8:
 	MOV	AL, BYTE PTR [SI]                   ; 60D8 8A 04
 	MOV	AH, BYTE PTR ES:[DI]                ; 60DA 26 8A 25
 	OR	AL, AL                               ; 60DD 0A C0
 	JE	L_60FA                               ; 60DF 74 19
-	CMP	WORD PTR D_082C, 1                  ; 60E1 83 3E 2C 11 01
+	CMP	WORD PTR vidmode, 1                  ; 60E1 83 3E 2C 11 01
 	JNE	L_60ED                              ; 60E6 75 05
 	CALL	F_6136                             ; 60E8 E8 4B 00
 	JMP	SHORT L_60FA                        ; 60EB EB 0D
@@ -112,7 +112,7 @@ L_6104:
 	DEC	WORD PTR D_1306                     ; 6105 FF 0E 06 13
 	CMP	WORD PTR D_1306, 0                  ; 6109 83 3E 06 13 00
 	JNE	L_60BF                              ; 610E 75 AF
-	CMP	WORD PTR D_082C, 1                  ; 6110 83 3E 2C 11 01
+	CMP	WORD PTR vidmode, 1                  ; 6110 83 3E 2C 11 01
 	JNE	L_612B                              ; 6115 75 14
 	MOV	DX, 3CEH                            ; 6117 BA CE 03
 	MOV	AL, 3                               ; 611A B0 03
@@ -146,7 +146,7 @@ L_6144:
 	MOV	BYTE PTR ES:[DI], AH                ; 6149 26 88 25
 	POP	DX                                  ; 614C 5A
 	RET                                     ; 614D C3
-F_614E:
+drawfite:
 	PUSH	BP                                 ; 614E 55
 	MOV	BP, SP                              ; 614F 8B EC
 	PUSH	SI                                 ; 6151 56
@@ -154,7 +154,7 @@ F_614E:
 	PUSH	DS                                 ; 6153 1E
 	PUSH	ES                                 ; 6154 06
 	MOV	WORD PTR D_1322, 0                  ; 6155 C7 06 22 13 00 00
-	MOV	BX, WORD PTR D_082C                 ; 615B 8B 1E 2C 11
+	MOV	BX, WORD PTR vidmode                 ; 615B 8B 1E 2C 11
 	SHL	BX, 1                               ; 615F D1 E3
 	MOV	AX, WORD PTR D_1318[BX]             ; 6161 8B 87 18 13
 	MOV	WORD PTR D_131E, AX                 ; 6165 A3 1E 13
@@ -169,7 +169,7 @@ F_614E:
 	ADD	SI, AX                              ; 617F 03 F0
 	ADD	SI, 4E5AH                           ; 6181 81 C6 5A 4E
 	MOV	AX, 0B800H                          ; 6185 B8 00 B8
-	CMP	WORD PTR D_082C, 1                  ; 6188 83 3E 2C 11 01
+	CMP	WORD PTR vidmode, 1                  ; 6188 83 3E 2C 11 01
 	JNE	L_6192                              ; 618D 75 03
 	MOV	AX, 0A000H                          ; 618F B8 00 A0
 L_6192:
@@ -177,10 +177,10 @@ L_6192:
 	MOV	WORD PTR D_1320, 13H                ; 6194 C7 06 20 13 13 00
 	MOV	BX, WORD PTR [BP+4]                 ; 619A 8B 5E 04
 	SHR	BX, 1                               ; 619D D1 EB
-	CMP	WORD PTR D_082C, 2                  ; 619F 83 3E 2C 11 02
+	CMP	WORD PTR vidmode, 2                  ; 619F 83 3E 2C 11 02
 	JE	L_61BB                               ; 61A4 74 15
 	SHR	BX, 1                               ; 61A6 D1 EB
-	CMP	WORD PTR D_082C, 0                  ; 61A8 83 3E 2C 11 00
+	CMP	WORD PTR vidmode, 0                  ; 61A8 83 3E 2C 11 00
 	JE	L_61BB                               ; 61AD 74 0C
 	SHR	BX, 1                               ; 61AF D1 EB
 	MOV	DX, 3CEH                            ; 61B1 BA CE 03
@@ -195,7 +195,7 @@ L_61BE:
 	MOV	CX, WORD PTR D_131E                 ; 61BE 8B 0E 1E 13
 	MOV	DI, DX                              ; 61C2 8B FA
 	SHL	DI, 1                               ; 61C4 D1 E7
-	MOV	DI, WORD PTR D_084A[DI]             ; 61C6 8B BD 6C 11
+	MOV	DI, WORD PTR rowtab[DI]             ; 61C6 8B BD 6C 11
 	ADD	DI, BX                              ; 61CA 03 FB
 L_61CC:
 	MOV	AL, BYTE PTR [SI]                   ; 61CC 8A 04

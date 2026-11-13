@@ -13,17 +13,17 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_082C:BYTE
-	EXTRN	D_084A:BYTE
+	EXTRN	vidmode:BYTE
+	EXTRN	rowtab:BYTE
 DATA	ENDS
 PROG	SEGMENT
 	EXTRN	F_3D61:NEAR
 PROG	ENDS
-	PUBLIC	F_3599,F_35CA,D_07C6,D_07C8,D_07CA,D_07CC
+	PUBLIC	putstr,fillrect,D_07C6,D_07C8,D_07CA,D_07CC
 	PUBLIC	D_07CE,D_07D0,D_07D2,D_07D4,D_07D6
 
 PROG	SEGMENT
-F_3599:
+putstr:
 	PUSH	BP                                 ; 3599 55
 	MOV	BP, SP                              ; 359A 8B EC
 	PUSH	SI                                 ; 359C 56
@@ -58,7 +58,7 @@ L_35C2:
 	POP	SI                                  ; 35C5 5E
 	POP	BP                                  ; 35C6 5D
 	RET	4                                   ; 35C7 C2 04 00
-F_35CA:
+fillrect:
 	PUSH	BP                                 ; 35CA 55
 	MOV	BP, SP                              ; 35CB 8B EC
 	PUSH	SI                                 ; 35CD 56
@@ -85,9 +85,9 @@ L_35E2:
 L_35FA:
 	MOV	WORD PTR D_07C8, AX                 ; 35FA A3 C8 07
 	MOV	WORD PTR D_07CE, BX                 ; 35FD 89 1E CE 07
-	CMP	WORD PTR D_082C, 0                  ; 3601 83 3E 2C 08 00
+	CMP	WORD PTR vidmode, 0                  ; 3601 83 3E 2C 08 00
 	JE	L_3615                               ; 3606 74 0D
-	CMP	WORD PTR D_082C, 2                  ; 3608 83 3E 2C 08 02
+	CMP	WORD PTR vidmode, 2                  ; 3608 83 3E 2C 08 02
 	JE	L_3612                               ; 360D 74 03
 	DB	0E9H
 	DW	L_3761-$-2                  ; 360F E9 4F 01
@@ -122,7 +122,7 @@ L_3615:
 L_3650:
 	MOV	BX, WORD PTR D_07C8                 ; 3650 8B 1E C8 07
 	SHL	BX, 1                               ; 3654 D1 E3
-	MOV	DI, WORD PTR D_084A[BX]             ; 3656 8B BF 4A 08
+	MOV	DI, WORD PTR rowtab[BX]             ; 3656 8B BF 4A 08
 	ADD	DI, WORD PTR D_07D2                 ; 365A 03 3E D2 07
 	MOV	AX, WORD PTR D_07C6                 ; 365E A1 C6 07
 	AND	AX, 3                               ; 3661 25 03 00
@@ -205,7 +205,7 @@ L_36DB:
 L_3701:
 	MOV	BX, WORD PTR D_07C8                 ; 3701 8B 1E C8 07
 	SHL	BX, 1                               ; 3705 D1 E3
-	MOV	BX, WORD PTR D_084A[BX]             ; 3707 8B 9F 4A 08
+	MOV	BX, WORD PTR rowtab[BX]             ; 3707 8B 9F 4A 08
 	MOV	SI, WORD PTR D_07C6                 ; 370B 8B 36 C6 07
 	AND	SI, 1                               ; 370F 81 E6 01 00
 	JE	L_3727                               ; 3713 74 12
@@ -255,7 +255,7 @@ L_3761:
 L_377F:
 	MOV	DI, WORD PTR D_07C8                 ; 377F 8B 3E C8 07
 	SHL	DI, 1                               ; 3783 D1 E7
-	MOV	BX, WORD PTR D_084A[DI]             ; 3785 8B 9D 4A 08
+	MOV	BX, WORD PTR rowtab[DI]             ; 3785 8B 9D 4A 08
 	ADD	BX, WORD PTR D_07D2                 ; 3789 03 1E D2 07
 	MOV	AX, WORD PTR D_07C6                 ; 378D A1 C6 07
 	AND	AX, 7                               ; 3790 25 07 00

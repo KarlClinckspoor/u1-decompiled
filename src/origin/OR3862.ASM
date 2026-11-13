@@ -12,10 +12,10 @@ UDATA	ENDS
 DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
-	PUBLIC	F_3862
+	PUBLIC	upcase
 
 PROG	SEGMENT
-F_3862:
+upcase:
 	PUSH	BP                                 ; 3862 55
 	MOV	BP, SP                              ; 3863 8B EC
 	PUSH	SI                                 ; 3865 56

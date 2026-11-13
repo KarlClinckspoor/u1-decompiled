@@ -1,0 +1,860 @@
+# docs/names.tsv: readable names; applied by tools/rename.py (see docs/NAMES.md)
+# columns: scope TAB old TAB new TAB comment
+# stage 1: Origin library (src/origin), shared names
+shared	F_1853	main	main program entry (called by _MAIN)
+shared	F_34BF	detvid	detect the video adapter (sets vidmode)
+shared	F_3547	modecga	set CGA mode 4
+shared	F_352C	gotoxy	text cursor to (col,row)
+shared	F_357C	putch	print one character in a colour
+shared	F_3599	putstr	print a string in a colour
+shared	F_35CA	fillrect	filled rectangle
+shared	F_33BB	lowcase	tolower
+shared	F_3862	upcase	toupper
+shared	F_353A	strlen2	string length (Origin copy)
+shared	F_355D	drawtile	draw a 16x16 overworld tile at (col,row)
+shared	F_3578	blittile	blitter behind drawtile
+shared	F_37FD	seedrnd	seed the game's random generator
+shared	F_3812	lineto	line from the pen to (x,y)
+shared	F_387E	arrowr	right arrow glyph at a text cell
+shared	F_3920	arrowl	left arrow glyph at a text cell
+shared	F_39C5	waitkey	wait for a key
+shared	F_39FC	drawline	line (x0,y0,x1,y1,colour)
+shared	F_3AD7	gamefram	game screen frame (GEN)
+shared	F_3AE2	presskey	Press Space to continue
+shared	F_3B46	msgline	print a line in the message window and scroll
+shared	F_3BD5	memcheck	ULTIMA memory check
+shared	F_3BF6	botbar	lower frame divider bar
+shared	F_3C46	topbar	top frame bar
+shared	F_3C6C	palcastl	EGA/Tandy castle picture palette
+shared	F_3C87	palnorm	restore the normal palette
+shared	F_3CA2	blittand	copy picture to Tandy screen
+shared	F_3CCD	blitcga	copy picture to CGA screen
+shared	F_3CE9	cvtplane	convert picture to EGA planes
+shared	F_3D6A	blitega	write picture planes to EGA screen
+shared	F_3C8B	putnum	print an unsigned number
+shared	F_3CF1	vwait	wait n vertical retraces
+shared	F_3D41	pixel	plot a pixel
+shared	F_3D47	pixelpen	plot a pixel and move the pen
+shared	F_3E2F	readfile	read a file (retry forever on error)
+shared	F_3E85	writfile	write a file (retry forever on error)
+shared	F_125C	diskprmt	Insert Ultima I diskette prompt
+shared	F_3E5E	waittick	wait n timer ticks
+shared	F_3EC4	clockrnd	random value from the DOS clock
+shared	F_3EED	scrlmsg	scroll the message window up
+shared	F_3F58	vidinit	set colours, row table and video mode
+shared	F_3F62	playsnd	play sound n
+shared	F_3F7F	sndbuzz	sound 0
+shared	F_3F97	sndbeep	sound 1
+shared	F_3FB5	sndhit	sound 2
+shared	F_3FBC	sndmatk	sound 3
+shared	F_3FC3	sndstep	sound 4
+shared	F_3FE3	sndmagic	sound 5
+shared	F_3FEA	sndfail	sound 6
+shared	F_4004	sndweap	sound 7
+shared	F_4038	sndlaser	sound 8
+shared	F_4051	sndhum	sound 9
+shared	F_4069	rndrange	random number in [lo,hi]
+shared	F_4071	mkrowtab	build the pixel row address table
+shared	F_40A8	isvowel
+shared	F_40E9	getlevel	level from experience
+shared	F_40EE	modetand	Tandy 16-colour mode
+shared	F_40FE	quadrant	world quadrant 0..3 of (x,y)
+shared	F_4115	modeega	EGA mode 0Dh
+shared	F_4127	keyup	get key upper-cased with delay
+shared	F_413C	getkey	poll a key with blinking cursor
+shared	F_4161	keywait	wait for a key, up to 1500 polls
+shared	F_4224	flushkey	flush the BIOS keyboard buffer
+shared	F_418A	drawhead	redraw the bars and print a heading
+shared	F_41CF	smallbar	narrow top bar
+shared	F_420B	pickitem	list box choose a letter
+shared	F_43C8	readycmd	Ready command
+shared	F_4437	showhp	redraw hit points in the status panel
+shared	F_44A2	showfood	redraw food
+shared	F_450D	showexp	redraw experience
+shared	F_4558	showcoin	redraw coin
+shared	F_45A3	showstat	draw the whole status panel
+shared	F_461C	putdots	print n dots
+shared	F_4645	morepage	More page break
+shared	F_468F	ztatpos	Ztats line number to position
+shared	F_46CA	ztatnum	Ztats 4-digit number with dots
+shared	F_46E5	ztatattr	Ztats attribute list
+shared	F_478E	ztats	Ztats screen
+shared	F_5643	textmode	back to BIOS text mode 3
+shared	F_603E	drawship	draw a sprite from the space bank
+shared	F_614E	drawfite	draw a sprite from the fight bank
+shared	F_68F8	plotclip	plot a pixel through the viewport clip
+shared	F_A363	terrain	terrain at (x,y)
+shared	F_A37D	mapcell	map cell lookup
+shared	F_A3BA	placeat	place number at (x,y)
+shared	F_A554	animwat	water tile animation
+shared	F_AC91	drawdmon	draw a dungeon monster sprite
+shared	F_AF57	drawview	repaint every visible tile
+shared	F_B0B5	readnum	number entry
+shared	F_B34F	towntile	draw an 8x8 town tile
+shared	F_B502	addmon	append an object table entry
+shared	F_B545	findmon	find an object table entry at (x,y)
+shared	F_B58E	delmon	remove an object table entry
+shared	F_B5E1	cntmon	count monsters
+shared	F_B617	cntveh	count vehicles
+shared	F_B64D	stepn	wrap step north
+shared	F_B665	scrolln	scroll map north
+shared	F_B6F0	steps	wrap step south
+shared	F_B70F	scrolls	scroll map south
+shared	F_B79A	stepe	wrap step east
+shared	F_B7CD	scrolle	scroll map east
+shared	F_B852	stepw	wrap step west
+shared	F_B884	scrollw	scroll map west
+shared	F_C2AF	objat	object or terrain type at (x,y)
+shared	F_C2EC	viewx	view column to world x
+shared	F_C31C	viewy	view row to world y
+shared	F_C3CA	drawwrld	redraw the world view
+shared	F_C47C	death	death and resurrection
+shared	F_91D4	lcrand	Lattice rand
+shared	F_91F0	lcsrand	Lattice srand
+shared	D_07F2	penx
+shared	D_07F4	peny
+shared	D_082A	wrflag
+shared	D_082C	vidmode
+shared	D_0830	vidmarg
+shared	D_0832	tickcnt
+shared	D_0834	tickmax
+shared	D_0836	sndtab
+shared	D_084A	rowtab
+shared	D_09DA	palette
+shared	D_0AB6	strrb
+shared	D_0AB9	strwb
+shared	D_0C70	rndseed
+shared	D_0CBA	lblhits
+shared	D_0CC0	lblfood
+shared	D_0CC6	lblexp
+shared	D_0CCC	lblcoin
+shared	D_0CD2	wrange
+shared	D_0D72	wnamelng
+shared	D_0DF8	wnames
+shared	D_0E30	racenam
+shared	D_0E54	classnam
+shared	D_0E9E	attrnam
+shared	D_0F04	spellnam
+shared	D_0F5C	armornam
+shared	D_0FA2	vehnam
+shared	D_0FD8	strtab
+shared	D_1DC8	dirtab
+shared	D_1F56	strmore
+shared	D_1F5D	strztats
+shared	D_1F63	strinv
+shared	D_1F6F	strplay
+shared	D_1F78	strlevel
+shared	D_1F81	strmale
+shared	D_1F88	strfem
+shared	D_1F91	strcopp
+shared	D_1F9F	strsilv
+shared	D_1FAD	strgold
+shared	D_1FBB	strenemy
+shared	D_0C72	strready
+shared	D_0C7A	strparen
+shared	D_0C7D	strweap
+shared	D_0C86	strarmor
+shared	D_0C8F	strspell
+shared	D_0C97	strprmpt
+shared	D_0CB2	strnone
+shared	D_0A82	strpress
+shared	D_07C0	tandystr
+shared	D_0DA6	colline
+shared	D_0DA8	colfill
+shared	D_2044	colhigh
+shared	D_2046	coltext
+shared	D_2048	forcecga
+shared	D_204A	gmode
+shared	D_204E	redraw
+shared	D_238C	tilegfx
+shared	D_3DAC	mapbin
+shared	D_8BA6	lastmon
+shared	D_3AAC	worldx
+shared	D_3AAE	worldy
+shared	D_2058	plname
+shared	D_2068	plrace
+shared	D_206A	plclass
+shared	D_206C	plsex
+shared	D_206E	plstat
+shared	D_207C	plcoin
+shared	D_207E	plexp
+shared	D_2080	plfood
+shared	D_2082	rdyweap
+shared	D_2084	rdyspel
+shared	D_2086	rdyarm
+shared	D_2088	plveh
+shared	D_20A4	gemred
+shared	D_20AC	ownarm
+shared	D_20B8	ownweap
+shared	D_20D8	ownspel
+shared	D_20EE	ownveh
+shared	D_20FE	plkills
+# stage 2: game functions of each EXE (OUT below)
+ultima	F_03E9	drawbmp	draw a 7x7 bitmap in two colours
+ultima	F_0473	randpict	draw one of three bitmaps at random
+ultima	F_04D0	chkvideo	check the adapter, set the video mode
+ultima	F_0516	chkmem	exit when there is too little memory
+ultima	F_053B	insdisk	insert-disk prompt
+ultima	F_0586	drawbann	title banner
+ultima	F_0628	revealpc	LFSR-ordered reveal of the picture
+ultima	F_0722	nbits	number of significant bits
+ultima	F_0744	plotcell	plot the stars of a picture cell
+ultima	F_08BF	revsetup	geometry for revealpc
+ultima	F_0926	pictmirr	draw the whole picture mirrored
+ultima	F_0A27	credits	credits screen, then execl gen.exe
+ultima	F_0AF7	ldcastle	read castle.4 / castle.16
+ultima	F_0B65	castlpic	show the castle picture
+ultima	F_0C08	story	new-release story text
+ultima	F_0D4C	pictstar	draw the picture star by star
+ultima	F_0DB3	presents	Presents screen
+mondain	F_03E9	idlewait	wait a while or for a key
+mondain	F_0423	bigframe	frame of the big window
+mondain	F_047D	clrbig	clear and frame the big window
+mondain	F_04A2	printat	print a string at (col,row)
+mondain	F_04BE	smframe	frame of the small window
+mondain	F_0518	clrsmall	clear and frame the small window
+mondain	F_053D	playif	play a sound if sound is on
+mondain	F_0551	cmdpass	Pass
+mondain	F_055F	cmdhuh	Huh? and a beep
+mondain	F_0576	cmdnoise	toggle the sound
+mondain	F_05B1	sign	sign of x
+mondain	F_0618	agilchk	random check against agility
+mondain	F_064A	nearmond	player within 7 steps of Mondain
+mondain	F_0696	moveplr	move the player one step
+mondain	F_0831	fireshot	fire a shot in a direction
+mondain	F_0944	attackdr	attack in a direction
+mondain	F_09C0	aimattk	aim and attack
+mondain	F_0A0D	cmdattk	Attack
+mondain	F_0A7A	spldamg	spell damage
+mondain	F_0AD9	splnone	spell without effect
+mondain	F_0B07	splblock	spell: put a block
+mondain	F_0BE4	splunblk	spell: remove a block
+mondain	F_0CAC	splboost	spell: strengthen Mondain
+mondain	F_0D08	splbolt	spell: fire a bolt
+mondain	F_0D88	splblink	spell: teleport the player
+mondain	F_0E56	castspl	cast spell number w
+mondain	F_0ED3	cmdcast	Cast
+mondain	F_0F7B	isgem	is the gem at an offset from the player
+mondain	F_0FC7	gemnear	gem within one square of the player
+mondain	F_1057	cmdget	Get (Gem)
+mondain	F_1124	cmdinfo	Inform and Search
+mondain	F_117E	refuse	print a message and beep
+mondain	F_1194	cmdboard	Board?
+mondain	F_11A2	cmddrop	Drop?
+mondain	F_11B0	cmdenter	Enter?
+mondain	F_11BE	cmdfire	Fire?
+mondain	F_11CC	cmdhyper	Hyperjump?
+mondain	F_11DA	cmdklimb	Klimb?
+mondain	F_11E8	cmdopen	Open?
+mondain	F_11F6	cmdquit	Quit refused
+mondain	F_1204	cmdsteal	Steal refused
+mondain	F_121B	cmdtrans	Transact refused
+mondain	F_1232	cmdunlk	Unlock?
+mondain	F_1240	cmdview	View?
+mondain	F_124E	cmdxit	Xit?
+mondain	F_12EC	defeat	THOU ART DEAD: save and return to OUT
+mondain	F_138D	killplr	the player dies
+mondain	F_13A3	drawfld	draw the battle map
+mondain	F_1415	stepx	x step of a direction code
+mondain	F_1447	stepy	y step of a direction code
+mondain	F_1477	animate	animate spell effect and tiles
+mondain	F_1565	fxrand	random sound/colour effect
+mondain	F_1589	movetry	move the player if the square is free
+mondain	F_161E	hurtplr	the player takes damage
+mondain	F_1664	mondmele	Mondain melee attack
+mondain	F_16E0	mondcast	Mondain casts a spell
+mondain	F_186F	mondturn	the monsters act
+mondain	F_19C8	mondstat	Mondain's state
+mondain	F_1B9B	story1	story screen 1
+mondain	F_1CAF	story2	story screen 2
+mondain	F_1D53	story3	story screen 3
+mondain	F_1D94	story4	story screen 4
+mondain	F_1DE6	storyrun	the four story screens
+mondain	F_1E03	showbmp	load a file and draw it as a 1-bit image
+mondain	F_1EA8	victory	victory screen
+mondain	F_1F31	endgame	end of the game
+gen	F_03E9	setvid	pick colours and video mode
+gen	F_048A	bordcorn	rounded corners of the border
+gen	F_05B2	drawbord	draw the screen border
+gen	F_0670	clrframe	clear the frame and draw the title bar
+gen	F_07A8	showattr	print the value of an attribute
+gen	F_07E2	pickrace	choose the race
+gen	F_0995	picksex	choose the sex
+gen	F_0A91	pickclas	choose the class
+gen	F_0C2C	readname	read the character name
+gen	F_0D18	titlebar	title bar text
+gen	F_0D42	beep	sound 1
+gen	F_0D50	asksave	ask whether to save the character
+gen	F_0DC2	curoff	erase the cursor marks of a line
+gen	F_0E07	curon	draw the cursor marks of a line
+gen	F_0E32	attrdec	decrease an attribute
+gen	F_0E61	attrinc	increase an attribute
+gen	F_0E9E	curup	cursor up one attribute
+gen	F_0ECA	curdown	cursor down one attribute
+gen	F_0EF6	attrscr	attribute screen
+gen	F_106A	chargen	character generation screen
+gen	F_13B2	ldnames	load the names of the saved characters
+gen	F_1423	freeslot	first free roster slot
+gen	F_1455	showrost	print the roster
+gen	F_14BB	askrepl	roster full: which to replace
+gen	F_15B3	askdisk	ask for the Ultima I diskette
+gen	F_1643	runout	run OUT.EXE
+gen	F_16DC	contgame	continue a previous game
+space	F_03E9	ceilsqrt	ceiling of the square root
+space	F_0411	playif	play a sound if sound is on
+space	F_0425	drawstar	draw the star picture
+space	F_04CA	drawbase	draw the star base picture
+space	F_0524	drawplan	draw the planet Sosaria
+space	F_063A	opposite	opposite direction
+space	F_0682	showfuel	print the ship fuel
+space	F_06FB	showshld	print the ship shield
+space	F_0774	shipfuel	refuel amount by ship type
+space	F_07AB	shipshld	shield amount by ship type
+space	F_07E2	portx	x position of a docked ship
+space	F_0838	porty	y position of a docked ship
+space	F_088E	getshld	shield of the player ship
+space	F_08C0	useshld	reduce the shield
+space	F_0910	shldcrsh	shield loss of a crash
+space	F_092D	getfuel	fuel of the player ship
+space	F_095F	usefuel	reduce the fuel
+space	F_09AF	mksector	fill a sector with random contents
+space	F_0D88	mkgalaxy	initialise the galaxy and the ships
+space	F_0EBD	toout	save inuse.u1 and run OUT.EXE
+space	F_0F0E	cmdhuh	Huh? and a beep
+space	F_0F25	die	the player dies
+space	F_0F3B	keypoll	wait for a key, about 10000 polls
+space	F_0F62	viewfram	frame of the viewing window
+space	F_0FBC	clrview	clear and frame the viewing window
+space	F_0FE1	printat	print a string at (col,row)
+space	F_0FFD	rndspeed	round to nearest 100 then 1000
+space	F_1031	scalevx	scale the x velocity
+space	F_1072	scalevy	scale the y velocity
+space	F_10B3	cmdview	View command
+space	F_127E	symenemy	sector map symbol: enemies
+space	F_12F1	symbase	sector map symbol: base
+space	F_1349	symstar	sector map symbol: star
+space	F_13B3	symempty	sector map symbol: empty
+space	F_142B	sectsym	map symbol of a sector
+space	F_14E5	cmdinfo	Inform and Search
+space	F_163C	cmdfire	Fire command
+space	F_165C	cmdspeed	Speed command
+space	F_16D3	fly	turn, thrust or retro
+space	F_1919	cmdarrow	arrow keys
+space	F_19BD	refuse	print a command name and beep
+space	F_19D3	cmdattk	Attack?
+space	F_19E1	cmdboard	Board?
+space	F_19EF	cmdcast	Cast?
+space	F_19FD	cmddrop	Drop?
+space	F_1A0B	cmdenter	Enter?
+space	F_1A19	cmdget	Get?
+space	F_1A27	cmdklimb	Klimb?
+space	F_1A35	cmdopen	Open?
+space	F_1A43	cmdquit	Quit?
+space	F_1A51	cmdready	Ready?
+space	F_1A5F	cmdsteal	Steal?
+space	F_1A6D	cmdtrans	Transact?
+space	F_1A7B	cmdunlk	Unlock?
+space	F_1A89	cmdxit	X-it?
+space	F_1A97	cmdpass	Pass
+space	F_1AF5	inview	inside the combat viewport
+space	F_1B21	newstar	place star i at a random offset
+space	F_1BBF	sign	sign of v
+space	F_1BE9	drawcros	draw the crosshair
+space	F_1C2A	movestar	move and redraw the stars
+space	F_1DDA	initstar	place all stars
+space	F_1E1C	newsect	leave the sector through an edge
+space	F_2003	cmdhyper	Hyperjump
+space	F_21FC	spaceace	victory screen
+space	F_2252	cmdlaser	Fire in front view
+space	F_23F3	cockpit	draw the cockpit frame
+space	F_254B	newenemy	put a target in view
+space	F_258D	redrfrnt	redraw the front view
+space	F_259E	drawtop	draw the top view
+space	F_2665	starhit	collision with the star
+space	F_2731	planhit	landing on the planet
+space	F_27EE	plotvp	plot a pixel inside the viewport
+space	F_281F	exhaust0	exhaust lights of type 0
+space	F_2B7B	exhaust2	exhaust lights of type 2
+space	F_2EC1	exhaust1	exhaust lights of type 1
+space	F_3109	exhaust	toggle the exhaust lights
+space	F_319F	randturn	random turn
+space	F_31D7	alienfir	the alien fires
+space	F_3330	fightfrm	one frame of the front view
+space	F_34A8	advx	add speed to x
+space	F_34D9	advy	add speed to y
+space	F_350A	crash	collision handling
+space	F_3567	dock	docking at a base
+space	F_3741	portof	docking port of a ship
+space	F_37E0	shipin	ship in a docking port
+space	F_386B	oneturn	one game turn
+space	F_3983	cmdnoise	toggle Noise
+space	F_3A4E	liftoff	lift-off countdown
+space	F_3DD6	abnormal	abnormal termination
+out	F_03E9	loadchar	read the player file (or inuse.u1) into the record
+out	F_0441	loadgfx	read the tile graphics file for the video mode
+shared	F_0476	playif	play a sound if sound is on
+out	F_048A	blocked	print blocked message n, sound 0
+out	F_04AF	canstep	can the player enter the square in a direction
+out	F_066F	domove	movement command
+out	F_0742	monname	name of a monster type
+out	F_0761	givecoin	give pence and print the found message
+out	F_08EE	killhook	kill reward hook
+out	F_0953	dunghit	attack the dungeon square (x,y)
+out	F_0BAA	shotrng	range of a shot in the facing direction
+out	F_0C52	dungshot	dungeon attack with the weapon
+out	F_0CF3	projectl	fire a projectile
+out	F_0FEF	shootdir	shoot with weapon or spell
+out	F_1072	aimshot	aim: direction a or ask, then shoot
+out	F_10C2	cmdattk	Attack command
+out	F_1135	execveh	save state and exec the vehicle program
+out	F_118D	cmdboard	Board command
+out	F_12F2	spldamg	spell damage roll
+out	F_1351	openchst	open a coffin or chest, pay pence
+out	F_13A8	dungspel	cast a dungeon spell
+out	F_1769	splprayr	Prayer spell
+out	F_18FC	splcomb	combat spell
+out	F_19FF	cmdcast	Cast command
+out	F_1AE4	altar	pence offered at a dungeon altar
+out	F_1BC0	droppay	drop pence
+out	F_1CF6	clrdrop	clear the map area for the drop list
+out	F_1D35	dropbar	frame bar at the top of the screen
+out	F_1D71	dropweap	weapon drop list
+out	F_1EDF	droparm	armour drop list
+out	F_204D	cmddrop	Drop command
+out	F_20FC	loadents	copy the level entity table
+out	F_2141	waitpoll	wait for a key, about 10000 polls
+out	F_2168	drawfrm	draw a frame outline
+out	F_21C2	boxclr	clear the frame area and draw the frame
+out	F_21E7	boxtext	print a string at (x,y)
+out	F_2203	rnd3	random -1, 0 or 1
+out	F_2231	drawlvl	redraw the whole level map
+out	F_22B8	drawents	redraw all active entities
+out	F_22F3	entat	entity at (x,y)
+out	F_2355	whatat	what is at a map position
+out	F_23E7	posclass	classify a map position
+out	F_2470	isguard	is the entity at an offset a guard
+out	F_249D	guardnr	is a guard next to the player
+out	F_252C	wander	thief or jester wanders
+out	F_266C	randmove	entity moves randomly
+out	F_26E2	moveent	try to move an entity
+out	F_2776	jestmove	jester or guard moves
+out	F_286B	guardapp	guard approaches the player
+out	F_294E	guardatk	guard attacks the player
+out	F_2A73	entturn	per-turn update of the entities
+out	F_2B6D	townatk	attack in a direction in a town
+out	F_2E22	townstep	step the player in a town
+out	F_2F3B	signship	transport shop sign
+out	F_2FF6	signarm	armour shop sign
+out	F_30C0	signweap	weapon shop sign
+out	F_31B1	signmagi	magic shop sign
+out	F_3240	signfood	food shop sign
+out	F_32F8	signpub	pub sign
+out	F_33B0	edgel	left wall edges
+out	F_3430	edger	right wall edges
+out	F_34B0	frontrct	front wall rectangle
+out	F_355A	outlinel	left wall outline
+out	F_35DC	outliner	right wall outline
+out	F_365E	sidelns	vertical lines at the side
+out	F_368F	deco1	wall decoration 1
+out	F_36C0	deco2	wall decoration 2
+out	F_36F1	deco3	wall decoration 3
+out	F_3722	ladder	ladder rungs
+out	F_37DB	doorl	left side door
+out	F_390D	doorr	right side door
+out	F_3A54	frontdr	front wall with a doorway
+out	F_3B25	vedgel	left vertical edge
+out	F_3B65	vedger	right vertical edge
+out	F_3BA5	drawfeat	name and draw a dungeon feature
+out	F_3BF5	drawcoff	coffin
+out	F_3C13	drawchst	chest
+out	F_3C31	featname	print a feature name
+out	F_3C64	sign	sign of x
+out	F_3C8E	facedx	dx of the facing direction
+out	F_3CBB	facedy	dy of the facing direction
+out	F_3CE8	showdir	print the compass direction
+out	F_3D6C	drawcell	draw a dungeon cell
+out	F_3DF5	drawcel2	draw a dungeon cell seen at depth
+out	F_3F19	wallpc1	wall piece at depth
+out	F_3F4C	wallpc2	wall piece at depth, other lines
+out	F_4013	passable	passable test of a map tile
+out	F_407E	walkable	is the square at an offset walkable
+out	F_40D4	viewdist	walkable distance along a direction
+out	F_414A	drawdung	first-person dungeon view
+out	F_456D	dungscrn	clear the screen and print the dungeon status
+out	F_45C8	dungseed	set the dungeon seed cell
+out	F_4602	dungmon	place a monster or ladder
+out	F_4761	mkdung	generate a dungeon level
+out	F_4A38	cmdturna	Turn around
+out	F_4A82	cmdturnl	Turn left
+out	F_4ACC	cmdturnr	Turn right
+out	F_4B16	cmdfwd	Forward
+out	F_4B73	dungcmd	dungeon command dispatch
+out	F_4BB0	startdng	enter the first dungeon level
+out	F_4BD6	princess	princess rescued
+out	F_4DBF	entcastl	enter a castle
+out	F_4E63	enttown	enter a town
+out	F_4EA2	placetxt	sign text of a place
+out	F_5085	firstvis	first visit quest message
+out	F_50C6	monument	enter a monument place
+out	F_52AB	cmdenter	Enter command
+out	F_53DA	cmdfire	Fire command
+out	F_5469	kingperm	king permission message
+out	F_5492	cntrarm	armour counter
+out	F_54B5	cntrweap	weapon counter
+out	F_54D8	cntrfood	food counter
+out	F_54FB	cntrdisp	dispatch on the counter tile
+out	F_5550	cmdget	Get command
+out	F_559A	cmdhyper	HyperJump? message
+out	F_55B1	dunglook	look at the cell ahead in a dungeon
+out	F_564B	cmdinfo	Inform command
+out	F_56F7	climbup	climb up a dungeon ladder
+out	F_57DF	climbdwn	climb down a dungeon ladder
+out	F_581A	cmdklimb	K-Limb command
+out	F_58BD	cmdnoise	Noise command
+out	F_58F8	chestmon	put a monster or treasure in a chest
+out	F_59D7	cmdopen	Open command
+out	F_5B0E	savegame	save to the player file
+out	F_5B54	cmdquit	Quit command
+out	F_5B8A	notcaugt	did the thief escape
+out	F_5BFA	stealwpn	steal a weapon
+out	F_5CBA	stealfod	steal food
+out	F_5D34	stealarm	steal armour
+out	F_5DB1	cmdsteal	Steal command
+out	F_5E4F	clrshop	clear the shop message box
+out	F_5E6C	msgsold	Sold! message
+out	F_5E88	msgdone	Done! message
+out	F_5EA4	msgpoor	cannot afford message
+out	F_5EC9	gossip	story pages
+out	F_616F	isent50	is the cell at an offset a wench or lecher
+out	F_619C	ent50nr	is a wench or lecher adjacent
+out	F_622C	tavern	order ale
+out	F_63B3	buyprice	buying price of an item
+out	F_63D4	sellpric	selling price of an item
+out	F_63F2	sellweap	weapon shop: selling
+out	F_65CE	weapln1	weapon list line
+out	F_665D	weapshop	weapon shop buy or sell
+out	F_67F1	price1	price formula 1
+out	F_680C	price2	price formula 2
+out	F_6823	armsell	armour shop: selling
+out	F_69E8	armline	armour list line
+out	F_6A77	armshop	armour shop
+out	F_6BAC	weapprc	weapon price
+out	F_6BC7	weapln2	weapon list line
+out	F_6C53	weapbuy	weapon shop: buying
+out	F_6DE3	foodshop	food shop
+out	F_6F58	transbgt	transport bought
+out	F_7034	transprc	transport price
+out	F_7052	transln	transport list line
+out	F_70CF	transshp	transport shop
+out	F_7377	shopdisp	Transact at a shop counter
+out	F_7526	questtxt	king quest text
+out	F_767D	questnew	has the king quest not been given
+out	F_769D	rewardst	quest reward: strength
+out	F_7738	rewardgm	quest reward: gem and hint
+out	F_78AF	questdon	quest completed
+out	F_794E	kingtrns	Transact with the king
+out	F_7B17	cmdtrans	Transact command
+out	F_7B4C	cmdview	View command
+out	F_7B63	dungchst	open a chest in the dungeon
+out	F_7C31	unlkdoor	unlock a castle door
+out	F_7CF2	cmdunlk	Unlock command
+out	F_7D6B	cmdxit	X-it command
+out	F_7E5B	cmdpass	Pass command
+out	F_7E69	cmdhuh	unknown command
+out	F_7E80	foodtick	food counter on the overworld
+out	F_7EB3	xinrange	overworld x in range
+out	F_7EE1	yinrange	overworld y in range
+out	F_7F0F	spawnmon	spawn a wandering monster
+out	F_80A2	moncango	can a monster move to a square
+out	F_8194	monreach	monster reach test
+out	F_81FC	monshoot	monster shoots or attacks
+out	F_8479	monplace	move a monster to a screen offset
+out	F_84D3	monstepy	monster steps in y
+out	F_8536	monstepx	monster steps in x
+out	F_8598	monchase	monster moves toward the player
+out	F_8600	worldmon	overworld monsters turn
+shared	F_86E1	rmregion	remove the monsters of a region
+out	F_873D	dungmatk	dungeon monster attacks the player
+out	F_8A04	dungmmov	dungeon monster moves
+out	F_8AC9	dungmons	dungeon monsters turn
+shared	F_8C20	randhop	random hop of the player
+out	F_8CEB	montrn	monsters turn dispatch
+gen	F_06BB	mainmenu	main menu: new character, continue, quit
+mondain	F_05DB	waitanim	wait for a key, animating meanwhile
+mondain	F_1B46	pollkey	read a key upper-cased with animation
+out	F_3F7F_O	walkdng	is the square at an offset walkable
+out	F_411C	drawable	tile type is not 0/6/7/8
+shared	F_AB9D	drawtomb	draw the tombstone
+shared	F_4341	readywpn	Ready: weapon list
+shared	F_436E	readyarm	Ready: armour list
+shared	F_439B	readyspl	Ready: spell list
+shared	F_C34C	incview	view column and row in range
+shared	F_C380	drawbuf	draw the view buffer
+# stage 3: game globals
+gen	D_013C	racenam	race names
+gen	D_0160	classnam	class names
+gen	D_0194	plfiles	player1..4.u1 file names
+gen	D_01A0	outname	the game program name
+gen	D_01A4	vidarg	video mode argument
+gen	D_01A8	slotarg	character number argument
+gen	D_01AA	slotused	which player files exist
+gen	D_0A30	plname	record: name
+gen	D_0A40	plrace	record: race
+gen	D_0A42	plclass	record: class
+gen	D_0A44	plsex	record: sex
+gen	D_0A46	plstat	record: hit points then attributes
+gen	D_0A54	plcoin	record: coins
+gen	D_0A56	plexp	record: experience
+gen	D_0A58	plfood	record: food
+gen	D_0A5A	rdyweap	record: readied weapon
+gen	D_0A5C	rdyspel	record: readied spell
+gen	D_0A5E	rdyarm	record: readied armour
+gen	D_0A60	plveh	record: vehicle
+gen	D_0A62	plseed	record: character seed
+gen	D_0A64	worldx	record: overworld x
+gen	D_0A66	worldy	record: overworld y
+gen	D_0A68	plnoise	record: sound flag
+gen	D_0A6A	plquest	record: quest states
+gen	D_0A7C	gems	record: gem counts
+gen	D_0A84	ownarm	record: armour owned
+gen	D_0A90	ownweap	record: weapons owned
+gen	D_0AB0	ownspel	record: spell charges
+gen	D_0AC6	ownveh	record: vehicles owned
+gen	D_0AD6	plkills	record: enemies destroyed
+gen	D_0AD8	lastmnmt	record: last monument
+gen	D_0ADA	savlast	record: saved monster index
+gen	D_0ADC	savturns	record: saved turn counter
+gen	D_0AE0	shuttle	record: shuttle fuel and shield
+gen	D_0AE4	objtype	record: object table 0 type
+gen	D_0AE6	objterr	record: object table 0 terrain
+gen	D_0AE8	objx	record: object table 0 x
+gen	D_0AEA	objy	record: object table 0 y
+gen	D_0AEC	objrest	record: rest of the object table
+gen	D_0D64	rosternm	names of the saved characters
+gen	D_0DA0	ptsleft	attribute points left
+gen	D_0DA4	nsaved	number of saved characters
+gen	D_0DAA	colhigh	highlight colour
+gen	D_0DAC	coltext	text colour
+gen	D_0DAE	forcecga	forced CGA
+ultima	D_0124	flick1	flicker bitmap 1
+ultima	D_0164	flick2	flicker bitmap 2
+ultima	D_01A4	flick3	flicker bitmap 3
+ultima	D_3262	pictrow1	picture rows, left part
+ultima	D_4320	pictrow2	picture rows, right part
+ultima	D_43A0	lfsrtap	LFSR taps
+shared	D_4994	tandyseg	Tandy buffer segment
+shared	D_4996	freeparg	free paragraphs
+shared	D_49BC	castpal	castle palette table
+ultima	D_4A2A	argv1	argv[1]
+shared	D_4A2C	castlbuf	castle picture buffer
+mondain	D_0126	plx	player x on the battle field
+mondain	D_0128	ply	player y
+mondain	D_012A	mondx	Mondain x
+mondain	D_012C	mondy	Mondain y
+mondain	D_012E	mondhp	Mondain hit points
+mondain	D_0130	fxfrm	frame of the spell effect
+mondain	D_0156	mondfile	Mond.Bin file names
+mondain	D_0184	tilefile	Tiles.Bin file names
+mondain	D_018A	tilesize	bytes of tiles to read
+mondain	D_0190	gemfrm	bouncing gem frame
+mondain	D_0192	gemdir	bouncing gem direction
+mondain	D_0194	field	the battle field
+mondain	D_0240	mondtile	Mondain tile
+mondain	D_0242	mondfram	Mondain frame
+mondain	D_0244	mondmode	Mondain state
+mondain	D_0246	fighton	fight on
+mondain	D_0248	gemgone	gem destroyed
+mondain	D_024A	wongame	victory
+mondain	D_2054	magx	magic square x
+mondain	D_2056	magy	magic square y
+mondain	D_2070	plstr	record: strength
+mondain	D_2072	plagi	record: agility
+mondain	D_2074	plsta	record: stamina
+mondain	U_2076	plcha	record: charisma
+mondain	D_2078	plwis	record: wisdom
+mondain	D_207A	plint	record: intelligence
+mondain	D_208A	plseed	record: character seed
+mondain	U_208C	worldx	record: overworld x
+mondain	U_208E	worldy	record: overworld y
+mondain	D_2090	plnoise	record: sound flag
+mondain	U_2092	plquest	record: quest states
+mondain	D_2E0C	argv1	argv[1]
+mondain	D_2E0E	argv2	argv[2]
+mondain	D_2E10	bmpbuf	bitmap file buffer
+space	D_0126	speed	ship speed
+space	D_0128	velx	x velocity
+space	D_012A	vely	y velocity
+space	D_012C	exhcnt	exhaust frame counter
+space	D_012E	exhtog	exhaust toggle flag
+space	D_0134	redrflag	redraw the view
+space	D_0136	crosvx	crosshair x velocity
+space	D_0138	crosvy	crosshair y velocity
+space	D_013A	crosx	crosshair x
+space	D_013C	crosy	crosshair y
+space	D_0166	spacefil	Space.Bin file names
+space	D_0194	fightfil	Fight.Bin file names
+space	D_01C4	flycmd	flight command names
+space	D_01E4	movecmd	front view move names
+space	D_01EE	sectx	current sector x
+space	D_01F0	secty	current sector y
+space	D_01F2	frontvw	0 top view, 1 front view
+space	D_01F4	escflag	escape flag
+space	D_01F6	hitmaxx	hit box max x by kind
+space	D_0204	hitmaxy	hit box max y by kind
+space	D_0212	hitminx	hit box min x by kind
+space	D_0220	hitminy	hit box min y by kind
+space	D_022E	starpic	star picture
+space	D_04DA	basepic	star base picture
+space	D_07FA_S	planpic	planet picture
+space	D_0AEE	portdx	docking port x offsets
+space	D_0B06	portdy	docking port y offsets
+space	D_0B1E	inusefil	inuse.u1
+space	D_0BD2	turntab	turn table
+space	D_0C92	enemyx	enemy x
+space	D_0C94	enemyy	enemy y
+space	D_0C96	enemypx	enemy previous x
+space	D_0C98	enemypy	enemy previous y
+space	D_0C9A	enemykd	enemy kind
+space	D_0C9C	jumping	hyperjump in progress
+space	D_0C9E	speeddly	frame delay by speed
+space	D_0DE0	exhdrawn	exhaust drawn
+space	D_0DE2	growcnt	enemy growth counter
+space	D_0E18	portname	docking port names
+space	D_26C0	galaxy	the 7x7 galaxy
+space	D_2C5C	spacebnk	Space.Bin sprites
+space	D_4C67	fightbnk	Fight.Bin sprites
+space	D_5AD2	shipcol	ship accent colour
+space	D_5B0E	plseed	record: character seed
+space	D_5B14	plnoise	record: sound flag
+space	D_5B8C	shutfuel	record: shuttle fuel
+space	D_5B8E	shutshld	record: shuttle shield
+space	D_5E10	argv1	argv[1]
+space	D_5E12	argv2	argv[2]
+space	D_5E14	curship	index of the player ship
+space	D_5E18	entrspd	speed at the view change
+space	D_5E1A	staroffx	star x offsets
+space	D_5E6A	staroffy	star y offsets
+space	D_5EBA	starx	star screen x
+space	D_5F0A	stary	star screen y
+space	D_5FFE	starmode	star field mode
+space	D_6000	lastdir	facing last drawn
+out	D_014E	tilefile	Tiles.Bin file names
+out	D_0172	msgleave	cannot leave it here message
+out	D_0180	plfile	playerN.u1 file name
+out	D_0182	escflag	escape flag
+out	D_16CC	spawnthr	monster spawn thresholds
+shared	D_17A4	randseed	Lattice rand seed
+out	D_3A90	plstr	record: strength
+out	D_3A92	plagi	record: agility
+out	D_3A94	plsta	record: stamina
+out	D_3A96	plcha	record: charisma
+out	D_3A98	plwis	record: wisdom
+out	D_3A9A	plint	record: intelligence
+out	D_3AAA	plseed	record: character seed
+out	D_3AB0	plnoise	record: sound flag
+out	D_3AB2	plquest	record: quest states
+out	D_3AC6	gemgreen	record: green gems
+out	D_3AC8	gemblue	record: blue gems
+out	D_3ACA	gemwhite	record: white gems
+out	D_3AFA	ownspl1	spell charges from index 1
+out	D_3B1A	ownshutl	record: shuttles owned
+out	D_3B1C	owntimem	record: time machines owned
+out	D_3B20	lastmnmt	record: last monument
+out	D_3B22	savlast	record: saved monster index
+out	D_3B24	savturns	record: saved turn counter
+out	D_3B28	shutfuel	record: shuttle fuel
+out	D_3B2A	shutshld	record: shuttle shield
+shared	D_3B2C	objtab	overworld object table
+shared	D_3B2E	objterr	object 0 terrain
+shared	D_3B30	objx	object 0 x
+shared	D_3B32	objy	object 0 y
+shared	D_3B34	objhp0	object 0 hit points and rest
+out	D_8ADC	viewbuf	19x9 view buffer
+out	D_8B31	viewctr	view buffer centre cell
+out	D_8B88	argv1	argv[1]
+out	D_8B8A	argv2	argv[2]
+out	D_8B8C	argv3	argv[3]
+out	D_8B8E	foodcnt	overworld food counter
+out	D_8B90	nmons	number of monsters
+out	D_8B92	nvehs	number of vehicle objects
+out	D_8B94	nwater	water cells around the place
+out	D_8B96	ngrass	grass cells around the place
+out	D_8B98	nwoods	woods cells around the place
+out	D_8B9C	prevmode	mode of the previous turn
+out	D_8B9E	doorunl	castle door unlocked
+out	D_8BA0	hasjkey	carrying the jester key
+out	D_8BA2	isbrit	this is Lord Britishs castle
+out	D_8BA4	takeleft	items that may still be taken
+out	D_8BA8	turns	turn counter
+out	D_8BAE	tcdbin	TCD.BIN town and castle maps
+out	D_ACC6	ents	town and castle entities
+out	D_AD3E	townx	player x in towns and dungeons
+out	D_AD40	towny	player y in towns and dungeons
+out	D_AD42	townmap	current town or castle map
+out	D_AD46	hostile	hostile flag
+out	D_AD48	alesdrnk	ales drunk
+out	D_AD4A	castlenr	castle number
+out	D_AD4C	kingnr	king number
+out	D_AD4E	lockkey	lock square the key fits
+out	D_AD50	dunglvl	dungeon level
+out	D_AD52	dungdir	dungeon facing
+out	D_AD54	dungbon	dungeon bonus hit points
+out	D_AD56	dungmap	dungeon level map
+out	D_B11E	dmontype	dungeon monster types present
+shared	D_18C8	placex	place x coordinates
+shared	D_191C	placey	place y coordinates
+shared	D_24DE	placeval	decimal place values
+out	D_307C	placenam	place names
+out	D_3174	landnam	land names
+out	D_31CC	princnam	princess names
+out	D_31DC	enttmpl	entity templates
+out	D_368C	dmgfact	reward and damage factors
+out	D_3698	hpfact	hit point factors
+out	D_36E8	movechan	monster move chances
+out	D_36F8	foodper	food periods
+out	D_3708	mntattr	monument attributes
+out	D_37AE	blockmsg	blocked messages
+out	D_3808	persp1	perspective table 1
+out	D_3814	persp2	perspective table 2
+out	D_3930	dmonname	dungeon monster names
+out	D_018D	sbang	!
+out	D_018F	sbangsp	! with a space
+out	D_0192	scopper	copper!
+out	D_019B	sempty	the empty string
+out	D_019C	ssilver	silver!
+out	D_01A5	sgold	gold!
+out	D_01AC	shit	Hit!
+out	D_01B2	sdestroy	destroyed!
+out	D_01BE	skilled	killed!
+out	D_01C7	sfind	Thou dost find:
+out	D_01D8	sdamagex	damage!
+out	D_01E1	smissed	Missed!
+out	D_01F1	smiss	Miss!
+out	D_01F7	skilthe	Killed the
+out	D_0203	shitthe	Hit the
+out	D_020C	sdamage	damage
+out	D_0214	smisthe	Missed the
+out	D_0220	snothing	nothing
+out	D_0228	sattkwth	Attack with
+out	D_0235	squest	?
+out	D_0237	scolon	colon and space
+out	D_02E1	scoffin	Coffin
+out	D_02E8	schest	Chest
+out	D_02EE	sladdcr	Ladder created!
+out	D_02FE	stelep	Teleported!
+out	D_030A	sfieldcr	Field created!
+out	D_0319	sfielddl	Field destroyed!
+out	D_032A	sfailed	Failed!
+out	D_03D7	spence	pence:
+out	D_03DF	snone	none
+out	D_03E4	snotmuch	Thou hast not that much!
+out	D_03FD	salakazt	Alakazot!
+out	D_040E	sweapon	weapon:
+out	D_0417	sparen	close parenthesis and space
+out	D_0CDC	sklimb	K-Limb
+out	D_0CE3	swhat	what?
+out	D_0CEA	sfacelad	Thou must face the ladder!
+out	D_0D13	sopen	Open
+out	D_0D18	scoffin2	coffin
+out	D_0D20	snonehr	none here
+space	D_5FFA	starquad	star quadrant

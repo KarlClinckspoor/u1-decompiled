@@ -12,10 +12,10 @@ UDATA	ENDS
 DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
-	PUBLIC	F_357C
+	PUBLIC	putch
 
 PROG	SEGMENT
-F_357C:
+putch:
 	PUSH	BP                                 ; 357C 55
 	MOV	BP, SP                              ; 357D 8B EC
 	PUSH	SI                                 ; 357F 56

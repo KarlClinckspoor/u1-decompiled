@@ -1,10 +1,10 @@
 /* opts: -ms -v -w -cs */
 /*
  * SPACE.EXE uninitialised data: DGROUP 26C0-6002, in address order (the Lattice UDATA of the game module).
- * D_26C0 is the 7x7 galaxy (0xB1A bytes, of which the sector (3,3) is D_2C30..D_2C5A),
- * D_2C5C and D_4C67 hold the two graphics files, D_2058 the 0x334-byte player record.
+ * galaxy is the 7x7 galaxy (0xB1A bytes, of which the sector (3,3) is D_2C30..D_2C5A),
+ * spacebnk and fightbnk hold the two graphics files, plname the 0x334-byte player record.
  */
-int D_26C0; /* 26C0 */
+int galaxy; /* 26C0 */
 int D_26C2; /* 26C2 */
 int D_26C4; /* 26C4 */
 int D_26C6; /* 26C6 */
@@ -43,46 +43,46 @@ int D_2C54; /* 2C54 */
 int D_2C56; /* 2C56 */
 int D_2C58; /* 2C58 */
 int D_2C5A; /* 2C5A */
-char D_2C5C[8004]; /* 2C5C */
+char spacebnk[8004]; /* 2C5C */
 char D_4BA0[130]; /* 4BA0 */
 char D_4C22[69]; /* 4C22 */
-char D_4C67[3691]; /* 4C67 */
-int D_5AD2; /* 5AD2 */
-int D_0DA6; /* 5AD4 */
-int D_0DA8; /* 5AD6 */
-int D_2044; /* 5AD8 */
-int D_2046; /* 5ADA */
-char D_2058[16]; /* 5ADC */
-int D_2068; /* 5AEC */
-int D_206A; /* 5AEE */
-int D_206C; /* 5AF0 */
-char D_206E[14]; /* 5AF2 */
-int D_207C; /* 5B00 */
-int D_207E; /* 5B02 */
-int D_2080; /* 5B04 */
-int D_2082; /* 5B06 */
-int D_2084; /* 5B08 */
-int D_2086; /* 5B0A */
-int D_2088; /* 5B0C */
-char D_5B0E[6]; /* 5B0E */
-char D_5B14[20]; /* 5B14 */
-char D_20A4[8]; /* 5B28 */
-char D_20AC[12]; /* 5B30 */
-char D_20B8[32]; /* 5B3C */
-char D_20D8[22]; /* 5B5C */
-char D_20EE[16]; /* 5B72 */
-char D_20FE[10]; /* 5B82 */
-int D_5B8C; /* 5B8C */
-char D_5B8E[642]; /* 5B8E */
-int D_5E10; /* 5E10 */
-int D_5E12; /* 5E12 */
-int D_5E14; /* 5E14 */
-int D_2048; /* 5E16 */
-int D_5E18; /* 5E18 */
-char D_5E1A[80]; /* 5E1A */
-char D_5E6A[80]; /* 5E6A */
-char D_5EBA[80]; /* 5EBA */
-char D_5F0A[240]; /* 5F0A */
-char D_5FFA[4]; /* 5FFA */
-int D_5FFE; /* 5FFE */
-int D_6000; /* 6000 */
+char fightbnk[3691]; /* 4C67 */
+int shipcol; /* 5AD2 */
+int colline; /* 5AD4 */
+int colfill; /* 5AD6 */
+int colhigh; /* 5AD8 */
+int coltext; /* 5ADA */
+char plname[16]; /* 5ADC */
+int plrace; /* 5AEC */
+int plclass; /* 5AEE */
+int plsex; /* 5AF0 */
+char plstat[14]; /* 5AF2 */
+int plcoin; /* 5B00 */
+int plexp; /* 5B02 */
+int plfood; /* 5B04 */
+int rdyweap; /* 5B06 */
+int rdyspel; /* 5B08 */
+int rdyarm; /* 5B0A */
+int plveh; /* 5B0C */
+char plseed[6]; /* 5B0E */
+char plnoise[20]; /* 5B14 */
+char gemred[8]; /* 5B28 */
+char ownarm[12]; /* 5B30 */
+char ownweap[32]; /* 5B3C */
+char ownspel[22]; /* 5B5C */
+char ownveh[16]; /* 5B72 */
+char plkills[10]; /* 5B82 */
+int shutfuel; /* 5B8C */
+char shutshld[642]; /* 5B8E */
+int argv1; /* 5E10 */
+int argv2; /* 5E12 */
+int curship; /* 5E14 */
+int forcecga; /* 5E16 */
+int entrspd; /* 5E18 */
+char staroffx[80]; /* 5E1A */
+char staroffy[80]; /* 5E6A */
+char starx[80]; /* 5EBA */
+char stary[240]; /* 5F0A */
+char starquad[4]; /* 5FFA */
+int starmode; /* 5FFE */
+int lastdir; /* 6000 */

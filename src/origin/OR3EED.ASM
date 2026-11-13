@@ -13,20 +13,20 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_082C:BYTE
-	EXTRN	D_084A:BYTE
+	EXTRN	vidmode:BYTE
+	EXTRN	rowtab:BYTE
 DATA	ENDS
-	PUBLIC	F_3EED
+	PUBLIC	scrlmsg
 
 PROG	SEGMENT
-F_3EED:
+scrlmsg:
 	PUSH	BP                                 ; 3EED 55
 	MOV	BP, SP                              ; 3EEE 8B EC
 	PUSH	SI                                 ; 3EF0 56
 	PUSH	DI                                 ; 3EF1 57
 	PUSH	DS                                 ; 3EF2 1E
 	PUSH	ES                                 ; 3EF3 06
-	CMP	WORD PTR D_082C, 0                  ; 3EF4 83 3E 2C 08 00
+	CMP	WORD PTR vidmode, 0                  ; 3EF4 83 3E 2C 08 00
 	JE	L_3F11                               ; 3EF9 74 16
 	MOV	AH, 6                               ; 3EFB B4 06
 	MOV	AL, 1                               ; 3EFD B0 01
@@ -57,8 +57,8 @@ L_3F1F:
 	INC	DX                                  ; 3F26 42
 	SHL	SI, 1                               ; 3F27 D1 E6
 	SHL	DI, 1                               ; 3F29 D1 E7
-	MOV	SI, WORD PTR D_084A[SI]             ; 3F2B 8B B4 4A 08
-	MOV	DI, WORD PTR D_084A[DI]             ; 3F2F 8B BD 4A 08
+	MOV	SI, WORD PTR rowtab[SI]             ; 3F2B 8B B4 4A 08
+	MOV	DI, WORD PTR rowtab[DI]             ; 3F2F 8B BD 4A 08
 	MOV	CX, 1EH                             ; 3F33 B9 1E 00
 	PUSH	ES                                 ; 3F36 06
 	POP	DS                                  ; 3F37 1F
@@ -75,7 +75,7 @@ L_3F46:
 	MOV	DI, BX                              ; 3F48 8B FB
 	INC	BX                                  ; 3F4A 43
 	SHL	DI, 1                               ; 3F4B D1 E7
-	MOV	DI, WORD PTR D_084A[DI]             ; 3F4D 8B BD 4A 08
+	MOV	DI, WORD PTR rowtab[DI]             ; 3F4D 8B BD 4A 08
 	MOV	CX, 1EH                             ; 3F51 B9 1E 00
 	PUSH	ES                                 ; 3F54 06
 	POP	DS                                  ; 3F55 1F

@@ -13,13 +13,13 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_082C:BYTE
-	EXTRN	D_084A:BYTE
+	EXTRN	vidmode:BYTE
+	EXTRN	rowtab:BYTE
 DATA	ENDS
-	PUBLIC	F_68F8,D_2640,D_2660
+	PUBLIC	plotclip,D_2640,D_2660
 
 PROG	SEGMENT
-F_68F8:
+plotclip:
 	PUSH	BP                                 ; 68F8 55
 	MOV	BP, SP                              ; 68F9 8B EC
 	PUSH	SI                                 ; 68FB 56
@@ -30,16 +30,16 @@ F_68F8:
 	MOV	DI, WORD PTR [BP+6]                 ; 6902 8B 7E 06
 	MOV	DX, WORD PTR [BP+8]                 ; 6905 8B 56 08
 	MOV	BYTE PTR D_2660, DL                 ; 6908 88 16 60 26
-	CMP	WORD PTR D_082C, 0                  ; 690C 83 3E 2C 11 00
+	CMP	WORD PTR vidmode, 0                  ; 690C 83 3E 2C 11 00
 	JE	L_691D                               ; 6911 74 0A
-	CMP	WORD PTR D_082C, 2                  ; 6913 83 3E 2C 11 02
+	CMP	WORD PTR vidmode, 2                  ; 6913 83 3E 2C 11 02
 	JE	L_694A                               ; 6918 74 30
 	JMP	SHORT L_697B                        ; 691A EB 5F
 	DB	90H	; 691C
 L_691D:
 	AND	DX, 3                               ; 691D 81 E2 03 00
 	SHL	DI, 1                               ; 6921 D1 E7
-	MOV	BX, WORD PTR D_084A[DI]             ; 6923 8B 9D 6C 11
+	MOV	BX, WORD PTR rowtab[DI]             ; 6923 8B 9D 6C 11
 	MOV	AX, 0B800H                          ; 6927 B8 00 B8
 	MOV	ES, AX                              ; 692A 8E C0
 	MOV	AX, SI                              ; 692C 8B C6
@@ -58,7 +58,7 @@ L_691D:
 L_694A:
 	AND	DX, 0FH                             ; 694A 81 E2 0F 00
 	SHL	DI, 1                               ; 694E D1 E7
-	MOV	BX, WORD PTR D_084A[DI]             ; 6950 8B 9D 6C 11
+	MOV	BX, WORD PTR rowtab[DI]             ; 6950 8B 9D 6C 11
 	MOV	AX, 0B800H                          ; 6954 B8 00 B8
 	MOV	ES, AX                              ; 6957 8E C0
 	SHR	SI, 1                               ; 6959 D1 EE
@@ -82,7 +82,7 @@ L_697B:
 	AND	DX, 0FH                             ; 697B 81 E2 0F 00
 	MOV	BX, DI                              ; 697F 8B DF
 	SHL	BX, 1                               ; 6981 D1 E3
-	MOV	BX, WORD PTR D_084A[BX]             ; 6983 8B 9F 6C 11
+	MOV	BX, WORD PTR rowtab[BX]             ; 6983 8B 9F 6C 11
 	MOV	DX, 0A000H                          ; 6987 BA 00 A0
 	MOV	ES, DX                              ; 698A 8E C2
 	MOV	CX, SI                              ; 698C 8B CE

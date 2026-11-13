@@ -12,10 +12,10 @@ UDATA	ENDS
 DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
-	PUBLIC	F_33BB
+	PUBLIC	lowcase
 
 PROG	SEGMENT
-F_33BB:
+lowcase:
 	PUSH	BP                                 ; 33BB 55
 	MOV	BP, SP                              ; 33BC 8B EC
 	PUSH	SI                                 ; 33BE 56

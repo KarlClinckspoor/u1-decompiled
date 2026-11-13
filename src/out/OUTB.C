@@ -1,6 +1,6 @@
 /* opts: -ms -v -w -cs */
 /*
- * OUT.EXE - the game, part B of 3 (game code 32F8-63F2: dungeon view, dungeon generation, enter/Get/Inform/Steal commands, shops, story pages (F_32F8-F_63D4)).
+ * OUT.EXE - the game, part B of 3 (game code 32F8-63F2: dungeon view, dungeon generation, enter/Get/Inform/Steal commands, shops, story pages (signpub-sellpric)).
  * The three parts are one program split for the compiler's memory (LC1 stops at about 2200 lines);
  * string literals used in more than one part are named arrays (D_xxxx = their DGROUP address).
  * Builds byte-identical with Lattice C 3.10 (lc -ms -v -w -cs).
@@ -8,17 +8,17 @@
  */
 
 /* Origin library and Lattice library */
-extern F_1D0D(), F_352C(), F_353A(), F_355D(), F_357C(), F_3599(), F_35CA();
-extern F_37FD(), F_3812(), F_387E(), F_3920(), F_39FC(), F_3AE2(), F_3B46();
-extern F_3BF6(), F_3C46(), F_3C8B(), F_3E2F(), F_3E5E(), F_3E85(), F_3EC4(), F_3EED();
-extern F_3F58(), F_3F62(), F_4069(), F_40A8(), F_40E9(), F_40FE(), F_43C8(), F_4437();
-extern F_44A2(), F_450D(), F_4558(), F_45A3(), F_478E(), F_5643(), F_91D4(), F_A363();
-extern F_A3BA(), F_A554(), F_AC91(), F_AF57(), F_B0B5(), F_B34F(), F_B502(), F_B545();
-extern F_B58E(), F_B5E1(), F_B617(), F_B665(), F_B70F(), F_B7CD(), F_B884(), F_C2AF();
-extern F_C2EC(), F_C31C(), F_C3CA(), F_C47C();
+extern F_1D0D(), gotoxy(), strlen2(), drawtile(), putch(), putstr(), fillrect();
+extern seedrnd(), lineto(), arrowr(), arrowl(), drawline(), presskey(), msgline();
+extern botbar(), topbar(), putnum(), readfile(), waittick(), writfile(), clockrnd(), scrlmsg();
+extern vidinit(), playsnd(), rndrange(), isvowel(), getlevel(), quadrant(), readycmd(), showhp();
+extern showfood(), showexp(), showcoin(), showstat(), ztats(), textmode(), lcrand(), terrain();
+extern placeat(), animwat(), drawdmon(), drawview(), readnum(), towntile(), addmon(), findmon();
+extern delmon(), cntmon(), cntveh(), scrolln(), scrolls(), scrolle(), scrollw(), objat();
+extern viewx(), viewy(), drawwrld(), death();
 extern EXECL(), EXIT();
-extern unsigned char F_33BB(), F_3862(), F_39C5(), F_4127(), F_413C(), F_4161();
-extern char F_411C();
+extern unsigned char lowcase(), upcase(), waitkey(), keyup(), getkey(), keywait();
+extern char drawable();
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
@@ -27,78 +27,78 @@ struct mon { int type, f2, x, y, f8, fa, fc, fe; };
 struct ent { int f0, f2, f4, f6; };
 
 /* data of the Origin text module (OM4437): tables of names and messages */
-extern int D_082C;
-extern int D_0CD2[];
-extern unsigned char *D_0D72[], *D_0DF8[], *D_0FD8[];
-extern char *D_0E9E[], *D_0F04[], *D_0F5C[], *D_0FA2[];
-extern int D_1DC8[];
+extern int vidmode;
+extern int wrange[];
+extern unsigned char *wnamelng[], *wnames[], *strtab[];
+extern char *attrnam[], *spellnam[], *armornam[], *vehnam[];
+extern int dirtab[];
 /* tables inside that module that have no label of their own (absolute names in OUTSYM.ASM) */
-extern struct ent D_31DC[][15];
-extern int D_368C[], D_3698[], D_36E8[], D_36F8[], D_31CC[], D_3708[], D_3808[], D_3814[];
-extern char *D_307C[], *D_3174[], *D_37AE[], *D_3930[];
+extern struct ent enttmpl[][15];
+extern int dmgfact[], hpfact[], movechan[], foodper[], princnam[], mntattr[], persp1[], persp2[];
+extern char *placenam[], *landnam[], *blockmsg[], *dmonname[];
 
 /* BSS (defined in OUTBSS.C) */
-extern int D_0DA6, D_0DA8, D_2044, D_2046, D_2048, D_204A, D_204E;
-extern char D_2058[];
-extern int D_206A, D_206C, D_206E[];
-extern int D_207C, D_207E, D_2080, D_2082, D_2084, D_2086, D_2088;
-extern int D_20A4, D_20AC[], D_20B8[], D_20D8[], D_20EE[], D_20FE;
-extern int D_3A90, D_3A92, D_3A94, D_3A96, D_3A98, D_3A9A;
-extern int D_3AAA, D_3AAC, D_3AAE, D_3AB0, D_3AB2[];
-extern int D_3AC6, D_3AC8, D_3ACA, D_3AFA[];
-extern int D_3B1A, D_3B1C, D_3B20, D_3B22, D_3B28, D_3B2A;
-extern long D_3B24;
-extern struct mon D_3B2C[];
-extern char D_3DAC[], D_238C[];
-extern int D_8B88, D_8B8A, D_8B8C, D_8B8E, D_8B90, D_8B92, D_8B94, D_8B96, D_8B98;
-extern int D_8B9C, D_8B9E, D_8BA0, D_8BA2, D_8BA4, D_8BA6;
-extern long D_8BA8;
-extern unsigned char D_8B31, D_8BAE[][38][18];
-extern struct ent D_ACC6[];
-extern int D_AD3E, D_AD40, D_AD42, D_AD46, D_AD48, D_AD4A, D_AD4C, D_AD4E;
-extern int D_AD50, D_AD52, D_AD54;
-extern struct cell D_AD56[][11];
+extern int colline, colfill, colhigh, coltext, forcecga, gmode, redraw;
+extern char plname[];
+extern int plclass, plsex, plstat[];
+extern int plcoin, plexp, plfood, rdyweap, rdyspel, rdyarm, plveh;
+extern int gemred, ownarm[], ownweap[], ownspel[], ownveh[], plkills;
+extern int plstr, plagi, plsta, plcha, plwis, plint;
+extern int plseed, worldx, worldy, plnoise, plquest[];
+extern int gemgreen, gemblue, gemwhite, ownspl1[];
+extern int ownshutl, owntimem, lastmnmt, savlast, shutfuel, shutshld;
+extern long savturns;
+extern struct mon objtab[];
+extern char mapbin[], tilegfx[];
+extern int argv1, argv2, argv3, foodcnt, nmons, nvehs, nwater, ngrass, nwoods;
+extern int prevmode, doorunl, hasjkey, isbrit, takeleft, lastmon;
+extern long turns;
+extern unsigned char viewctr, tcdbin[][38][18];
+extern struct ent ents[];
+extern int townx, towny, townmap, hostile, alesdrnk, castlenr, kingnr, lockkey;
+extern int dunglvl, dungdir, dungbon;
+extern struct cell dungmap[][11];
 extern int D_ADB6, D_ADBE, D_AE96, D_AFD6;
-extern char D_B11E[];
+extern char dmontype[];
 
-extern char D_018D[];
-extern char D_019B[];
-extern char D_01C7[];
-extern char D_0220[];
-extern char D_0235[];
-extern char D_02E1[];
-extern char D_02E8[];
+extern char sbang[];
+extern char sempty[];
+extern char sfind[];
+extern char snothing[];
+extern char squest[];
+extern char scoffin[];
+extern char schest[];
 
-#define MT ((int (*)[8])D_3B2C)
+#define MT ((int (*)[8])objtab)
 
-extern char *D_0172, *D_0180;
-extern int D_0182;
+extern char *msgleave, *plfile;
+extern int escflag;
 /* pub sign number n; always returns 6 */
-F_32F8(n)
+signpub(n)
 unsigned n;
 {
-    F_21C2(D_0DA8);
+    boxclr(colfill);
     switch (n) {
     case 0:
-        F_21E7(14, 4, "Pub de Varg");
+        boxtext(14, 4, "Pub de Varg");
         break;
     case 1:
-        F_21E7(11, 4, "Ye Olde Local Pub");
+        boxtext(11, 4, "Ye Olde Local Pub");
         break;
     case 2:
-        F_21E7(13, 4, "Dr. Cat's Lair");
+        boxtext(13, 4, "Dr. Cat's Lair");
         break;
     case 3:
-        F_21E7(13, 4, "Teaser's House");
+        boxtext(13, 4, "Teaser's House");
         break;
     case 5:
-        F_21E7(12, 4, "Mary's Midway");
+        boxtext(12, 4, "Mary's Midway");
         break;
     case 6:
-        F_21E7(10, 4, "Kurtstable's Korner");
+        boxtext(10, 4, "Kurtstable's Korner");
         break;
     case 7:
-        F_21E7(11, 4, "Dav's House-o-Suds");
+        boxtext(11, 4, "Dav's House-o-Suds");
         break;
     }
     return 6;
@@ -106,27 +106,27 @@ unsigned n;
 
 /* ---- ou_2b6d_c ---- */
 /* draw the left wall edges (top and bottom) of dungeon depth step i */
-F_33B0(i)
+edgel(i)
 int i;
 {
     if (i <= 5) {
-        F_39FC(D_3808[i - 1] + 16, D_3814[i - 1] + 8, D_3808[i] + 16, D_3814[i] + 8, D_0DA6);
-        F_39FC(D_3808[i - 1] + 16, 151 - D_3814[i - 1], D_3808[i] + 16, 151 - D_3814[i], D_0DA6);
+        drawline(persp1[i - 1] + 16, persp2[i - 1] + 8, persp1[i] + 16, persp2[i] + 8, colline);
+        drawline(persp1[i - 1] + 16, 151 - persp2[i - 1], persp1[i] + 16, 151 - persp2[i], colline);
     }
 }
 
 /* draw the right wall edges (top and bottom) of dungeon depth step i */
-F_3430(i)
+edger(i)
 int i;
 {
     if (i <= 5) {
-        F_39FC(303 - D_3808[i - 1], D_3814[i - 1] + 8, 303 - D_3808[i], D_3814[i] + 8, D_0DA6);
-        F_39FC(303 - D_3808[i - 1], 151 - D_3814[i - 1], 303 - D_3808[i], 151 - D_3814[i], D_0DA6);
+        drawline(303 - persp1[i - 1], persp2[i - 1] + 8, 303 - persp1[i], persp2[i] + 8, colline);
+        drawline(303 - persp1[i - 1], 151 - persp2[i - 1], 303 - persp1[i], 151 - persp2[i], colline);
     }
 }
 
 /* draw the front wall rectangle of depth step i (inset by 8 pixels when i is 0) */
-F_34B0(i)
+frontrct(i)
 int i;
 {
     int dx, dy;
@@ -135,201 +135,201 @@ int i;
     if (i == 0)
         dx = dy = 8;
     if (i <= 5) {
-        F_39FC(D_3808[i] + 16 + dx, D_3814[i] + 8 + dy, 303 - D_3808[i] - dx, D_3814[i] + 8 + dy, D_0DA6);
-        F_39FC(D_3808[i] + 16 + dx, 151 - D_3814[i] - dy, 303 - D_3808[i] - dx, 151 - D_3814[i] - dy, D_0DA6);
+        drawline(persp1[i] + 16 + dx, persp2[i] + 8 + dy, 303 - persp1[i] - dx, persp2[i] + 8 + dy, colline);
+        drawline(persp1[i] + 16 + dx, 151 - persp2[i] - dy, 303 - persp1[i] - dx, 151 - persp2[i] - dy, colline);
     }
 }
 
 /* draw the left wall's outline at depth step i */
-F_355A(i)
+outlinel(i)
 int i;
 {
     if (i <= 5) {
-        F_39FC(D_3808[i - 1] + 16, D_3814[i] + 8, D_3808[i] + 16, D_3814[i] + 8, D_0DA6);
-        F_39FC(D_3808[i - 1] + 16, 151 - D_3814[i], D_3808[i] + 16, 151 - D_3814[i], D_0DA6);
+        drawline(persp1[i - 1] + 16, persp2[i] + 8, persp1[i] + 16, persp2[i] + 8, colline);
+        drawline(persp1[i - 1] + 16, 151 - persp2[i], persp1[i] + 16, 151 - persp2[i], colline);
     }
 }
 
 /* draw the right wall's outline at depth step i */
-F_35DC(i)
+outliner(i)
 int i;
 {
     if (i <= 5) {
-        F_39FC(303 - D_3808[i - 1], D_3814[i] + 8, 303 - D_3808[i], D_3814[i] + 8, D_0DA6);
-        F_39FC(303 - D_3808[i - 1], 151 - D_3814[i], 303 - D_3808[i], 151 - D_3814[i], D_0DA6);
+        drawline(303 - persp1[i - 1], persp2[i] + 8, 303 - persp1[i], persp2[i] + 8, colline);
+        drawline(303 - persp1[i - 1], 151 - persp2[i], 303 - persp1[i], 151 - persp2[i], colline);
     }
 }
 
 /* vertical lines at x=26 and x=28 spaced by step i */
-F_365E(i)
+sidelns(i)
 int i;
 {
     if (i <= 5) {
-        F_AC91(26, i, D_0DA6);
-        F_AC91(28, i, D_0DA6);
+        drawdmon(26, i, colline);
+        drawdmon(28, i, colline);
     }
 }
 
-F_368F(i)
+deco1(i)
 int i;
 {
     if (i <= 5) {
-        F_AC91(27, i, D_0DA6);
-        F_AC91(28, i, D_0DA6);
+        drawdmon(27, i, colline);
+        drawdmon(28, i, colline);
     }
 }
 
-F_36C0(i)
+deco2(i)
 int i;
 {
     if (i <= 5) {
-        F_AC91(27, i, D_0DA6);
-        F_AC91(29, i, D_0DA6);
+        drawdmon(27, i, colline);
+        drawdmon(29, i, colline);
     }
 }
 
-F_36F1(i)
+deco3(i)
 int i;
 {
     if (i <= 5) {
-        F_AC91(26, i, D_0DA6);
-        F_AC91(29, i, D_0DA6);
+        drawdmon(26, i, colline);
+        drawdmon(29, i, colline);
     }
 }
 
 /* draw three horizontal rungs (a ladder) across the wall at depth step i */
-F_3722(i)
+ladder(i)
 int i;
 {
     int k, d;
 
     if (i <= 5) {
-        d = D_3814[i] + 8 - (151 - D_3814[i]);
+        d = persp2[i] + 8 - (151 - persp2[i]);
         d = ABS(d / 4);
         for (k = 1; k <= 3; k++)
-            F_39FC(D_3808[i] + 16, D_3814[i] + 8 + k * d + i / 2, 303 - D_3808[i],
-                   D_3814[i] + 8 + k * d + i / 2, D_2044);
+            drawline(persp1[i] + 16, persp2[i] + 8 + k * d + i / 2, 303 - persp1[i],
+                   persp2[i] + 8 + k * d + i / 2, colhigh);
     }
 }
 
 /* draw the left side door at depth step i: wall lines plus door frame */
-F_37DB(i)
+doorl(i)
 int i;
 {
     int a, b;
 
     if (i <= 5) {
-        F_33B0(i);
-        a = D_3808[i - 1] - D_3808[i];
-        b = D_3814[i - 1] - D_3814[i];
+        edgel(i);
+        a = persp1[i - 1] - persp1[i];
+        b = persp2[i - 1] - persp2[i];
         a = ABS(a / 9);
         b = ABS(b / 5);
-        F_39FC(a + 16 + a + D_3808[i - 1], 151 - b - D_3814[i - 1] - 1, a + 16 + a + D_3808[i - 1],
-               D_3814[i] + 8 - b, D_0DA6);
-        F_3812(a * 6 + 16 + D_3808[i - 1], D_3814[i] + 8 + b, D_0DA6);
-        F_3812(a * 6 + 16 + D_3808[i - 1], 151 - D_3814[i] + b + b - (i == 1) * 2, D_0DA6);
+        drawline(a + 16 + a + persp1[i - 1], 151 - b - persp2[i - 1] - 1, a + 16 + a + persp1[i - 1],
+               persp2[i] + 8 - b, colline);
+        lineto(a * 6 + 16 + persp1[i - 1], persp2[i] + 8 + b, colline);
+        lineto(a * 6 + 16 + persp1[i - 1], 151 - persp2[i] + b + b - (i == 1) * 2, colline);
     }
 }
 
 /* draw the right side door at depth step i */
-F_390D(i)
+doorr(i)
 int i;
 {
     int a, b;
 
     if (i <= 5) {
-        F_3430(i);
-        a = D_3808[i - 1] - D_3808[i];
-        b = D_3814[i - 1] - D_3814[i];
+        edger(i);
+        a = persp1[i - 1] - persp1[i];
+        b = persp2[i - 1] - persp2[i];
         a = ABS(a / 9);
         b = ABS(b / 5);
-        F_39FC(303 - (a + a + D_3808[i - 1]), 151 - b - D_3814[i - 1] - 1, 303 - (a + a + D_3808[i - 1]),
-               D_3814[i] + 8 - b, D_0DA6);
-        F_3812(303 - (a * 6 + D_3808[i - 1]), D_3814[i] + 8 + b, D_0DA6);
-        F_3812(303 - (a * 6 + D_3808[i - 1]), 151 - D_3814[i] + b + b - (i == 1) * 2, D_0DA6);
+        drawline(303 - (a + a + persp1[i - 1]), 151 - b - persp2[i - 1] - 1, 303 - (a + a + persp1[i - 1]),
+               persp2[i] + 8 - b, colline);
+        lineto(303 - (a * 6 + persp1[i - 1]), persp2[i] + 8 + b, colline);
+        lineto(303 - (a * 6 + persp1[i - 1]), 151 - persp2[i] + b + b - (i == 1) * 2, colline);
     }
 }
 
 /* draw the front wall at depth step i with a doorway */
-F_3A54(i)
+frontdr(i)
 int i;
 {
     int col, dy;
 
     dy = col = 0;
     if (i)
-        col = D_0DA6;
+        col = colline;
     else
         dy = 8;
     if (i < 5) {
-        F_34B0(i);
-        F_39FC(303 - D_3808[i + 1], 151 - D_3814[i] - dy, D_3808[i + 1] + 16, 151 - D_3814[i] - dy, col);
-        F_3812(D_3808[i + 1] + 16, D_3814[i + 1] + 8, D_0DA6);
-        F_3812(303 - D_3808[i + 1], D_3814[i + 1] + 8, D_0DA6);
-        F_3812(303 - D_3808[i + 1], 151 - D_3814[i] - dy, D_0DA6);
+        frontrct(i);
+        drawline(303 - persp1[i + 1], 151 - persp2[i] - dy, persp1[i + 1] + 16, 151 - persp2[i] - dy, col);
+        lineto(persp1[i + 1] + 16, persp2[i + 1] + 8, colline);
+        lineto(303 - persp1[i + 1], persp2[i + 1] + 8, colline);
+        lineto(303 - persp1[i + 1], 151 - persp2[i] - dy, colline);
     }
 }
 
 /* vertical line at the left edge of depth step i */
-F_3B25(i)
+vedgel(i)
 int i;
 {
     if (i <= 5)
-        F_39FC(D_3808[i] + 16, D_3814[i] + 8, D_3808[i] + 16, 151 - D_3814[i], D_0DA6);
+        drawline(persp1[i] + 16, persp2[i] + 8, persp1[i] + 16, 151 - persp2[i], colline);
 }
 
 /* vertical line at the right edge of depth step i */
-F_3B65(i)
+vedger(i)
 int i;
 {
     if (i <= 5)
-        F_39FC(303 - D_3808[i], D_3814[i] + 8, 303 - D_3808[i], 151 - D_3814[i], D_0DA6);
+        drawline(303 - persp1[i], persp2[i] + 8, 303 - persp1[i], 151 - persp2[i], colline);
 }
 
 /* name the dungeon feature kind y and draw it at depth x (kind 9 = front wall outline) */
-F_3BA5(x, y)
+drawfeat(x, y)
 int x, y;
 {
     if (x < 5) {
-        F_3B46(D_3930[y]);
+        msgline(dmonname[y]);
         if (y != 9)
-            F_AC91(y, x, D_0DA6);
+            drawdmon(y, x, colline);
         else {
-            F_34B0(x);
-            F_3B25(x);
-            F_3B65(x);
+            frontrct(x);
+            vedgel(x);
+            vedger(x);
         }
     }
 }
 
 /* coffin at depth x */
-F_3BF5(x)
+drawcoff(x)
 int x;
 {
-    F_3B46(D_02E1);
-    F_AC91(25, x, D_0DA6);
+    msgline(scoffin);
+    drawdmon(25, x, colline);
 }
 
 /* chest at depth x */
-F_3C13(x)
+drawchst(x)
 int x;
 {
-    F_3B46(D_02E8);
-    F_AC91(11, x, D_0DA6);
+    msgline(schest);
+    drawdmon(11, x, colline);
 }
 
 /* print the name of feature kind k ("Mimic" for 11) */
-F_3C31(k)
+featname(k)
 int k;
 {
     if (k != 11)
-        F_3599(D_3930[k], D_2046);
+        putstr(dmonname[k], coltext);
     else
-        F_3599("Mimic", D_2046);
+        putstr("Mimic", coltext);
 }
 
 /* sign of x: -1, 0 or 1 */
-F_3C64(x)
+sign(x)
 int x;
 {
     if (x < 0)
@@ -339,191 +339,191 @@ int x;
     return 0;
 }
 
-/* dx of the facing direction D_AD52: east 1, west -1 */
-F_3C8E()
+/* dx of the facing direction dungdir: east 1, west -1 */
+facedx()
 {
     int r;
 
     r = 0;
-    if (D_AD52 == 2)
+    if (dungdir == 2)
         r = 1;
-    else if (D_AD52 == 1)
+    else if (dungdir == 1)
         r = -1;
     return r;
 }
 
-/* dy of the facing direction D_AD52: north -1, south 1 */
-F_3CBB()
+/* dy of the facing direction dungdir: north -1, south 1 */
+facedy()
 {
     int r;
 
     r = 0;
-    if (D_AD52 == 3)
+    if (dungdir == 3)
         r = -1;
-    else if (D_AD52 == 4)
+    else if (dungdir == 4)
         r = 1;
     return r;
 }
 
 /* print the compass direction at the status line */
-F_3CE8()
+showdir()
 {
-    F_387E(16, 19);
-    switch (D_AD52) {
+    arrowr(16, 19);
+    switch (dungdir) {
     case 3:
-        F_3599(" North ", D_2046);
+        putstr(" North ", coltext);
         break;
     case 4:
-        F_3599(" South ", D_2046);
+        putstr(" South ", coltext);
         break;
     case 2:
-        F_3599(" East  ", D_2046);
+        putstr(" East  ", coltext);
         break;
     case 1:
-        F_3599(" West  ", D_2046);
+        putstr(" West  ", coltext);
         break;
     }
-    F_3920(24, 19);
-    F_352C(1, 24);
+    arrowl(24, 19);
+    gotoxy(1, 24);
 }
 
 /* draw the dungeon cell (x, y) at depth step depth */
-F_3D6C(depth, x, y)
+drawcell(depth, x, y)
 int depth, x, y;
 {
     int t;
 
-    t = D_AD56[x][y].a;
+    t = dungmap[x][y].a;
     if (t == 3 || t == 2 || t == 1)
-        F_34B0(depth);
+        frontrct(depth);
     if (t == 6)
-        F_AC91(27, depth + 1, D_0DA6);
+        drawdmon(27, depth + 1, colline);
     if (t == 7)
-        F_AC91(26, depth + 1, D_0DA6);
-    F_3BA5(depth, D_AD56[x][y].b);
+        drawdmon(26, depth + 1, colline);
+    drawfeat(depth, dungmap[x][y].b);
 }
 
 /* draw the dungeon cell (x, y) seen at depth step depth */
-F_3DF5(depth, x, y)
+drawcel2(depth, x, y)
 int depth, x, y;
 {
-    if (D_AD56[x][y].b != -1)
-        F_3D6C(depth, x, y);
+    if (dungmap[x][y].b != -1)
+        drawcell(depth, x, y);
     else {
-        switch (D_AD56[x][y].a) {
+        switch (dungmap[x][y].a) {
         case 1:
         case 2:
-            F_34B0(depth);
+            frontrct(depth);
             break;
         case 3:
-            F_3A54(depth);
+            frontdr(depth);
             break;
         case 8:
-            F_3722(depth);
+            ladder(depth);
             break;
         case 6:
-            if (D_AD52 == 3 || D_AD52 == 4)
-                F_368F(depth + 1);
+            if (dungdir == 3 || dungdir == 4)
+                deco1(depth + 1);
             else
-                F_36C0(depth + 1);
+                deco2(depth + 1);
             break;
         case 7:
-            if (D_AD52 == 3 || D_AD52 == 4)
-                F_365E(depth + 1);
+            if (dungdir == 3 || dungdir == 4)
+                sidelns(depth + 1);
             else
-                F_36F1(depth + 1);
+                deco3(depth + 1);
             break;
         }
     }
-    if (D_AD56[x][y].c == 5)
-        F_3BF5(depth + 1);
-    else if (D_AD56[x][y].c == 4)
-        F_3C13(depth + 1);
+    if (dungmap[x][y].c == 5)
+        drawcoff(depth + 1);
+    else if (dungmap[x][y].c == 4)
+        drawchst(depth + 1);
 }
 
 /* draw the wall piece at depth step depth, type side: 1/2 left-ish, 3 door, else right */
-F_3F19(depth, side)
+wallpc1(depth, side)
 int depth, side;
 {
     switch (side) {
     case 2:
     case 1:
-        F_3430(depth);
+        edger(depth);
         break;
     case 3:
-        F_390D(depth);
+        doorr(depth);
         break;
     default:
-        F_35DC(depth);
+        outliner(depth);
     }
 }
 
 /* same for the other pair of wall lines */
-F_3F4C(depth, side)
+wallpc2(depth, side)
 int depth, side;
 {
     switch (side) {
     case 2:
     case 1:
-        F_33B0(depth);
+        edgel(depth);
         break;
     case 3:
-        F_37DB(depth);
+        doorl(depth);
         break;
     default:
-        F_355A(depth);
+        outlinel(depth);
     }
 }
 
-/* is the square at (D_AD3E + a, D_AD40 + b) walkable? 1 yes, 0 no */
-F_3F7F_O(a, b)
+/* is the square at (townx + a, towny + b) walkable? 1 yes, 0 no */
+walkdng(a, b)
 int a, b;
 {
     int v;
 
-    v = D_AD56[D_AD3E + a][D_AD40 + b].a;
+    v = dungmap[townx + a][towny + b].a;
     if (v == 1 || v == 2 || v == 8)
         return 1;
-    if (v == 3 && D_AD56[D_AD3E][D_AD40].a == 3)
+    if (v == 3 && dungmap[townx][towny].a == 3)
         return 1;
-    if (D_AD56[D_AD3E + a][D_AD40 + b].b == -1)
+    if (dungmap[townx + a][towny + b].b == -1)
         return 0;
     return 1;
 }
 
 /* ---- ou_4013 ---- */
 /* passable test for map tile (x,y): 0 if blocked */
-F_4013(x, y)
+passable(x, y)
 int x, y;
 {
-    if (D_AD56[x][y].b == -1 || D_AD56[x][y].b == 20 || D_AD56[x][y].b == 11 || D_AD56[x][y].b == 9)
+    if (dungmap[x][y].b == -1 || dungmap[x][y].b == 20 || dungmap[x][y].b == 11 || dungmap[x][y].b == 9)
         return 0;
     return 1;
 }
 
 /* is square at offset (dx,dy) from player walkable */
-F_407E(dx, dy)
+walkable(dx, dy)
 int dx, dy;
 {
     int t;
 
-    t = D_AD56[D_AD3E + dx][D_AD40 + dy].a;
+    t = dungmap[townx + dx][towny + dy].a;
     if (t == 1 || t == 2 || t == 3)
         return 1;
-    return F_4013(D_AD3E + dx, D_AD40 + dy);
+    return passable(townx + dx, towny + dy);
 }
 
 /* distance (1..5) walking along direction (a,b) until blocked */
-F_40D4(a, b)
+viewdist(a, b)
 int a, b;
 {
     int n;
 
     n = 1;
-    while (!F_407E(a, b)) {
+    while (!walkable(a, b)) {
         n++;
-        a += F_3C64(a);
-        b += F_3C64(b);
+        a += sign(a);
+        b += sign(b);
     }
     if (n > 5)
         n = 5;
@@ -531,7 +531,7 @@ int a, b;
 }
 
 /* tile type is not 0/6/7/8 */
-char F_411C(c)
+char drawable(c)
 unsigned char c;
 {
     if (c == 0 || c == 7 || c == 6 || c == 8)
@@ -539,21 +539,21 @@ unsigned char c;
     return 1;
 }
 
-/* draw the first-person dungeon view in the facing direction D_AD52 */
-F_414A()
+/* draw the first-person dungeon view in the facing direction dungdir */
+drawdung()
 {
     int a, b, c, d, ex, ey, dx, dy, n, dist, fx, fy, f1, f2;
     unsigned char pl, pr, l, r, fl, fr;
 
     d = c = b = a = 0;
-    if (D_204E) {
-        F_456D();
-        D_204E = 0;
+    if (redraw) {
+        dungscrn();
+        redraw = 0;
     }
     fl = fr = pl = pr = 100;
-    dx = F_3C8E();
-    dy = F_3CBB();
-    switch (D_AD52) {
+    dx = facedx();
+    dy = facedy();
+    switch (dungdir) {
     case 3:
         a = -1;
         b = 1;
@@ -571,330 +571,330 @@ F_414A()
         d = -1;
         break;
     }
-    F_35CA(8, 8, 0x137, 0x97, 0);
-    F_3CE8();
-    f1 = D_AD56[D_AD3E][D_AD40].a == 3;
-    f2 = D_AD56[D_AD3E][D_AD40].a == 2 || D_AD56[D_AD3E][D_AD40].a == 1;
-    dist = F_40D4(dx, dy);
+    fillrect(8, 8, 0x137, 0x97, 0);
+    showdir();
+    f1 = dungmap[townx][towny].a == 3;
+    f2 = dungmap[townx][towny].a == 2 || dungmap[townx][towny].a == 1;
+    dist = viewdist(dx, dy);
     if (f2)
-        F_34B0(0);
+        frontrct(0);
     else {
         n = dist;
-        fx = ex = F_3C64(dx) * n;
-        fy = ey = F_3C64(dy) * n;
-        if (f1 && (D_AD56[D_AD3E + dx][D_AD40 + dy].a == 1 || D_AD56[D_AD3E + dx][D_AD40 + dy].a == 3
-                   || D_AD56[D_AD3E + dx][D_AD40 + dy].a == 2))
-            F_34B0(0);
+        fx = ex = sign(dx) * n;
+        fy = ey = sign(dy) * n;
+        if (f1 && (dungmap[townx + dx][towny + dy].a == 1 || dungmap[townx + dx][towny + dy].a == 3
+                   || dungmap[townx + dx][towny + dy].a == 2))
+            frontrct(0);
         else {
             if (f1)
-                F_3A54(0);
+                frontdr(0);
             while (n) {
                 ex -= dx;
                 ey -= dy;
                 if (!f1 || n > 1) {
-                    l = D_AD56[D_AD3E + ex + a][D_AD40 + ey + c].a;
-                    r = D_AD56[D_AD3E + ex + b][D_AD40 + ey + d].a;
-                    F_3F4C(n, l);
-                    F_3F19(n, r);
-                    l = F_411C(l);
-                    r = F_411C(r);
+                    l = dungmap[townx + ex + a][towny + ey + c].a;
+                    r = dungmap[townx + ex + b][towny + ey + d].a;
+                    wallpc2(n, l);
+                    wallpc1(n, r);
+                    l = drawable(l);
+                    r = drawable(r);
                     if (n == dist) {
                         fl = l;
                         fr = r;
                     }
                     if (n != dist) {
                         if (pl != l)
-                            F_3B25(n);
+                            vedgel(n);
                         if (pr != r)
-                            F_3B65(n);
+                            vedger(n);
                     }
                 }
-                F_3DF5(n, D_AD3E + ex + dx, D_AD40 + ey + dy);
+                drawcel2(n, townx + ex + dx, towny + ey + dy);
                 pl = l;
                 pr = r;
                 n--;
             }
             if (!f1)
-                F_3DF5(0, D_AD3E, D_AD40);
-            if (F_4013(D_AD3E + fx, D_AD40 + fy) && D_AD56[D_AD3E + fx][D_AD40 + fy].a != 3 && dist < 5) {
-                l = D_AD56[a + D_AD3E + fx][c + D_AD40 + fy].a;
-                r = D_AD56[D_AD3E + b + fx][D_AD40 + d + fy].a;
-                F_3F4C(dist + 1, l);
-                F_3F19(dist + 1, r);
-                if (!F_411C(l))
-                    F_3B25(dist);
-                if (!F_411C(r))
-                    F_3B65(dist);
+                drawcel2(0, townx, towny);
+            if (passable(townx + fx, towny + fy) && dungmap[townx + fx][towny + fy].a != 3 && dist < 5) {
+                l = dungmap[a + townx + fx][c + towny + fy].a;
+                r = dungmap[townx + b + fx][towny + d + fy].a;
+                wallpc2(dist + 1, l);
+                wallpc1(dist + 1, r);
+                if (!drawable(l))
+                    vedgel(dist);
+                if (!drawable(r))
+                    vedger(dist);
             } else {
                 if (fl == 1)
-                    F_3B25(dist);
+                    vedgel(dist);
                 if (fr == 1)
-                    F_3B65(dist);
+                    vedger(dist);
             }
         }
         if (f1) {
-            if (D_AD56[D_AD3E][D_AD40].c == 5)
-                F_3BF5(1);
-            else if (D_AD56[D_AD3E][D_AD40].c == 4)
-                F_3C13(1);
+            if (dungmap[townx][towny].c == 5)
+                drawcoff(1);
+            else if (dungmap[townx][towny].c == 4)
+                drawchst(1);
         }
     }
 }
 
 /* clear the screen area and print the status line with the dungeon level */
-F_456D()
+dungscrn()
 {
-    F_387E(15, 0);
-    F_3599(" Level    ", D_2046);
-    F_3920(26, 0);
-    F_352C(23, 0);
-    F_3C8B(D_AD50, 2, 32, D_2046, 0);
-    F_352C(1, 24);
+    arrowr(15, 0);
+    putstr(" Level    ", coltext);
+    arrowl(26, 0);
+    gotoxy(23, 0);
+    putnum(dunglvl, 2, 32, coltext, 0);
+    gotoxy(1, 24);
 }
 
-/* set the cell (D_3AAA + 3*D_3AAE + 5*D_3AAC + 17*D_AD50) */
-F_45C8()
+/* set the cell (plseed + 3*worldy + 5*worldx + 17*dunglvl) */
+dungseed()
 {
     int t;
 
-    t = D_3AAC * 5 + D_3AAE * 3 + D_AD50 * 17;
-    F_37FD(t + D_3AAA);
+    t = worldx * 5 + worldy * 3 + dunglvl * 17;
+    seedrnd(t + plseed);
 }
 
 /* place one monster/ladder on a random free square of the dungeon level */
-F_4602()
+dungmon()
 {
     int x, y, q, ok, cnt;
 
     cnt = 0;
     do {
-        x = F_4069(0, 242) % 9 + 1;
-        y = F_4069(0, 242) % 9 + 1;
-        ok = D_AD56[x][y].b == -1 && D_AD56[x][y].a != 1 && D_AD56[x][y].a != 2
-             && D_AD56[x][y].a != 8 && D_AD56[x][y].c != 4;
+        x = rndrange(0, 242) % 9 + 1;
+        y = rndrange(0, 242) % 9 + 1;
+        ok = dungmap[x][y].b == -1 && dungmap[x][y].a != 1 && dungmap[x][y].a != 2
+             && dungmap[x][y].a != 8 && dungmap[x][y].c != 4;
     } while (!ok && ++cnt <= 500);
-    if (cnt < 500 && !(x == D_AD3E && y == D_AD40)) {
+    if (cnt < 500 && !(x == townx && y == towny)) {
         do {
-            cnt = F_4069(0, 49) / 10;
-        } while (D_B11E[cnt]);
-        D_B11E[cnt] = 1;
-        q = (D_AD50 - 1) / 2 * 5 + cnt;
-        D_AD56[x][y].b = q;
-        D_AD56[x][y].d = F_4069(1, D_AD50 * D_AD50 + 1) + 10 + q;
+            cnt = rndrange(0, 49) / 10;
+        } while (dmontype[cnt]);
+        dmontype[cnt] = 1;
+        q = (dunglvl - 1) / 2 * 5 + cnt;
+        dungmap[x][y].b = q;
+        dungmap[x][y].d = rndrange(1, dunglvl * dunglvl + 1) + 10 + q;
     }
 }
 
 /* generate a new dungeon level: walls, doors, traps, monsters */
-F_4761()
+mkdung()
 {
     int i, j, k, m, d;
 
-    F_456D();
-    F_45C8();
+    dungscrn();
+    dungseed();
     for (i = 0; i <= 10; i++)
         for (j = 0; j <= 10; j++) {
-            D_AD56[i][j].a = 0;
-            D_AD56[i][j].c = 0;
-            D_AD56[i][j].b = -1;
-            D_AD56[i][j].d = 0;
+            dungmap[i][j].a = 0;
+            dungmap[i][j].c = 0;
+            dungmap[i][j].b = -1;
+            dungmap[i][j].d = 0;
         }
     for (i = 0; i <= 10; i++) {
-        D_AD56[i][0].a = 1;
-        D_AD56[0][i].a = 1;
-        D_AD56[10][i].a = 1;
-        D_AD56[i][10].a = 1;
+        dungmap[i][0].a = 1;
+        dungmap[0][i].a = 1;
+        dungmap[10][i].a = 1;
+        dungmap[i][10].a = 1;
     }
     for (i = 2; i <= 8; i += 2) {
-        D_AD56[i][2].a = 1;
-        D_AD56[i][4].a = 1;
-        D_AD56[i][6].a = 1;
-        D_AD56[i][8].a = 1;
+        dungmap[i][2].a = 1;
+        dungmap[i][4].a = 1;
+        dungmap[i][6].a = 1;
+        dungmap[i][8].a = 1;
     }
     for (i = 2; i <= 8; i += 2)
         for (j = 1; j <= 9; j++)
-            D_AD56[i][j].a = F_4069(1, 4) - 1;
-    m = D_AD50 << 1;
+            dungmap[i][j].a = rndrange(1, 4) - 1;
+    m = dunglvl << 1;
     k = 0;
     while (k <= m) {
-        if (F_4069(1, 255) > 160)
+        if (rndrange(1, 255) > 160)
             d = 8;
         else
             d = 1;
-        i = F_4069(1, 16) - 1;
-        if (D_AD50 & 1)
-            D_AD56[D_1DC8[38 + i]][D_1DC8[54 + i]].a = d;
+        i = rndrange(1, 16) - 1;
+        if (dunglvl & 1)
+            dungmap[dirtab[38 + i]][dirtab[54 + i]].a = d;
         else
-            D_AD56[D_1DC8[54 + i]][D_1DC8[38 + i]].a = d;
+            dungmap[dirtab[54 + i]][dirtab[38 + i]].a = d;
         k++;
     }
-    F_37FD(F_3EC4() + 0x6F1);
+    seedrnd(clockrnd() + 0x6F1);
     k = 0;
-    while (k <= D_AD50) {
-        d = (F_4069(1, 100) & 1) + 4;
-        i = F_4069(10, 99) / 10;
-        j = F_4069(10, 99) / 10;
-        if (D_AD56[i][j].a != 1 && D_AD56[i][j].a != 2 && D_AD56[i][j].a != 8)
-            D_AD56[i][j].c = d;
+    while (k <= dunglvl) {
+        d = (rndrange(1, 100) & 1) + 4;
+        i = rndrange(10, 99) / 10;
+        j = rndrange(10, 99) / 10;
+        if (dungmap[i][j].a != 1 && dungmap[i][j].a != 2 && dungmap[i][j].a != 8)
+            dungmap[i][j].c = d;
         k++;
     }
     D_ADBE = 0;
-    if (D_AD50 & 1) {
+    if (dunglvl & 1) {
         D_AFD6 = 7;
         D_AE96 = 6;
     } else {
         D_AFD6 = 6;
         D_AE96 = 7;
     }
-    if (D_AD50 == 10)
+    if (dunglvl == 10)
         D_AFD6 = 0;
-    if (D_AD50 == 1) {
+    if (dunglvl == 1) {
         D_ADB6 = 7;
         D_AFD6 = 0;
     }
     for (i = 0; i < 5; i++)
-        D_B11E[i] = 0;
-    F_4602();
-    F_4602();
-    F_4602();
+        dmontype[i] = 0;
+    dungmon();
+    dungmon();
+    dungmon();
 }
 
 /* Turn around command */
-F_4A38()
+cmdturna()
 {
-    F_3B46("Turn around");
-    switch (D_AD52) {
+    msgline("Turn around");
+    switch (dungdir) {
     case 3:
-        D_AD52 = 4;
+        dungdir = 4;
         break;
     case 4:
-        D_AD52 = 3;
+        dungdir = 3;
         break;
     case 2:
-        D_AD52 = 1;
+        dungdir = 1;
         break;
     case 1:
-        D_AD52 = 2;
+        dungdir = 2;
         break;
     }
 }
 
 /* Turn left command */
-F_4A82()
+cmdturnl()
 {
-    F_3B46("Turn left");
-    switch (D_AD52) {
+    msgline("Turn left");
+    switch (dungdir) {
     case 3:
-        D_AD52 = 1;
+        dungdir = 1;
         break;
     case 4:
-        D_AD52 = 2;
+        dungdir = 2;
         break;
     case 2:
-        D_AD52 = 3;
+        dungdir = 3;
         break;
     case 1:
-        D_AD52 = 4;
+        dungdir = 4;
         break;
     }
 }
 
 /* Turn right command */
-F_4ACC()
+cmdturnr()
 {
-    F_3B46("Turn right");
-    switch (D_AD52) {
+    msgline("Turn right");
+    switch (dungdir) {
     case 3:
-        D_AD52 = 2;
+        dungdir = 2;
         break;
     case 4:
-        D_AD52 = 1;
+        dungdir = 1;
         break;
     case 2:
-        D_AD52 = 4;
+        dungdir = 4;
         break;
     case 1:
-        D_AD52 = 3;
+        dungdir = 3;
         break;
     }
 }
 
 /* Forward command: step one square unless blocked */
-F_4B16()
+cmdfwd()
 {
     int dx, dy;
 
-    dx = F_3C8E();
-    dy = F_3CBB();
-    F_3599("Forward", D_2046);
-    if (F_3F7F_O(dx, dy) == 0) {
-        D_AD3E += dx;
-        D_AD40 += dy;
-        F_3B46(D_019B);
+    dx = facedx();
+    dy = facedy();
+    putstr("Forward", coltext);
+    if (walkdng(dx, dy) == 0) {
+        townx += dx;
+        towny += dy;
+        msgline(sempty);
     } else {
-        F_0476(0);
-        F_3B46(" - path blocked!");
+        playif(0);
+        msgline(" - path blocked!");
     }
 }
 
 /* dungeon command dispatch: 1 left, 2 right, 3 forward, 4 turn around */
-F_4B73(c)
+dungcmd(c)
 unsigned char c;
 {
     switch (c) {
     case 4:
-        F_4A38();
+        cmdturna();
         break;
     case 3:
-        F_4B16();
+        cmdfwd();
         break;
     case 1:
-        F_4A82();
+        cmdturnl();
         break;
     case 2:
-        F_4ACC();
+        cmdturnr();
         break;
     }
 }
 
 /* enter the first dungeon level (start state) */
-F_4BB0()
+startdng()
 {
-    D_204A = 3;
-    D_AD50 = D_AD3E = D_AD40 = 1;
-    D_AD52 = 4;
-    D_AD54 = 0;
-    F_4761();
+    gmode = 3;
+    dunglvl = townx = towny = 1;
+    dungdir = 4;
+    dungbon = 0;
+    mkdung();
 }
 
 /* princess rescued: rewards and the time-machine message */
-F_4BD6()
+princess()
 {
     int rx, ry, x, y, flg, cnt, off;
 
     off = cnt = 0;
-    flg = D_20FE >= 20 && D_207E >= 7000;
+    flg = plkills >= 20 && plexp >= 7000;
     if (!flg)
         off = 2;
-    F_21C2(D_0DA8);
-    F_21E7(5, off + 5, " Thou hast saved the princess");
-    F_21E7(5, off + 6, D_31CC[D_AD4A]);
-    F_3599(".  She giveth thee", D_2046);
-    F_21E7(8, off + 7, "500 hit points, pence and");
-    F_21E7(12, off + 8, "experience points.");
-    D_207C += 500;
-    D_206E[0] += 500;
-    D_207E += 500;
-    F_4558();
-    F_4437();
-    F_450D();
+    boxclr(colfill);
+    boxtext(5, off + 5, " Thou hast saved the princess");
+    boxtext(5, off + 6, princnam[castlenr]);
+    putstr(".  She giveth thee", coltext);
+    boxtext(8, off + 7, "500 hit points, pence and");
+    boxtext(12, off + 8, "experience points.");
+    plcoin += 500;
+    plstat[0] += 500;
+    plexp += 500;
+    showcoin();
+    showhp();
+    showexp();
     if (flg) {
-        F_21E7(5, 10, "  She informs thee that thou");
-        F_21E7(5, 11, "art now ready for time travel,");
-        F_21E7(5, 12, "    and that there is a time");
-        F_21E7(5, 13, " machine far to the northwest!");
-        if (D_3B1C < 9) {
-            D_3B1C++;
-            switch (F_40FE(D_3AAC, D_3AAE)) {
+        boxtext(5, 10, "  She informs thee that thou");
+        boxtext(5, 11, "art now ready for time travel,");
+        boxtext(5, 12, "    and that there is a time");
+        boxtext(5, 13, " machine far to the northwest!");
+        if (owntimem < 9) {
+            owntimem++;
+            switch (quadrant(worldx, worldy)) {
             case 0:
                 x = y = 0;
                 break;
@@ -912,804 +912,804 @@ F_4BD6()
                 break;
             }
             do {
-                rx = F_4069(12, 21);
-                ry = F_4069(11, 15);
-                if (F_C2AF(x + rx, y + ry, 1) == 2) {
+                rx = rndrange(12, 21);
+                ry = rndrange(11, 15);
+                if (objat(x + rx, y + ry, 1) == 2) {
                     cnt = 500;
-                    F_B502(18, 2, x + rx, y + ry, 0);
+                    addmon(18, 2, x + rx, y + ry, 0);
                 }
             } while (cnt++ < 499);
         }
     }
-    F_3E5E(5);
-    F_2141();
-    F_352C(1, 24);
+    waittick(5);
+    waitpoll();
+    gotoxy(1, 24);
 }
 
 /* enter a castle (c = 0x21..0x28): set up the level, player position */
-F_4DBF(c)
+entcastl(c)
 int c;
 {
-    D_AD4A = c - 33;
-    D_AD42 = (c - 1) % 2;
-    D_AD4C = D_AD4A + 1;
-    D_204A = 2;
-    F_20FC();
-    D_AD3E = 0;
-    D_AD40 = 9;
-    D_AD46 = 0;
-    D_8BA0 = 0;
-    D_8B9E = 0;
-    D_8BA4 = 0;
-    D_8BAE[D_AD42][35][(D_AD42 == 0) * 10 + 4] = 11;
-    D_8BAE[D_AD42][31][(D_AD42 == 0) * 10 + 4] = 11;
-    if (F_4069(1, 255) & 1)
-        D_AD4E = 61;
+    castlenr = c - 33;
+    townmap = (c - 1) % 2;
+    kingnr = castlenr + 1;
+    gmode = 2;
+    loadents();
+    townx = 0;
+    towny = 9;
+    hostile = 0;
+    hasjkey = 0;
+    doorunl = 0;
+    takeleft = 0;
+    tcdbin[townmap][35][(townmap == 0) * 10 + 4] = 11;
+    tcdbin[townmap][31][(townmap == 0) * 10 + 4] = 11;
+    if (rndrange(1, 255) & 1)
+        lockkey = 61;
     else
-        D_AD4E = 60;
+        lockkey = 60;
 }
 
 /* enter a town (c = 1..0x20): set up the level and position */
-F_4E63(c)
+enttown(c)
 int c;
 {
-    D_AD48 = 0;
-    D_AD42 = (c - 1) % 8 + 2;
-    D_204A = 1;
-    F_20FC();
-    D_AD3E = 19;
-    D_AD40 = 17;
-    F_2231();
-    D_204E = 0;
+    alesdrnk = 0;
+    townmap = (c - 1) % 8 + 2;
+    gmode = 1;
+    loadents();
+    townx = 19;
+    towny = 17;
+    drawlvl();
+    redraw = 0;
 }
 
 /* show the sign / inscription text for a place (c = 0..7) */
-F_4EA2(c)
+placetxt(c)
 unsigned c;
 {
-    F_21C2(D_0DA8);
+    boxclr(colfill);
     switch (c) {
     case 0:
-        F_21E7(8, 8, "You feel a strong magic");
-        F_21E7(12, 9, "surrounding you!");
+        boxtext(8, 8, "You feel a strong magic");
+        boxtext(12, 9, "surrounding you!");
         break;
     case 1:
-        F_21E7(10, 7, "You hear someone say,");
-        F_21E7(6, 9, " \"TURIS-SCIENTIA-MAGNOPERE\"");
+        boxtext(10, 7, "You hear someone say,");
+        boxtext(6, 9, " \"TURIS-SCIENTIA-MAGNOPERE\"");
         break;
     case 2:
-        F_21E7(13, 7, "A sign reads:");
-        F_21E7(8, 9, "\"FORTES FORTUNA ADIUVAT!\"");
+        boxtext(13, 7, "A sign reads:");
+        boxtext(8, 9, "\"FORTES FORTUNA ADIUVAT!\"");
         break;
     case 3:
-        F_21E7(13, 5, "On a pedestal,");
-        F_21E7(10, 6, "these words appear:");
-        F_21E7(8, 7, "\"MY NAME IS OZYMANDIAS,");
-        F_21E7(13, 8, "KING OF KINGS:");
-        F_21E7(11, 9, "LOOK AT MY WORKS,");
-        F_21E7(8, 10, "YE MIGHTY, AND DESPAIR!\"");
-        F_21E7(8, 12, "Nothing beside remains.");
-        F_21E7(7, 13, "You feel a strange force!");
+        boxtext(13, 5, "On a pedestal,");
+        boxtext(10, 6, "these words appear:");
+        boxtext(8, 7, "\"MY NAME IS OZYMANDIAS,");
+        boxtext(13, 8, "KING OF KINGS:");
+        boxtext(11, 9, "LOOK AT MY WORKS,");
+        boxtext(8, 10, "YE MIGHTY, AND DESPAIR!\"");
+        boxtext(8, 12, "Nothing beside remains.");
+        boxtext(7, 13, "You feel a strange force!");
         break;
     case 4:
-        F_21E7(12, 6, "The sign reads:");
-        F_21E7(12, 8, "\"ULTIMA THULE!\"");
-        F_21E7(7, 10, "The sky grows dark, and a");
-        F_21E7(7, 11, "strong magic engulfs you!");
+        boxtext(12, 6, "The sign reads:");
+        boxtext(12, 8, "\"ULTIMA THULE!\"");
+        boxtext(7, 10, "The sky grows dark, and a");
+        boxtext(7, 11, "strong magic engulfs you!");
         break;
     case 5:
-        F_21E7(12, 7, "The sign reads:");
-        F_21E7(11, 9, "\"OMNIA MUTANTUR!\"");
+        boxtext(12, 7, "The sign reads:");
+        boxtext(11, 9, "\"OMNIA MUTANTUR!\"");
         break;
     case 6:
-        F_21E7(12, 7, "The sign reads:");
-        F_21E7(9, 9, "\"GO EAST TO GO EAST!\"");
+        boxtext(12, 7, "The sign reads:");
+        boxtext(9, 9, "\"GO EAST TO GO EAST!\"");
         break;
     case 7:
-        F_21E7(10, 7, "The grave is marked:");
-        F_21E7(14, 9, "\"VAE VICTIS\"");
+        boxtext(10, 7, "The grave is marked:");
+        boxtext(14, 9, "\"VAE VICTIS\"");
         break;
     }
-    F_352C(1, 24);
+    gotoxy(1, 24);
 }
 
 /* first visit message "A quest has been completed!" for an odd place */
-F_5085(c)
+firstvis(c)
 int c;
 {
-    if (D_3AB2[8 - c] == -1) {
-        D_3AB2[8 - c] = 1;
-        F_3599("A quest has been completed!", D_2046);
-        F_0476(5);
-        F_3B46(D_019B);
+    if (plquest[8 - c] == -1) {
+        plquest[8 - c] = 1;
+        putstr("A quest has been completed!", coltext);
+        playif(5);
+        msgline(sempty);
     }
 }
 
 /* enter a sign/shrine place (c = 0x29..0x30): text, gifts, stat gain */
-F_50C6(c)
+monument(c)
 int c;
 {
     int v, hp, gain, ok;
 
     ok = 1;
     c -= 41;
-    F_4EA2(c);
+    placetxt(c);
     if (c & 1)
-        F_5085(c);
-    if (c == D_3B20)
+        firstvis(c);
+    if (c == lastmnmt)
         ok = 0;
     else {
-        D_3B20 = c;
-        v = D_3708[c];
+        lastmnmt = c;
+        v = mntattr[c];
         if (v == 0 && c == 2) {
             v = 0;
             do
                 v++;
-            while (D_20B8[v] != 0);
+            while (ownweap[v] != 0);
             if (v > 15)
                 ok = 0;
             else {
-                D_20B8[v]++;
-                F_3599("You find a", D_2046);
-                if (F_40A8(D_0DF8[v][0]))
-                    F_357C('n', D_2046);
-                F_357C(' ', D_2046);
-                F_3599(D_0D72[v], D_2046);
-                F_3599(D_018D, D_2046);
+                ownweap[v]++;
+                putstr("You find a", coltext);
+                if (isvowel(wnames[v][0]))
+                    putch('n', coltext);
+                putch(' ', coltext);
+                putstr(wnamelng[v], coltext);
+                putstr(sbang, coltext);
             }
         } else if (c != 6) {
-            hp = D_206E[v];
+            hp = plstat[v];
             if (hp == 99)
                 ok = 0;
             else {
                 gain = (hp + 8) / 10;
                 if (gain + hp > 99)
                     gain = 99 - hp;
-                F_3599("Thou dost gain ", D_2046);
-                F_3C8B(gain, 1, 32, D_2046, 1);
-                F_357C(' ', D_2046);
-                F_3599(D_0E9E[v], D_2046);
-                D_206E[v] += gain;
+                putstr("Thou dost gain ", coltext);
+                putnum(gain, 1, 32, coltext, 1);
+                putch(' ', coltext);
+                putstr(attrnam[v], coltext);
+                plstat[v] += gain;
             }
         }
     }
     if (c == 6)
         ok = 0;
     if (ok) {
-        F_2168(D_0DA6);
-        F_0476(5);
-        F_2168(D_0DA8);
+        drawfrm(colline);
+        playif(5);
+        drawfrm(colfill);
     } else if (c != 6) {
-        F_3599("Hmmmm...no effect!", D_2046);
-        F_0476(6);
+        putstr("Hmmmm...no effect!", coltext);
+        playif(6);
     }
-    F_2141();
+    waitpoll();
     if (c != 6)
-        F_3B46(D_019B);
+        msgline(sempty);
 }
 
 /* Enter command: enter the town/castle/dungeon/shrine at the player's spot */
-F_52AB()
+cmdenter()
 {
     int t, i, j, k;
 
-    F_3599("Enter", D_2046);
-    t = F_A3BA(D_3AAC, D_3AAE);
-    if (!t || D_204A) {
-        F_3B46(D_0235);
-        F_0476(1);
+    putstr("Enter", coltext);
+    t = placeat(worldx, worldy);
+    if (!t || gmode) {
+        msgline(squest);
+        playif(1);
     } else {
-        F_3B46("ing...");
-        D_AD46 = D_8B94 = D_8B96 = D_8B98 = 0;
-        D_204E = 1;
+        msgline("ing...");
+        hostile = nwater = ngrass = nwoods = 0;
+        redraw = 1;
         for (i = -1; i <= 1; i++)
             for (j = -1; j <= 1; j++) {
-                k = F_C2AF(D_3AAC + i, D_3AAE + j, 1);
+                k = objat(worldx + i, worldy + j, 1);
                 if (k == 0)
-                    D_8B94++;
+                    nwater++;
                 else if (k == 1)
-                    D_8B96++;
+                    ngrass++;
                 else if (k == 2)
-                    D_8B98++;
+                    nwoods++;
             }
-        D_8BA2 = t == 33;
+        isbrit = t == 33;
         if (t < 33)
-            F_3599("The city of ", D_2046);
-        F_3B46(D_307C[t]);
+            putstr("The city of ", coltext);
+        msgline(placenam[t]);
         if (t < 33)
-            F_4E63(t);
+            enttown(t);
         else if (t < 41)
-            F_4DBF(t);
+            entcastl(t);
         else if (t < 49)
-            F_50C6(t);
+            monument(t);
         else
-            F_4BB0(t);
+            startdng(t);
     }
 }
 
 /* Fire command (ship cannons / lasers) */
-F_53DA()
+cmdfire()
 {
-    if (D_204A == 1 || D_204A == 2 || D_204A == 3) {
-        F_3B46("Fire?");
-        F_0476(1);
+    if (gmode == 1 || gmode == 2 || gmode == 3) {
+        msgline("Fire?");
+        playif(1);
     } else {
-        F_3599("Fire ", D_2046);
-        if (D_2088 != 4 && D_2088 != 5) {
-            F_3B46("what?");
-            F_0476(1);
+        putstr("Fire ", coltext);
+        if (plveh != 4 && plveh != 5) {
+            msgline("what?");
+            playif(1);
         } else {
-            if (D_2088 == 4)
-                F_3599("cannons: ", D_2046);
+            if (plveh == 4)
+                putstr("cannons: ", coltext);
             else
-                F_3599("lasers: ", D_2046);
-            F_1072(-1, 8);
+                putstr("lasers: ", coltext);
+            aimshot(-1, 8);
         }
     }
 }
 
 /* ---- ou_5469 ---- */
 /* "not the king's permission" message and sound */
-F_5469()
+kingperm()
 {
-    F_3B46(D_019B);
-    F_3B46("Thou hast not the king's");
-    F_3B46("permission!");
-    F_0476(1);
+    msgline(sempty);
+    msgline("Thou hast not the king's");
+    msgline("permission!");
+    playif(1);
 }
 
-/* shop counter type 0x37: needs a turn counter, then F_5D34 (armour) */
-F_5492()
+/* shop counter type 0x37: needs a turn counter, then stealarm (armour) */
+cntrarm()
 {
-    if (D_8BA4 == 0)
-        F_5469();
+    if (takeleft == 0)
+        kingperm();
     else {
-        D_8BA4--;
-        F_5D34(0);
+        takeleft--;
+        stealarm(0);
     }
 }
 
-/* shop counter type 0x3B: F_5BFA (weapons) */
-F_54B5()
+/* shop counter type 0x3B: stealwpn (weapons) */
+cntrweap()
 {
-    if (D_8BA4 == 0)
-        F_5469();
+    if (takeleft == 0)
+        kingperm();
     else {
-        D_8BA4--;
-        F_5BFA(0);
+        takeleft--;
+        stealwpn(0);
     }
 }
 
-/* shop counter type 0x39: F_5CBA (food) */
-F_54D8()
+/* shop counter type 0x39: stealfod (food) */
+cntrfood()
 {
-    if (D_8BA4 == 0)
-        F_5469();
+    if (takeleft == 0)
+        kingperm();
     else {
-        D_8BA4--;
-        F_5CBA(0);
+        takeleft--;
+        stealfod(0);
     }
 }
 
 /* dispatch on the counter tile the player stands on */
-F_54FB()
+cntrdisp()
 {
     int c;
 
-    c = D_8BAE[D_AD42][D_AD3E][D_AD40];
+    c = tcdbin[townmap][townx][towny];
     switch (c) {
     case 0x39:
-        F_54D8();
+        cntrfood();
         break;
     case 0x37:
-        F_5492();
+        cntrarm();
         break;
     case 0x3B:
-        F_54B5();
+        cntrweap();
         break;
     default:
-        F_3B46(" - nothing here!");
+        msgline(" - nothing here!");
     }
 }
 
 /* Get command */
-F_5550()
+cmdget()
 {
-    F_3599("Get", D_2046);
-    if (D_204A == 2)
-        F_54FB();
+    putstr("Get", coltext);
+    if (gmode == 2)
+        cntrdisp();
     else {
-        if (D_204A == 1)
-            F_3599(" what", D_2046);
-        F_3B46(D_0235);
-        F_0476(1);
+        if (gmode == 1)
+            putstr(" what", coltext);
+        msgline(squest);
+        playif(1);
     }
 }
 
 /* HyperJump? message */
-F_559A()
+cmdhyper()
 {
-    F_3B46("HyperJump?");
-    F_0476(1);
+    msgline("HyperJump?");
+    playif(1);
 }
 
 /* dungeon: look at the cell in the facing direction (secret door -> ladder) */
-F_55B1()
+dunglook()
 {
     int a, dx, dy;
 
-    dx = F_3C8E();
-    dy = F_3CBB();
-    a = D_AD56[D_AD3E + dx][D_AD40 + dy].a;
-    F_3599("Thou dost find ", D_2046);
-    if (a == 2 && D_AD56[D_AD3E][D_AD40].a != 3) {
-        F_3B46("a secret door!");
-        D_AD56[D_AD3E + dx][D_AD40 + dy].a = 3;
+    dx = facedx();
+    dy = facedy();
+    a = dungmap[townx + dx][towny + dy].a;
+    putstr("Thou dost find ", coltext);
+    if (a == 2 && dungmap[townx][towny].a != 3) {
+        msgline("a secret door!");
+        dungmap[townx + dx][towny + dy].a = 3;
     } else
-        F_3B46(D_0220);
+        msgline(snothing);
 }
 
 /* Inform command: names the place you are on or looking at */
-F_564B()
+cmdinfo()
 {
     int m;
 
-    F_3B46("Inform and search");
-    if (D_204A == 3)
-        F_55B1();
+    msgline("Inform and search");
+    if (gmode == 3)
+        dunglook();
     else {
-        m = F_A3BA(D_3AAC, D_3AAE);
+        m = placeat(worldx, worldy);
         if (m) {
             if (m < 33)
-                F_3599("the city of ", D_2046);
-            F_3B46(D_307C[m]);
+                putstr("the city of ", coltext);
+            msgline(placenam[m]);
         } else {
-            m = F_A363(D_3AAC, D_3AAE);
+            m = terrain(worldx, worldy);
             if (m == 0)
-                F_3B46("You are at sea");
+                msgline("You are at sea");
             else if (m == 2)
-                F_3B46("You are in the woods");
+                msgline("You are in the woods");
             else {
-                F_3B46("You are in the lands");
-                F_3B46(D_3174[F_40FE(D_3AAC, D_3AAE)]);
+                msgline("You are in the lands");
+                msgline(landnam[quadrant(worldx, worldy)]);
             }
         }
     }
 }
 
 /* Climb up a dungeon ladder: out of the dungeon on level 0 (hit point bonus) */
-F_56F7()
+climbup()
 {
-    D_AD50--;
-    F_3599(" up to level ", D_2046);
-    F_3C8B(D_AD50, 1, ' ', D_2046, 1);
-    F_3B46(D_019B);
-    if (D_AD50 == 0) {
-        if (D_AD54 + D_206E[0] > 9999)
-            D_AD54 = 9999 - D_206E[0];
-        if (D_AD54) {
-            F_3599("Thou dost gain ", D_2046);
-            F_3C8B(D_AD54, 1, ' ', D_2046, 1);
-            F_3599(" hit ", D_2046);
-            if (D_AD54 > 999)
-                F_3B46(D_019B);
-            F_3B46("points");
-            D_206E[0] += D_AD54;
-            F_4437();
+    dunglvl--;
+    putstr(" up to level ", coltext);
+    putnum(dunglvl, 1, ' ', coltext, 1);
+    msgline(sempty);
+    if (dunglvl == 0) {
+        if (dungbon + plstat[0] > 9999)
+            dungbon = 9999 - plstat[0];
+        if (dungbon) {
+            putstr("Thou dost gain ", coltext);
+            putnum(dungbon, 1, ' ', coltext, 1);
+            putstr(" hit ", coltext);
+            if (dungbon > 999)
+                msgline(sempty);
+            msgline("points");
+            plstat[0] += dungbon;
+            showhp();
         }
-        D_204A = 0;
-        F_3C46();
-        F_3BF6();
+        gmode = 0;
+        topbar();
+        botbar();
     } else {
-        F_4761();
-        D_AD56[D_AD3E][D_AD40].b = -1;
+        mkdung();
+        dungmap[townx][towny].b = -1;
     }
 }
 
 /* Climb down a dungeon ladder */
-F_57DF()
+climbdwn()
 {
-    D_AD50++;
-    F_3599(" down to level ", D_2046);
-    F_3C8B(D_AD50, 1, ' ', D_2046, 1);
-    F_3B46(D_019B);
-    F_4761();
+    dunglvl++;
+    putstr(" down to level ", coltext);
+    putnum(dunglvl, 1, ' ', coltext, 1);
+    msgline(sempty);
+    mkdung();
 }
 
-char D_0CDC[] = "K-Limb";
-char D_0CE3[] = " what?";
-char D_0CEA[] = "Thou must face the ladder!";
+char sklimb[] = "K-Limb";
+char swhat[] = " what?";
+char sfacelad[] = "Thou must face the ladder!";
 /* K-Limb command (dungeon ladders only) */
-F_581A()
+cmdklimb()
 {
     unsigned char c;
 
-    F_3599(D_0CDC, D_2046);
-    if (D_204A != 3) {
-        F_3B46(D_0235);
-        F_0476(1);
+    putstr(sklimb, coltext);
+    if (gmode != 3) {
+        msgline(squest);
+        playif(1);
     } else {
-        c = D_AD56[D_AD3E][D_AD40].a;
+        c = dungmap[townx][towny].a;
         if (c != 7 && c != 6) {
-            F_3B46(D_0CE3);
-            F_0476(1);
-        } else if (D_AD52 == 2 || D_AD52 == 1) {
-            F_3B46(D_019B);
-            F_3B46(D_0CEA);
-            F_0476(1);
+            msgline(swhat);
+            playif(1);
+        } else if (dungdir == 2 || dungdir == 1) {
+            msgline(sempty);
+            msgline(sfacelad);
+            playif(1);
         } else if (c == 7)
-            F_56F7();
+            climbup();
         else
-            F_57DF();
+            climbdwn();
     }
 }
 
 /* Noise command: toggle sound */
-F_58BD()
+cmdnoise()
 {
-    F_3599("Noise ", D_2046);
-    if (D_3AB0 = !D_3AB0)
-        F_3B46("on");
+    putstr("Noise ", coltext);
+    if (plnoise = !plnoise)
+        msgline("on");
     else
-        F_3B46("off");
+        msgline("off");
 }
 
 /* put a chest-kept monster/treasure number at (x,y) in the dungeon level */
-F_58F8(x, y)
+chestmon(x, y)
 int x, y;
 {
     int t, r, n;
 
     n = 0;
-    t = D_AD56[x][y].a;
+    t = dungmap[x][y].a;
     if (t == 0 || t == 7 || t == 6) {
-        if (D_AD56[x][y].b == -1) {
+        if (dungmap[x][y].b == -1) {
             do {
-                t = F_4069(0, 49) / 10;
-            } while (D_B11E[t] && ++n < 50);
-            D_B11E[t] = 1;
-            r = (D_AD50 - 1) / 2 * 5 + t;
-            D_AD56[x][y].b = r;
-            D_AD56[x][y].d = F_4069(1, D_AD50 * D_AD50 + 1) + 10 + r;
+                t = rndrange(0, 49) / 10;
+            } while (dmontype[t] && ++n < 50);
+            dmontype[t] = 1;
+            r = (dunglvl - 1) / 2 * 5 + t;
+            dungmap[x][y].b = r;
+            dungmap[x][y].d = rndrange(1, dunglvl * dunglvl + 1) + 10 + r;
         }
     }
 }
 
-char D_0D13[] = "Open";
-char D_0D18[] = " coffin";
-char D_0D20[] = " - none here!";
+char sopen[] = "Open";
+char scoffin2[] = " coffin";
+char snonehr[] = " - none here!";
 /* Open coffin command (dungeon): monster or pence */
-F_59D7()
+cmdopen()
 {
     int x, y;
 
-    x = F_3C8E() + D_AD3E;
-    y = F_3CBB() + D_AD40;
-    F_3599(D_0D13, D_2046);
-    if (D_204A != 3) {
-        F_3B46(D_0235);
-        F_0476(1);
+    x = facedx() + townx;
+    y = facedy() + towny;
+    putstr(sopen, coltext);
+    if (gmode != 3) {
+        msgline(squest);
+        playif(1);
     } else {
-        F_3599(D_0D18, D_2046);
-        if (D_AD56[D_AD3E][D_AD40].c != 5) {
-            F_3B46(D_0D20);
-            F_0476(1);
+        putstr(scoffin2, coltext);
+        if (dungmap[townx][towny].c != 5) {
+            msgline(snonehr);
+            playif(1);
         } else {
-            F_3B46(D_019B);
-            if (F_4069(1, 255) < 104 && D_AD56[x][y].a != 1 && D_AD56[x][y].a != 2 && D_AD56[x][y].b == -1)
-                F_58F8(x, y);
+            msgline(sempty);
+            if (rndrange(1, 255) < 104 && dungmap[x][y].a != 1 && dungmap[x][y].a != 2 && dungmap[x][y].b == -1)
+                chestmon(x, y);
             else {
-                D_AD56[D_AD3E][D_AD40].c = 0;
-                F_3599(D_01C7, D_2046);
-                F_0761(F_4069(3, D_AD50 * D_AD50 + 9), 0);
+                dungmap[townx][towny].c = 0;
+                putstr(sfind, coltext);
+                givecoin(rndrange(3, dunglvl * dunglvl + 9), 0);
             }
         }
     }
 }
 
 /* save the game to the player file */
-F_5B0E()
+savegame()
 {
-    F_3599("saving game...", D_2046);
-    D_3B22 = D_8BA6;
-    D_3B24 = D_8BA8;
-    F_3E85(D_0180, (int)D_2058, 820);
-    F_3B46("saved.");
+    putstr("saving game...", coltext);
+    savlast = lastmon;
+    savturns = turns;
+    writfile(plfile, (int)plname, 820);
+    msgline("saved.");
 }
 
 /* Quit command (outdoors only) */
-F_5B54()
+cmdquit()
 {
-    F_3599("Quit - ", D_2046);
-    if (D_204A != 0) {
-        F_3B46("only allowed outdoors!");
-        F_0476(1);
+    putstr("Quit - ", coltext);
+    if (gmode != 0) {
+        msgline("only allowed outdoors!");
+        playif(1);
     } else
-        F_5B0E();
+        savegame();
 }
 
 /* did the thief get caught? (returns 1 if not caught) */
-F_5B8A()
+notcaugt()
 {
     int r, flag;
 
     flag = 0;
-    r = F_4069(1, 255);
-    if (D_AD46 || r < 38)
+    r = rndrange(1, 255);
+    if (hostile || r < 38)
         flag = 1;
-    if (!flag && D_206A == 3)
+    if (!flag && plclass == 3)
         return 0;
     if (!flag && r > 77)
         return 0;
-    F_3B46(D_019B);
-    F_3B46("Oh no!  Thou wert caught!");
-    return D_AD46 = 1;
+    msgline(sempty);
+    msgline("Oh no!  Thou wert caught!");
+    return hostile = 1;
 }
 
 /* steal a weapon (arg: check for being caught) */
-F_5BFA(chk)
+stealwpn(chk)
 int chk;
 {
     int i, r;
 
     r = 0;
     if (chk)
-        r = F_5B8A();
+        r = notcaugt();
     if (r == 0) {
-        F_3B46(D_019B);
-        F_3599("Thou dost find a", D_2046);
-        i = F_4069(1, 15);
-        if (F_40A8(D_0D72[i][0]))
-            F_357C('n', D_2046);
-        if (F_353A(D_0D72[i]) > 8)
-            F_3B46(D_019B);
+        msgline(sempty);
+        putstr("Thou dost find a", coltext);
+        i = rndrange(1, 15);
+        if (isvowel(wnamelng[i][0]))
+            putch('n', coltext);
+        if (strlen2(wnamelng[i]) > 8)
+            msgline(sempty);
         else
-            F_357C(' ', D_2046);
-        F_3B46(D_0D72[i]);
-        if (D_20B8[i] < 255)
-            D_20B8[i]++;
+            putch(' ', coltext);
+        msgline(wnamelng[i]);
+        if (ownweap[i] < 255)
+            ownweap[i]++;
     }
 }
 
 /* steal food */
-F_5CBA(chk)
+stealfod(chk)
 int chk;
 {
     int n, r;
 
     r = 0;
     if (chk)
-        r = F_5B8A();
+        r = notcaugt();
     if (r == 0) {
-        F_3B46(D_019B);
-        F_3599("Thou dost find ", D_2046);
-        n = F_4069(2, 31);
-        F_3C8B(n, 1, ' ', D_2046, 1);
-        F_3B46(" bags of");
-        F_3B46("food!");
-        D_2080 += n;
-        F_44A2();
+        msgline(sempty);
+        putstr("Thou dost find ", coltext);
+        n = rndrange(2, 31);
+        putnum(n, 1, ' ', coltext, 1);
+        msgline(" bags of");
+        msgline("food!");
+        plfood += n;
+        showfood();
     }
 }
 
 /* steal armour */
-F_5D34(chk)
+stealarm(chk)
 int chk;
 {
     int i, r;
 
     r = 0;
     if (chk)
-        r = F_5B8A();
+        r = notcaugt();
     if (r == 0) {
-        F_3B46(D_019B);
-        F_3599("Thou dost find ", D_2046);
-        i = F_4069(1, 5);
+        msgline(sempty);
+        putstr("Thou dost find ", coltext);
+        i = rndrange(1, 5);
         if (i > 4)
-            F_3599("a ", D_2046);
-        F_3B46(D_0F5C[i]);
-        if (D_20AC[i] < 255)
-            D_20AC[i]++;
+            putstr("a ", coltext);
+        msgline(armornam[i]);
+        if (ownarm[i] < 255)
+            ownarm[i]++;
     }
 }
 
 /* Steal command */
-F_5DB1()
+cmdsteal()
 {
     int c;
 
-    F_3599("Steal", D_2046);
-    if (D_204A != 1 && D_204A != 2) {
-        F_3B46(D_0235);
-        F_0476(1);
+    putstr("Steal", coltext);
+    if (gmode != 1 && gmode != 2) {
+        msgline(squest);
+        playif(1);
     } else {
-        c = D_8BAE[D_AD42][D_AD3E][D_AD40];
+        c = tcdbin[townmap][townx][towny];
         switch (c) {
         case 0x37:
-            F_5D34(1);
+            stealarm(1);
             break;
         case 0x3B:
-            F_5BFA(1);
+            stealwpn(1);
             break;
         case 0x39:
-            F_5CBA(1);
+            stealfod(1);
             break;
         default:
-            F_3B46(" - nothing here!");
-            F_0476(1);
+            msgline(" - nothing here!");
+            playif(1);
         }
     }
 }
 
 /* clear the shop message box */
-F_5E4F()
+clrshop()
 {
-    F_35CA(39, 48, 280, 120, 0);
+    fillrect(39, 48, 280, 120, 0);
 }
 
 /* "Sold!" message */
-F_5E6C()
+msgsold()
 {
-    F_5E4F();
-    F_21E7(18, 9, "Sold!");
-    F_2141();
+    clrshop();
+    boxtext(18, 9, "Sold!");
+    waitpoll();
 }
 
 /* "Done!" message */
-F_5E88()
+msgdone()
 {
-    F_5E4F();
-    F_21E7(18, 9, "Done!");
-    F_2141();
+    clrshop();
+    boxtext(18, 9, "Done!");
+    waitpoll();
 }
 
 /* "Thou canst not afford it!" message */
-F_5EA4()
+msgpoor()
 {
-    F_5E4F();
-    F_21E7(8, 9, "Thou canst not afford it!");
-    F_0476(1);
-    F_2141();
+    clrshop();
+    boxtext(8, 9, "Thou canst not afford it!");
+    playif(1);
+    waitpoll();
 }
 
 /* story pages 0-8 (tavern seduction, advice from the king / castle people) */
-F_5EC9(n)
+gossip(n)
 int n;
 {
-    F_5E4F();
+    clrshop();
     if (n)
-        F_21E7(11, 7, "Thou had best know");
+        boxtext(11, 7, "Thou had best know");
     switch (n) {
     case 0:
-        F_21E7(9, 8, "Thou hast been seduced!");
-        F_21E7(11, 10, "After a long night,");
-        F_21E7(13, 11, "thou art back.");
+        boxtext(9, 8, "Thou hast been seduced!");
+        boxtext(11, 10, "After a long night,");
+        boxtext(13, 11, "thou art back.");
         break;
     case 1:
-        F_21E7(10, 8, "about space travel!");
-        F_21E7(10, 9, "Thou must destroy at");
-        F_21E7(9, 10, "least 20 enemy vessels");
-        F_21E7(11, 11, "to become an ace!");
+        boxtext(10, 8, "about space travel!");
+        boxtext(10, 9, "Thou must destroy at");
+        boxtext(9, 10, "least 20 enemy vessels");
+        boxtext(11, 11, "to become an ace!");
         break;
     case 2:
-        F_21E7(11, 8, "to watch the ");
-        if (D_206C == 0)
-            F_3599("wench.", D_2046);
+        boxtext(11, 8, "to watch the ");
+        if (plsex == 0)
+            putstr("wench.", coltext);
         else
-            F_3599("lecher.", D_2046);
+            putstr("lecher.", coltext);
         break;
     case 3:
-        F_21E7(5, 8, " that the princess will give");
-        F_21E7(5, 9, " great reward to the one who");
-        F_21E7(5, 10, "rescues her, and an extra gift");
-        F_21E7(10, 11, "to an 8th level ace!");
+        boxtext(5, 8, " that the princess will give");
+        boxtext(5, 9, " great reward to the one who");
+        boxtext(5, 10, "rescues her, and an extra gift");
+        boxtext(10, 11, "to an 8th level ace!");
         break;
     case 4:
-        F_21E7(7, 8, "thou must go back in time.");
+        boxtext(7, 8, "thou must go back in time.");
         break;
     case 5:
-        F_21E7(10, 8, "thou should destroy");
-        F_21E7(13, 9, "the evil gem!");
+        boxtext(10, 8, "thou should destroy");
+        boxtext(13, 9, "the evil gem!");
         break;
     case 6:
-        F_21E7(5, 8, "   that many lakes and ponds");
-        F_21E7(5, 9, "  have strong magical powers!");
+        boxtext(5, 8, "   that many lakes and ponds");
+        boxtext(5, 9, "  have strong magical powers!");
         break;
     case 7:
-        F_21E7(10, 8, "this is a great game!");
+        boxtext(10, 8, "this is a great game!");
         break;
     case 8:
-        F_21E7(5, 8, "   that over 1000 years ago,");
-        F_21E7(5, 9, "Mondain the Wizard created an");
-        F_21E7(5, 10, " evil gem.  With this gem, he");
-        F_21E7(5, 11, "   is immortal and cannot be");
-        F_21E7(15, 12, "defeated.");
-        while (!F_413C(0))
+        boxtext(5, 8, "   that over 1000 years ago,");
+        boxtext(5, 9, "Mondain the Wizard created an");
+        boxtext(5, 10, " evil gem.  With this gem, he");
+        boxtext(5, 11, "   is immortal and cannot be");
+        boxtext(15, 12, "defeated.");
+        while (!getkey(0))
             ;
-        F_5E4F();
-        F_21E7(5, 7, "The quest of --Ultima-- is to");
-        F_21E7(5, 8, " traverse the lands in search");
-        F_21E7(8, 9, "of a time machine.  Upon");
-        F_21E7(5, 10, " finding such a device, thou");
-        F_21E7(5, 11, "should go back in time to the");
-        F_21E7(5, 12, " days before Mondain created");
-        F_21E7(5, 13, "the evil gem and destroy him!");
-        while (!F_413C(0))
+        clrshop();
+        boxtext(5, 7, "The quest of --Ultima-- is to");
+        boxtext(5, 8, " traverse the lands in search");
+        boxtext(8, 9, "of a time machine.  Upon");
+        boxtext(5, 10, " finding such a device, thou");
+        boxtext(5, 11, "should go back in time to the");
+        boxtext(5, 12, " days before Mondain created");
+        boxtext(5, 13, "the evil gem and destroy him!");
+        while (!getkey(0))
             ;
     }
     if (n != 8)
-        F_2141();
+        waitpoll();
 }
 
 /* is the cell at offset (dx,dy) from the player a type-50 entity? */
-F_616F(dx, dy)
+isent50(dx, dy)
 int dx, dy;
 {
-    return F_2355(D_AD3E + dx, D_AD40 + dy) == 50;
+    return whatat(townx + dx, towny + dy) == 50;
 }
 
 /* is a type-50 entity adjacent (8 directions)? */
-F_619C()
+ent50nr()
 {
-    return F_616F(1, 1) || F_616F(1, 0) || F_616F(1, -1) || F_616F(0, 1) ||
-           F_616F(0, -1) || F_616F(-1, 1) || F_616F(-1, 0) || F_616F(-1, -1);
+    return isent50(1, 1) || isent50(1, 0) || isent50(1, -1) || isent50(0, 1) ||
+           isent50(0, -1) || isent50(-1, 1) || isent50(-1, 0) || isent50(-1, -1);
 }
 
 /* tavern: order ale (arg 'B') or refuse */
-F_622C(a)
+tavern(a)
 char a;
 {
     int r;
 
-    r = F_32F8(D_AD42 - 2);
+    r = signpub(townmap - 2);
     if (a == 'B') {
-        if (D_207C == 0) {
-            F_21E7(12, r + 1, "Thou art broke!");
-            F_21E7(8, r + 4, "Come back when thou hast");
-            F_21E7(10, r + 5, "some money to spend.");
-            F_2141();
-            F_352C(15, 24);
-            F_3599(D_0220, D_2046);
+        if (plcoin == 0) {
+            boxtext(12, r + 1, "Thou art broke!");
+            boxtext(8, r + 4, "Come back when thou hast");
+            boxtext(10, r + 5, "some money to spend.");
+            waitpoll();
+            gotoxy(15, 24);
+            putstr(snothing, coltext);
         } else {
-            D_207C--;
-            F_4558();
-            F_21E7(8, r + 1, "The tavern keeper sayeth:");
-            F_21E7(9, r + 4, "Here, have a cold one!");
-            F_352C(15, 24);
-            F_3599("ale", D_2046);
-            D_AD48++;
-            F_2141();
-            if (D_AD48 > D_3A94 / 4 && F_619C()) {
-                F_5EC9(0);
-                D_207C = D_207C / 2;
-                F_4558();
-                D_3A98--;
-                if (D_3A98 == 4)
-                    D_3A98++;
+            plcoin--;
+            showcoin();
+            boxtext(8, r + 1, "The tavern keeper sayeth:");
+            boxtext(9, r + 4, "Here, have a cold one!");
+            gotoxy(15, 24);
+            putstr("ale", coltext);
+            alesdrnk++;
+            waitpoll();
+            if (alesdrnk > plsta / 4 && ent50nr()) {
+                gossip(0);
+                plcoin = plcoin / 2;
+                showcoin();
+                plwis--;
+                if (plwis == 4)
+                    plwis++;
             }
-            if (F_4069(1, 255) < 75)
-                F_5EC9(F_4069(11, 89) / 10);
+            if (rndrange(1, 255) < 75)
+                gossip(rndrange(11, 89) / 10);
         }
     } else {
-        F_21E7(8, r + 2, "We have plenty of booze");
-        F_21E7(17, r + 3, "already!");
-        F_2141();
-        F_352C(16, 24);
-        F_3599(D_0220, D_2046);
+        boxtext(8, r + 2, "We have plenty of booze");
+        boxtext(17, r + 3, "already!");
+        waitpoll();
+        gotoxy(16, 24);
+        putstr(snothing, coltext);
     }
-    F_3B46(D_019B);
+    msgline(sempty);
 }
 
-/* armour/weapon buying price for item n (charisma D_3A9A) */
-F_63B3(n)
+/* armour/weapon buying price for item n (charisma plint) */
+buyprice(n)
 int n;
 {
-    return (255 - D_3A9A) * n * n / 256 + 5;
+    return (255 - plint) * n * n / 256 + 5;
 }
 
-/* selling price for item n (D_3A96) */
-F_63D4(n)
+/* selling price for item n (plcha) */
+sellpric(n)
 int n;
 {
-    return (D_3A96 + 40) * n * n / 256 + 1;
+    return (plcha + 40) * n * n / 256 + 1;
 }

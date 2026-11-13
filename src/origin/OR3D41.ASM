@@ -13,17 +13,17 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_07F2:BYTE
-	EXTRN	D_07F4:BYTE
-	EXTRN	D_084A:BYTE
+	EXTRN	penx:BYTE
+	EXTRN	peny:BYTE
+	EXTRN	rowtab:BYTE
 DATA	ENDS
-	PUBLIC	F_3D41,F_3D47,F_3D61,D_080A,D_082A,D_082C
-	PUBLIC	D_082E,D_0830
+	PUBLIC	pixel,pixelpen,F_3D61,D_080A,wrflag,vidmode
+	PUBLIC	D_082E,vidmarg
 
 PROG	SEGMENT
-F_3D41:
-	MOV	WORD PTR D_082A, 1                  ; 3D41 C7 06 2A 08 01 00
-F_3D47:
+pixel:
+	MOV	WORD PTR wrflag, 1                  ; 3D41 C7 06 2A 08 01 00
+pixelpen:
 	PUSH	BP                                 ; 3D47 55
 	MOV	BP, SP                              ; 3D48 8B EC
 	PUSH	SI                                 ; 3D4A 56
@@ -33,23 +33,23 @@ F_3D47:
 	MOV	SI, WORD PTR [BP+4]                 ; 3D4E 8B 76 04
 	MOV	DI, WORD PTR [BP+6]                 ; 3D51 8B 7E 06
 	MOV	DX, WORD PTR [BP+8]                 ; 3D54 8B 56 08
-	MOV	WORD PTR D_07F2, SI                 ; 3D57 89 36 F2 07
-	MOV	WORD PTR D_07F4, DI                 ; 3D5B 89 3E F4 07
+	MOV	WORD PTR penx, SI                 ; 3D57 89 36 F2 07
+	MOV	WORD PTR peny, DI                 ; 3D5B 89 3E F4 07
 	JMP	SHORT L_3D68                        ; 3D5F EB 07
 F_3D61:
-	MOV	WORD PTR D_082A, 0                  ; 3D61 C7 06 2A 08 00 00
+	MOV	WORD PTR wrflag, 0                  ; 3D61 C7 06 2A 08 00 00
 	PUSH	ES                                 ; 3D67 06
 L_3D68:
-	CMP	WORD PTR D_082C, 0                  ; 3D68 83 3E 2C 08 00
+	CMP	WORD PTR vidmode, 0                  ; 3D68 83 3E 2C 08 00
 	JE	L_3D79                               ; 3D6D 74 0A
-	CMP	WORD PTR D_082C, 2                  ; 3D6F 83 3E 2C 08 02
+	CMP	WORD PTR vidmode, 2                  ; 3D6F 83 3E 2C 08 02
 	JE	L_3DAB                               ; 3D74 74 35
 	JMP	SHORT L_3DEA                        ; 3D76 EB 72
 	DB	90H	; 3D78
 L_3D79:
 	AND	DX, 3                               ; 3D79 81 E2 03 00
 	SHL	DI, 1                               ; 3D7D D1 E7
-	MOV	BX, WORD PTR D_084A[DI]             ; 3D7F 8B 9D 4A 08
+	MOV	BX, WORD PTR rowtab[DI]             ; 3D7F 8B 9D 4A 08
 	MOV	AX, 0B800H                          ; 3D83 B8 00 B8
 	MOV	ES, AX                              ; 3D86 8E C0
 	MOV	AX, SI                              ; 3D88 8B C6
@@ -70,7 +70,7 @@ L_3D79:
 L_3DAB:
 	AND	DX, 0FH                             ; 3DAB 81 E2 0F 00
 	SHL	DI, 1                               ; 3DAF D1 E7
-	MOV	BX, WORD PTR D_084A[DI]             ; 3DB1 8B 9D 4A 08
+	MOV	BX, WORD PTR rowtab[DI]             ; 3DB1 8B 9D 4A 08
 	MOV	AX, 0B800H                          ; 3DB5 B8 00 B8
 	MOV	ES, AX                              ; 3DB8 8E C0
 	SHR	SI, 1                               ; 3DBA D1 EE
@@ -101,7 +101,7 @@ L_3DEA:
 	PUSH	DX                                 ; 3DEE 52
 	MOV	BX, DI                              ; 3DEF 8B DF
 	SHL	BX, 1                               ; 3DF1 D1 E3
-	MOV	BX, WORD PTR D_084A[BX]             ; 3DF3 8B 9F 4A 08
+	MOV	BX, WORD PTR rowtab[BX]             ; 3DF3 8B 9F 4A 08
 	MOV	DX, 0A000H                          ; 3DF7 BA 00 A0
 	MOV	ES, DX                              ; 3DFA 8E C2
 	MOV	CX, SI                              ; 3DFC 8B CE
@@ -144,7 +144,7 @@ L_3DEA:
 	MOV	AL, 0FFH                            ; 3E4A B0 FF
 	OUT	DX, AL                              ; 3E4C EE
 L_3E4D:
-	CMP	WORD PTR D_082A, 1                  ; 3E4D 83 3E 2A 08 01
+	CMP	WORD PTR wrflag, 1                  ; 3E4D 83 3E 2A 08 01
 	JE	L_3E56                               ; 3E52 74 02
 	POP	ES                                  ; 3E54 07
 	RET                                     ; 3E55 C3
@@ -161,10 +161,10 @@ DATA	SEGMENT
 D_080A	DB	3FH,0,3FH,40H,3FH,80H,3FH,0C0H,0CFH,0,0CFH,10H	; 080A
 	DB	0CFH,20H,0CFH,30H,0F3H,0,0F3H,4,0F3H,8,0F3H,0CH	; 0816
 	DB	0FCH,0,0FCH,1,0FCH,2,0FCH,3	; 0822
-D_082A	DB	0,0	; 082A
-D_082C	DB	0,0	; 082C
+wrflag	DB	0,0	; 082A
+vidmode	DB	0,0	; 082C
 D_082E	DB	0,0	; 082E
-D_0830	DB	0,0	; 0830
+vidmarg	DB	0,0	; 0830
 DATA	ENDS
 
 	END

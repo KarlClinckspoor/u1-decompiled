@@ -12,10 +12,10 @@ UDATA	ENDS
 DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
-	PUBLIC	F_3CF1,D_0AA0
+	PUBLIC	vwait,D_0AA0
 
 PROG	SEGMENT
-F_3CF1:
+vwait:
 	PUSH	BP                                 ; 3CF1 55
 	MOV	BP, SP                              ; 3CF2 8B EC
 	PUSH	SI                                 ; 3CF4 56

@@ -12,10 +12,10 @@ UDATA	ENDS
 DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
-	PUBLIC	F_3F62,D_0836
+	PUBLIC	playsnd,sndtab
 
 PROG	SEGMENT
-F_3F62:
+playsnd:
 	PUSH	BP                                 ; 3F62 55
 	MOV	BP, SP                              ; 3F63 8B EC
 	PUSH	SI                                 ; 3F65 56
@@ -26,7 +26,7 @@ F_3F62:
 	CMP	BX, 9                               ; 3F6C 83 FB 09
 	JA	L_3F77                               ; 3F6F 77 06
 	SHL	BX, 1                               ; 3F71 D1 E3
-	CALL	WORD PTR D_0836[BX]                ; 3F73 FF 97 36 08
+	CALL	WORD PTR sndtab[BX]                ; 3F73 FF 97 36 08
 L_3F77:
 	POP	ES                                  ; 3F77 07
 	POP	DS                                  ; 3F78 1F
@@ -34,7 +34,7 @@ L_3F77:
 	POP	SI                                  ; 3F7A 5E
 	POP	BP                                  ; 3F7B 5D
 	RET	2                                   ; 3F7C C2 02 00
-F_3F7F:
+sndbuzz:
 	IN	AL, 61H                              ; 3F7F E4 61
 	PUSH	AX                                 ; 3F81 50
 	AND	AL, 0FCH                            ; 3F82 24 FC
@@ -50,7 +50,7 @@ L_3F8E:
 	POP	AX                                  ; 3F93 58
 	OUT	61H, AL                             ; 3F94 E6 61
 	RET                                     ; 3F96 C3
-F_3F97:
+sndbeep:
 	IN	AL, 61H                              ; 3F97 E4 61
 	PUSH	AX                                 ; 3F99 50
 	AND	AL, 0FCH                            ; 3F9A 24 FC
@@ -70,17 +70,17 @@ L_3FA9:
 	POP	AX                                  ; 3FB1 58
 	OUT	61H, AL                             ; 3FB2 E6 61
 	RET                                     ; 3FB4 C3
-F_3FB5:
+sndhit:
 	XOR	BH, BH                              ; 3FB5 32 FF
 	MOV	BL, 0C8H                            ; 3FB7 B3 C8
 	JMP	SHORT L_3FC7                        ; 3FB9 EB 0C
 	DB	90H	; 3FBB
-F_3FBC:
+sndmatk:
 	MOV	BH, 7FH                             ; 3FBC B7 7F
 	MOV	BL, 0FFH                            ; 3FBE B3 FF
 	JMP	SHORT L_3FC7                        ; 3FC0 EB 05
 	DB	90H	; 3FC2
-F_3FC3:
+sndstep:
 	XOR	BH, BH                              ; 3FC3 32 FF
 	MOV	BL, 8                               ; 3FC5 B3 08
 L_3FC7:
@@ -101,12 +101,12 @@ L_3FD3:
 	POP	AX                                  ; 3FDF 58
 	OUT	61H, AL                             ; 3FE0 E6 61
 	RET                                     ; 3FE2 C3
-F_3FE3:
+sndmagic:
 	MOV	BL, 0C0H                            ; 3FE3 B3 C0
 	MOV	BH, 3CH                             ; 3FE5 B7 3C
 	JMP	SHORT L_4008                        ; 3FE7 EB 1F
 	DB	90H	; 3FE9
-F_3FEA:
+sndfail:
 	IN	AL, 61H                              ; 3FEA E4 61
 	PUSH	AX                                 ; 3FEC 50
 	AND	AL, 0FCH                            ; 3FED 24 FC
@@ -124,7 +124,7 @@ L_3FF5:
 	POP	AX                                  ; 4000 58
 	OUT	61H, AL                             ; 4001 E6 61
 	RET                                     ; 4003 C3
-F_4004:
+sndweap:
 	MOV	BL, 5                               ; 4004 B3 05
 	MOV	BH, 0FH                             ; 4006 B7 0F
 L_4008:
@@ -157,7 +157,7 @@ L_401F:
 	POP	AX                                  ; 4034 58
 	OUT	61H, AL                             ; 4035 E6 61
 	RET                                     ; 4037 C3
-F_4038:
+sndlaser:
 	IN	AL, 61H                              ; 4038 E4 61
 	PUSH	AX                                 ; 403A 50
 	AND	AL, 0FCH                            ; 403B 24 FC
@@ -174,7 +174,7 @@ L_4045:
 	POP	AX                                  ; 404D 58
 	OUT	61H, AL                             ; 404E E6 61
 	RET                                     ; 4050 C3
-F_4051:
+sndhum:
 	XOR	BH, BH                              ; 4051 32 FF
 	MOV	BL, 4                               ; 4053 B3 04
 	IN	AL, 61H                              ; 4055 E4 61
@@ -197,8 +197,8 @@ L_4061:
 PROG	ENDS
 
 DATA	SEGMENT
-D_0836	DW	F_3F7F,F_3F97,F_3FB5,F_3FBC,F_3FC3	; 0836 sound routines, called by F_3F62
-	DW	F_3FE3,F_3FEA,F_4004,F_4038,F_4051
+sndtab	DW	sndbuzz,sndbeep,sndhit,sndmatk,sndstep	; 0836 sound routines, called by playsnd
+	DW	sndmagic,sndfail,sndweap,sndlaser,sndhum
 DATA	ENDS
 
 	END

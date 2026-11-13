@@ -13,52 +13,52 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_3AAC:BYTE
-	EXTRN	D_3AAE:BYTE
-	EXTRN	D_3B2C:BYTE
-	EXTRN	D_3B2E:BYTE
-	EXTRN	D_3B30:BYTE
-	EXTRN	D_3B32:BYTE
-	EXTRN	D_3B34:BYTE
-	EXTRN	D_8BA6:BYTE
+	EXTRN	worldx:BYTE
+	EXTRN	worldy:BYTE
+	EXTRN	objtab:BYTE
+	EXTRN	objterr:BYTE
+	EXTRN	objx:BYTE
+	EXTRN	objy:BYTE
+	EXTRN	objhp0:BYTE
+	EXTRN	lastmon:BYTE
 DATA	ENDS
 PROG	SEGMENT
-	EXTRN	F_A363:NEAR
-	EXTRN	F_C2EC:NEAR
-	EXTRN	F_C31C:NEAR
+	EXTRN	terrain:NEAR
+	EXTRN	viewx:NEAR
+	EXTRN	viewy:NEAR
 PROG	ENDS
-	PUBLIC	F_B502,F_B545,F_B58E,F_B5E1,F_B617,F_B64D
-	PUBLIC	F_B665,F_B6F0,F_B70F,F_B79A,F_B7CD,F_B852
-	PUBLIC	F_B884
+	PUBLIC	addmon,findmon,delmon,cntmon,cntveh,stepn
+	PUBLIC	scrolln,steps,scrolls,stepe,scrolle,stepw
+	PUBLIC	scrollw
 
 PROG	SEGMENT
-F_B502:
+addmon:
 	PUSH	BP                                 ; B502 55
 	SUB	SP, 4                               ; B503 83 EC 04
 	MOV	BP, SP                              ; B506 8B EC
-	MOV	AX, WORD PTR D_8BA6                 ; B508 A1 A6 8B
+	MOV	AX, WORD PTR lastmon                 ; B508 A1 A6 8B
 	CMP	AX, 27H                             ; B50B 3D 27 00
 	JGE	L_B540                              ; B50E 7D 30
-	INC	WORD PTR D_8BA6                     ; B510 FF 06 A6 8B
+	INC	WORD PTR lastmon                     ; B510 FF 06 A6 8B
 	MOV	CL, 4                               ; B514 B1 04
-	MOV	AX, WORD PTR D_8BA6                 ; B516 A1 A6 8B
+	MOV	AX, WORD PTR lastmon                 ; B516 A1 A6 8B
 	SHL	AX, CL                              ; B519 D3 E0
 	MOV	SI, AX                              ; B51B 8B F0
 	MOV	BX, WORD PTR [BP+8]                 ; B51D 8B 5E 08
-	MOV	WORD PTR D_3B2C[SI], BX             ; B520 89 9C 2C 3B
+	MOV	WORD PTR objtab[SI], BX             ; B520 89 9C 2C 3B
 	MOV	BX, WORD PTR [BP+0AH]               ; B524 8B 5E 0A
-	MOV	WORD PTR D_3B2E[SI], BX             ; B527 89 9C 2E 3B
+	MOV	WORD PTR objterr[SI], BX             ; B527 89 9C 2E 3B
 	MOV	BX, WORD PTR [BP+0CH]               ; B52B 8B 5E 0C
-	MOV	WORD PTR D_3B30[SI], BX             ; B52E 89 9C 30 3B
+	MOV	WORD PTR objx[SI], BX             ; B52E 89 9C 30 3B
 	MOV	BX, WORD PTR [BP+0EH]               ; B532 8B 5E 0E
-	MOV	WORD PTR D_3B32[SI], BX             ; B535 89 9C 32 3B
+	MOV	WORD PTR objy[SI], BX             ; B535 89 9C 32 3B
 	MOV	AX, WORD PTR [BP+10H]               ; B539 8B 46 10
-	MOV	WORD PTR D_3B34[SI], AX             ; B53C 89 84 34 3B
+	MOV	WORD PTR objhp0[SI], AX             ; B53C 89 84 34 3B
 L_B540:
 	ADD	SP, 4                               ; B540 83 C4 04
 	POP	BP                                  ; B543 5D
 	RET                                     ; B544 C3
-F_B545:
+findmon:
 	PUSH	BP                                 ; B545 55
 	SUB	SP, 6                               ; B546 83 EC 06
 	MOV	BP, SP                              ; B549 8B EC
@@ -67,15 +67,15 @@ L_B550:
 	CMP	WORD PTR [BP+4], 0                  ; B550 83 7E 04 00
 	JNE	L_B583                              ; B554 75 2D
 	MOV	AX, WORD PTR [BP+0EH]               ; B556 8B 46 0E
-	CMP	AX, WORD PTR D_8BA6                 ; B559 3B 06 A6 8B
+	CMP	AX, WORD PTR lastmon                 ; B559 3B 06 A6 8B
 	JG	L_B583                               ; B55D 7F 24
 	MOV	CL, 4                               ; B55F B1 04
 	SHL	AX, CL                              ; B561 D3 E0
 	MOV	SI, AX                              ; B563 8B F0
-	MOV	BX, WORD PTR D_3B30[SI]             ; B565 8B 9C 30 3B
+	MOV	BX, WORD PTR objx[SI]             ; B565 8B 9C 30 3B
 	CMP	BX, WORD PTR [BP+0AH]               ; B569 3B 5E 0A
 	JNE	L_B57E                              ; B56C 75 10
-	MOV	AX, WORD PTR D_3B32[SI]             ; B56E 8B 84 32 3B
+	MOV	AX, WORD PTR objy[SI]             ; B56E 8B 84 32 3B
 	CMP	AX, WORD PTR [BP+0CH]               ; B572 3B 46 0C
 	JNE	L_B57E                              ; B575 75 07
 	MOV	AX, WORD PTR [BP+0EH]               ; B577 8B 46 0E
@@ -90,7 +90,7 @@ L_B583:
 	ADD	SP, 6                               ; B589 83 C4 06
 	POP	BP                                  ; B58C 5D
 	RET                                     ; B58D C3
-F_B58E:
+delmon:
 	PUSH	BP                                 ; B58E 55
 	SUB	SP, 0AH                             ; B58F 83 EC 0A
 	MOV	BP, SP                              ; B592 8B EC
@@ -98,7 +98,7 @@ F_B58E:
 	PUSH	AX                                 ; B597 50
 	PUSH	WORD PTR [BP+10H]                  ; B598 FF 76 10
 	PUSH	WORD PTR [BP+0EH]                  ; B59B FF 76 0E
-	CALL	F_B545                             ; B59E E8 A4 FF
+	CALL	findmon                             ; B59E E8 A4 FF
 	MOV	SP, BP                              ; B5A1 8B E5
 	TEST	AX, AX                             ; B5A3 85 C0
 	MOV	WORD PTR [BP+6], AX                 ; B5A5 89 46 06
@@ -106,7 +106,7 @@ F_B58E:
 	MOV	WORD PTR [BP+8], AX                 ; B5AA 89 46 08
 L_B5AD:
 	MOV	AX, WORD PTR [BP+8]                 ; B5AD 8B 46 08
-	MOV	BX, WORD PTR D_8BA6                 ; B5B0 8B 1E A6 8B
+	MOV	BX, WORD PTR lastmon                 ; B5B0 8B 1E A6 8B
 	CMP	BX, AX                              ; B5B4 3B D8
 	JLE	L_B5D8                              ; B5B6 7E 20
 	MOV	CL, 4                               ; B5B8 B1 04
@@ -123,12 +123,12 @@ L_B5AD:
 	INC	WORD PTR [BP+8]                     ; B5D3 FF 46 08
 	JMP	SHORT L_B5AD                        ; B5D6 EB D5
 L_B5D8:
-	DEC	WORD PTR D_8BA6                     ; B5D8 FF 0E A6 8B
+	DEC	WORD PTR lastmon                     ; B5D8 FF 0E A6 8B
 L_B5DC:
 	ADD	SP, 0AH                             ; B5DC 83 C4 0A
 	POP	BP                                  ; B5DF 5D
 	RET                                     ; B5E0 C3
-F_B5E1:
+cntmon:
 	PUSH	BP                                 ; B5E1 55
 	SUB	SP, 6                               ; B5E2 83 EC 06
 	MOV	BP, SP                              ; B5E5 8B EC
@@ -137,13 +137,13 @@ F_B5E1:
 	MOV	WORD PTR [BP+4], AX                 ; B5EC 89 46 04
 L_B5EF:
 	MOV	AX, WORD PTR [BP+2]                 ; B5EF 8B 46 02
-	MOV	BX, WORD PTR D_8BA6                 ; B5F2 8B 1E A6 8B
+	MOV	BX, WORD PTR lastmon                 ; B5F2 8B 1E A6 8B
 	CMP	BX, AX                              ; B5F6 3B D8
 	JL	L_B60F                               ; B5F8 7C 15
 	MOV	CL, 4                               ; B5FA B1 04
 	SHL	AX, CL                              ; B5FC D3 E0
 	MOV	SI, AX                              ; B5FE 8B F0
-	CMP	WORD PTR D_3B2C[SI], 13H            ; B600 83 BC 2C 3B 13
+	CMP	WORD PTR objtab[SI], 13H            ; B600 83 BC 2C 3B 13
 	JL	L_B60A                               ; B605 7C 03
 	INC	WORD PTR [BP+4]                     ; B607 FF 46 04
 L_B60A:
@@ -154,7 +154,7 @@ L_B60F:
 	ADD	SP, 6                               ; B612 83 C4 06
 	POP	BP                                  ; B615 5D
 	RET                                     ; B616 C3
-F_B617:
+cntveh:
 	PUSH	BP                                 ; B617 55
 	SUB	SP, 6                               ; B618 83 EC 06
 	MOV	BP, SP                              ; B61B 8B EC
@@ -163,13 +163,13 @@ F_B617:
 	MOV	WORD PTR [BP+4], AX                 ; B622 89 46 04
 L_B625:
 	MOV	AX, WORD PTR [BP+2]                 ; B625 8B 46 02
-	MOV	BX, WORD PTR D_8BA6                 ; B628 8B 1E A6 8B
+	MOV	BX, WORD PTR lastmon                 ; B628 8B 1E A6 8B
 	CMP	BX, AX                              ; B62C 3B D8
 	JL	L_B645                               ; B62E 7C 15
 	MOV	CL, 4                               ; B630 B1 04
 	SHL	AX, CL                              ; B632 D3 E0
 	MOV	SI, AX                              ; B634 8B F0
-	CMP	WORD PTR D_3B2C[SI], 11H            ; B636 83 BC 2C 3B 11
+	CMP	WORD PTR objtab[SI], 11H            ; B636 83 BC 2C 3B 11
 	JG	L_B640                               ; B63B 7F 03
 	INC	WORD PTR [BP+4]                     ; B63D FF 46 04
 L_B640:
@@ -180,24 +180,24 @@ L_B645:
 	ADD	SP, 6                               ; B648 83 C4 06
 	POP	BP                                  ; B64B 5D
 	RET                                     ; B64C C3
-F_B64D:
+stepn:
 	PUSH	BP                                 ; B64D 55
 	MOV	BP, SP                              ; B64E 8B EC
-	MOV	AX, WORD PTR D_3AAE                 ; B650 A1 AE 3A
+	MOV	AX, WORD PTR worldy                 ; B650 A1 AE 3A
 	TEST	AX, AX                             ; B653 85 C0
 	JE	L_B65D                               ; B655 74 06
-	DEC	WORD PTR D_3AAE                     ; B657 FF 0E AE 3A
+	DEC	WORD PTR worldy                     ; B657 FF 0E AE 3A
 	JMP	SHORT L_B663                        ; B65B EB 06
 L_B65D:
-	MOV	WORD PTR D_3AAE, 9BH                ; B65D C7 06 AE 3A 9B 00
+	MOV	WORD PTR worldy, 9BH                ; B65D C7 06 AE 3A 9B 00
 L_B663:
 	POP	BP                                  ; B663 5D
 	RET                                     ; B664 C3
-F_B665:
+scrolln:
 	PUSH	BP                                 ; B665 55
 	SUB	SP, 0AH                             ; B666 83 EC 0A
 	MOV	BP, SP                              ; B669 8B EC
-	CALL	F_B64D                             ; B66B E8 DF FF
+	CALL	stepn                             ; B66B E8 DF FF
 	MOV	WORD PTR [BP+8], 7                  ; B66E C7 46 08 07 00
 L_B673:
 	MOV	AX, WORD PTR [BP+8]                 ; B673 8B 46 08
@@ -234,16 +234,16 @@ L_B6B0:
 	MOV	SI, AX                              ; B6BE 8B F0
 	PUSH	WORD PTR [BP+6]                    ; B6C0 FF 76 06
 	MOV	WORD PTR [BP], SI                   ; B6C3 89 76 00
-	CALL	F_C2EC                             ; B6C6 E8 23 0C
+	CALL	viewx                             ; B6C6 E8 23 0C
 	MOV	SP, BP                              ; B6C9 8B E5
 	XOR	BX, BX                              ; B6CB 33 DB
 	PUSH	BX                                 ; B6CD 53
 	MOV	WORD PTR [BP+2], AX                 ; B6CE 89 46 02
-	CALL	F_C31C                             ; B6D1 E8 48 0C
+	CALL	viewy                             ; B6D1 E8 48 0C
 	MOV	SP, BP                              ; B6D4 8B E5
 	PUSH	AX                                 ; B6D6 50
 	PUSH	WORD PTR [BP+2]                    ; B6D7 FF 76 02
-	CALL	F_A363                             ; B6DA E8 86 EC
+	CALL	terrain                             ; B6DA E8 86 EC
 	MOV	SP, BP                              ; B6DD 8B E5
 	MOV	SI, WORD PTR [BP]                   ; B6DF 8B 76 00
 	MOV	BYTE PTR [SI-7524H], AL             ; B6E2 88 84 DC 8A
@@ -253,25 +253,25 @@ L_B6EB:
 	ADD	SP, 0AH                             ; B6EB 83 C4 0A
 	POP	BP                                  ; B6EE 5D
 	RET                                     ; B6EF C3
-F_B6F0:
+steps:
 	PUSH	BP                                 ; B6F0 55
 	SUB	SP, 2                               ; B6F1 83 EC 02
 	MOV	BP, SP                              ; B6F4 8B EC
-	CMP	WORD PTR D_3AAE, 9BH                ; B6F6 81 3E AE 3A 9B 00
+	CMP	WORD PTR worldy, 9BH                ; B6F6 81 3E AE 3A 9B 00
 	JNE	L_B706                              ; B6FC 75 08
-	MOV	WORD PTR D_3AAE, 0                  ; B6FE C7 06 AE 3A 00 00
+	MOV	WORD PTR worldy, 0                  ; B6FE C7 06 AE 3A 00 00
 	JMP	SHORT L_B70A                        ; B704 EB 04
 L_B706:
-	INC	WORD PTR D_3AAE                     ; B706 FF 06 AE 3A
+	INC	WORD PTR worldy                     ; B706 FF 06 AE 3A
 L_B70A:
 	ADD	SP, 2                               ; B70A 83 C4 02
 	POP	BP                                  ; B70D 5D
 	RET                                     ; B70E C3
-F_B70F:
+scrolls:
 	PUSH	BP                                 ; B70F 55
 	SUB	SP, 0AH                             ; B710 83 EC 0A
 	MOV	BP, SP                              ; B713 8B EC
-	CALL	F_B6F0                             ; B715 E8 D8 FF
+	CALL	steps                             ; B715 E8 D8 FF
 	MOV	WORD PTR [BP+8], 1                  ; B718 C7 46 08 01 00
 L_B71D:
 	CMP	WORD PTR [BP+8], 9                  ; B71D 83 7E 08 09
@@ -307,16 +307,16 @@ L_B759:
 	MOV	SI, AX                              ; B767 8B F0
 	PUSH	WORD PTR [BP+6]                    ; B769 FF 76 06
 	MOV	WORD PTR [BP], SI                   ; B76C 89 76 00
-	CALL	F_C2EC                             ; B76F E8 7A 0B
+	CALL	viewx                             ; B76F E8 7A 0B
 	MOV	SP, BP                              ; B772 8B E5
 	MOV	BX, 8                               ; B774 BB 08 00
 	PUSH	BX                                 ; B777 53
 	MOV	WORD PTR [BP+2], AX                 ; B778 89 46 02
-	CALL	F_C31C                             ; B77B E8 9E 0B
+	CALL	viewy                             ; B77B E8 9E 0B
 	MOV	SP, BP                              ; B77E 8B E5
 	PUSH	AX                                 ; B780 50
 	PUSH	WORD PTR [BP+2]                    ; B781 FF 76 02
-	CALL	F_A363                             ; B784 E8 DC EB
+	CALL	terrain                             ; B784 E8 DC EB
 	MOV	SP, BP                              ; B787 8B E5
 	MOV	SI, WORD PTR [BP]                   ; B789 8B 76 00
 	MOV	BYTE PTR [SI-751CH], AL             ; B78C 88 84 E4 8A
@@ -326,34 +326,34 @@ L_B795:
 	ADD	SP, 0AH                             ; B795 83 C4 0A
 	POP	BP                                  ; B798 5D
 	RET                                     ; B799 C3
-F_B79A:
+stepe:
 	PUSH	BP                                 ; B79A 55
 	SUB	SP, 2                               ; B79B 83 EC 02
 	MOV	BP, SP                              ; B79E 8B EC
-	MOV	AX, WORD PTR D_3AAC                 ; B7A0 A1 AC 3A
+	MOV	AX, WORD PTR worldx                 ; B7A0 A1 AC 3A
 	CMP	AX, 0A7H                            ; B7A3 3D A7 00
 	JE	L_B7AE                               ; B7A6 74 06
-	INC	WORD PTR D_3AAC                     ; B7A8 FF 06 AC 3A
+	INC	WORD PTR worldx                     ; B7A8 FF 06 AC 3A
 	JMP	SHORT L_B7C8                        ; B7AC EB 1A
 L_B7AE:
-	MOV	AX, WORD PTR D_3AAE                 ; B7AE A1 AE 3A
+	MOV	AX, WORD PTR worldy                 ; B7AE A1 AE 3A
 	CMP	AX, 4DH                             ; B7B1 3D 4D 00
 	JL	L_B7BD                               ; B7B4 7C 07
-	SUB	WORD PTR D_3AAE, 4DH                ; B7B6 83 2E AE 3A 4D
+	SUB	WORD PTR worldy, 4DH                ; B7B6 83 2E AE 3A 4D
 	JMP	SHORT L_B7C2                        ; B7BB EB 05
 L_B7BD:
-	ADD	WORD PTR D_3AAE, 4DH                ; B7BD 83 06 AE 3A 4D
+	ADD	WORD PTR worldy, 4DH                ; B7BD 83 06 AE 3A 4D
 L_B7C2:
-	MOV	WORD PTR D_3AAC, 0                  ; B7C2 C7 06 AC 3A 00 00
+	MOV	WORD PTR worldx, 0                  ; B7C2 C7 06 AC 3A 00 00
 L_B7C8:
 	ADD	SP, 2                               ; B7C8 83 C4 02
 	POP	BP                                  ; B7CB 5D
 	RET                                     ; B7CC C3
-F_B7CD:
+scrolle:
 	PUSH	BP                                 ; B7CD 55
 	SUB	SP, 0AH                             ; B7CE 83 EC 0A
 	MOV	BP, SP                              ; B7D1 8B EC
-	CALL	F_B79A                             ; B7D3 E8 C4 FF
+	CALL	stepe                             ; B7D3 E8 C4 FF
 	MOV	WORD PTR [BP+8], 0                  ; B7D6 C7 46 08 00 00
 L_B7DB:
 	CMP	WORD PTR [BP+8], 9                  ; B7DB 83 7E 08 09
@@ -388,15 +388,15 @@ L_B81C:
 	JGE	L_B84D                              ; B822 7D 29
 	MOV	AX, 12H                             ; B824 B8 12 00
 	PUSH	AX                                 ; B827 50
-	CALL	F_C2EC                             ; B828 E8 C1 0A
+	CALL	viewx                             ; B828 E8 C1 0A
 	MOV	SP, BP                              ; B82B 8B E5
 	PUSH	WORD PTR [BP+8]                    ; B82D FF 76 08
 	MOV	WORD PTR [BP+2], AX                 ; B830 89 46 02
-	CALL	F_C31C                             ; B833 E8 E6 0A
+	CALL	viewy                             ; B833 E8 E6 0A
 	MOV	SP, BP                              ; B836 8B E5
 	PUSH	AX                                 ; B838 50
 	PUSH	WORD PTR [BP+2]                    ; B839 FF 76 02
-	CALL	F_A363                             ; B83C E8 24 EB
+	CALL	terrain                             ; B83C E8 24 EB
 	MOV	SP, BP                              ; B83F 8B E5
 	MOV	SI, WORD PTR [BP+8]                 ; B841 8B 76 08
 	MOV	BYTE PTR [SI-7482H], AL             ; B844 88 84 7E 8B
@@ -406,34 +406,34 @@ L_B84D:
 	ADD	SP, 0AH                             ; B84D 83 C4 0A
 	POP	BP                                  ; B850 5D
 	RET                                     ; B851 C3
-F_B852:
+stepw:
 	PUSH	BP                                 ; B852 55
 	SUB	SP, 2                               ; B853 83 EC 02
 	MOV	BP, SP                              ; B856 8B EC
-	MOV	AX, WORD PTR D_3AAC                 ; B858 A1 AC 3A
+	MOV	AX, WORD PTR worldx                 ; B858 A1 AC 3A
 	TEST	AX, AX                             ; B85B 85 C0
 	JE	L_B865                               ; B85D 74 06
-	DEC	WORD PTR D_3AAC                     ; B85F FF 0E AC 3A
+	DEC	WORD PTR worldx                     ; B85F FF 0E AC 3A
 	JMP	SHORT L_B87F                        ; B863 EB 1A
 L_B865:
-	MOV	AX, WORD PTR D_3AAE                 ; B865 A1 AE 3A
+	MOV	AX, WORD PTR worldy                 ; B865 A1 AE 3A
 	CMP	AX, 4DH                             ; B868 3D 4D 00
 	JL	L_B874                               ; B86B 7C 07
-	SUB	WORD PTR D_3AAE, 4DH                ; B86D 83 2E AE 3A 4D
+	SUB	WORD PTR worldy, 4DH                ; B86D 83 2E AE 3A 4D
 	JMP	SHORT L_B879                        ; B872 EB 05
 L_B874:
-	ADD	WORD PTR D_3AAE, 4DH                ; B874 83 06 AE 3A 4D
+	ADD	WORD PTR worldy, 4DH                ; B874 83 06 AE 3A 4D
 L_B879:
-	MOV	WORD PTR D_3AAC, 0A7H               ; B879 C7 06 AC 3A A7 00
+	MOV	WORD PTR worldx, 0A7H               ; B879 C7 06 AC 3A A7 00
 L_B87F:
 	ADD	SP, 2                               ; B87F 83 C4 02
 	POP	BP                                  ; B882 5D
 	RET                                     ; B883 C3
-F_B884:
+scrollw:
 	PUSH	BP                                 ; B884 55
 	SUB	SP, 0AH                             ; B885 83 EC 0A
 	MOV	BP, SP                              ; B888 8B EC
-	CALL	F_B852                             ; B88A E8 C5 FF
+	CALL	stepw                             ; B88A E8 C5 FF
 	MOV	WORD PTR [BP+8], 0                  ; B88D C7 46 08 00 00
 L_B892:
 	CMP	WORD PTR [BP+8], 9                  ; B892 83 7E 08 09
@@ -465,15 +465,15 @@ L_B8CB:
 	JGE	L_B8FB                              ; B8D1 7D 28
 	XOR	AX, AX                              ; B8D3 33 C0
 	PUSH	AX                                 ; B8D5 50
-	CALL	F_C2EC                             ; B8D6 E8 13 0A
+	CALL	viewx                             ; B8D6 E8 13 0A
 	MOV	SP, BP                              ; B8D9 8B E5
 	PUSH	WORD PTR [BP+8]                    ; B8DB FF 76 08
 	MOV	WORD PTR [BP+2], AX                 ; B8DE 89 46 02
-	CALL	F_C31C                             ; B8E1 E8 38 0A
+	CALL	viewy                             ; B8E1 E8 38 0A
 	MOV	SP, BP                              ; B8E4 8B E5
 	PUSH	AX                                 ; B8E6 50
 	PUSH	WORD PTR [BP+2]                    ; B8E7 FF 76 02
-	CALL	F_A363                             ; B8EA E8 76 EA
+	CALL	terrain                             ; B8EA E8 76 EA
 	MOV	SP, BP                              ; B8ED 8B E5
 	MOV	SI, WORD PTR [BP+8]                 ; B8EF 8B 76 08
 	MOV	BYTE PTR [SI-7524H], AL             ; B8F2 88 84 DC 8A

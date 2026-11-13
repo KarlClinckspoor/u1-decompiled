@@ -15,10 +15,10 @@ DGROUP	GROUP	DATA,UDATA
 PROG	SEGMENT
 	EXTRN	F_3D61:NEAR
 PROG	ENDS
-	PUBLIC	F_AB9D,D_19EC,D_1A0C,D_1A0E,D_1A10,D_1A12
+	PUBLIC	drawtomb,D_19EC,D_1A0C,D_1A0E,D_1A10,D_1A12
 
 PROG	SEGMENT
-F_AB9D:
+drawtomb:
 	PUSH	BP                                 ; AB9D 55
 	MOV	BP, SP                              ; AB9E 8B EC
 	PUSH	SI                                 ; ABA0 56

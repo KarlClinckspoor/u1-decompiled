@@ -21,7 +21,7 @@ DATA	SEGMENT
 DATA	ENDS
 PROG	SEGMENT
 	EXTRN	EXIT:NEAR
-	EXTRN	F_1853:NEAR
+	EXTRN	main:NEAR
 	EXTRN	GETFC:NEAR
 PROG	ENDS
 	PUBLIC	_MAIN
@@ -73,7 +73,7 @@ L_1CC3:
 	PUSH	WORD PTR ENVIRON                   ; 1CED FF 36 58 00
 	PUSH	WORD PTR _ARGV                     ; 1CF1 FF 36 54 00
 	PUSH	WORD PTR _ARGC                     ; 1CF5 FF 36 56 00
-	CALL	F_1853                             ; 1CF9 E8 57 FB
+	CALL	main                             ; 1CF9 E8 57 FB
 	MOV	SP, BP                              ; 1CFC 8B E5
 	XOR	AX, AX                              ; 1CFE 33 C0
 	PUSH	AX                                 ; 1D00 50

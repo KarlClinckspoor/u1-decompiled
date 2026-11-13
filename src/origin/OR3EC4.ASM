@@ -12,10 +12,10 @@ UDATA	ENDS
 DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
-	PUBLIC	F_3EC4
+	PUBLIC	clockrnd
 
 PROG	SEGMENT
-F_3EC4:
+clockrnd:
 	PUSH	BP                                 ; 3EC4 55
 	MOV	BP, SP                              ; 3EC5 8B EC
 	PUSH	SI                                 ; 3EC7 56

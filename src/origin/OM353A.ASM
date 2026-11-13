@@ -12,10 +12,10 @@ UDATA	ENDS
 DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
-	PUBLIC	F_353A
+	PUBLIC	strlen2
 
 PROG	SEGMENT
-F_353A:
+strlen2:
 	PUSH	BP                                 ; 353A 55
 	SUB	SP, 2                               ; 353B 83 EC 02
 	MOV	BP, SP                              ; 353E 8B EC

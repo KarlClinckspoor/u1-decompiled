@@ -13,29 +13,29 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_082C:BYTE
+	EXTRN	vidmode:BYTE
 	EXTRN	D_082E:BYTE
-	EXTRN	D_0DA6:BYTE
-	EXTRN	D_0DA8:BYTE
-	EXTRN	D_2044:BYTE
-	EXTRN	D_2046:BYTE
-	EXTRN	D_2048:BYTE
+	EXTRN	colline:BYTE
+	EXTRN	colfill:BYTE
+	EXTRN	colhigh:BYTE
+	EXTRN	coltext:BYTE
+	EXTRN	forcecga:BYTE
 DATA	ENDS
 PROG	SEGMENT
-	EXTRN	F_34BF:NEAR
-	EXTRN	F_3547:NEAR
-	EXTRN	F_4071:NEAR
-	EXTRN	F_40EE:NEAR
-	EXTRN	F_4115:NEAR
+	EXTRN	detvid:NEAR
+	EXTRN	modecga:NEAR
+	EXTRN	mkrowtab:NEAR
+	EXTRN	modetand:NEAR
+	EXTRN	modeega:NEAR
 PROG	ENDS
-	PUBLIC	F_3F58
+	PUBLIC	vidinit
 
 PROG	SEGMENT
-F_3F58:
+vidinit:
 	PUSH	BP                                 ; 3F58 55
 	SUB	SP, 2                               ; 3F59 83 EC 02
 	MOV	BP, SP                              ; 3F5C 8B EC
-	CALL	F_34BF                             ; 3F5E E8 B7 F0
+	CALL	detvid                             ; 3F5E E8 B7 F0
 	CMP	AX, 2                               ; 3F61 3D 02 00
 	JE	L_3F8C                               ; 3F64 74 26
 	CMP	AX, 1                               ; 3F66 3D 01 00
@@ -43,42 +43,42 @@ F_3F58:
 	TEST	AX, AX                             ; 3F6B 85 C0
 	JNE	L_3FAA                              ; 3F6D 75 3B
 	MOV	AX, 3                               ; 3F6F B8 03 00
-	MOV	WORD PTR D_0DA6, AX                 ; 3F72 A3 40 20
-	MOV	WORD PTR D_0DA8, 2                  ; 3F75 C7 06 42 20 02 00
-	MOV	WORD PTR D_2044, 1                  ; 3F7B C7 06 44 20 01 00
-	MOV	WORD PTR D_2046, AX                 ; 3F81 A3 46 20
+	MOV	WORD PTR colline, AX                 ; 3F72 A3 40 20
+	MOV	WORD PTR colfill, 2                  ; 3F75 C7 06 42 20 02 00
+	MOV	WORD PTR colhigh, 1                  ; 3F7B C7 06 44 20 01 00
+	MOV	WORD PTR coltext, AX                 ; 3F81 A3 46 20
 	MOV	WORD PTR D_082E, 6                  ; 3F84 C7 06 7E 0A 06 00
 	JMP	SHORT L_3FAA                        ; 3F8A EB 1E
 L_3F8C:
-	MOV	WORD PTR D_0DA6, 0FH                ; 3F8C C7 06 40 20 0F 00
-	MOV	WORD PTR D_0DA8, 1                  ; 3F92 C7 06 42 20 01 00
-	MOV	WORD PTR D_2044, 0CH                ; 3F98 C7 06 44 20 0C 00
-	MOV	WORD PTR D_2046, 0BH                ; 3F9E C7 06 46 20 0B 00
+	MOV	WORD PTR colline, 0FH                ; 3F8C C7 06 40 20 0F 00
+	MOV	WORD PTR colfill, 1                  ; 3F92 C7 06 42 20 01 00
+	MOV	WORD PTR colhigh, 0CH                ; 3F98 C7 06 44 20 0C 00
+	MOV	WORD PTR coltext, 0BH                ; 3F9E C7 06 46 20 0B 00
 	MOV	WORD PTR D_082E, 7                  ; 3FA4 C7 06 7E 0A 07 00
 L_3FAA:
-	CMP	WORD PTR D_2048, 0                  ; 3FAA 83 3E 48 20 00
+	CMP	WORD PTR forcecga, 0                  ; 3FAA 83 3E 48 20 00
 	JE	L_3FC9                               ; 3FAF 74 18
-	MOV	WORD PTR D_082C, 0                  ; 3FB1 C7 06 7C 0A 00 00
-	MOV	WORD PTR D_0DA6, 3                  ; 3FB7 C7 06 40 20 03 00
-	MOV	WORD PTR D_0DA8, 2                  ; 3FBD C7 06 42 20 02 00
-	MOV	WORD PTR D_2044, 1                  ; 3FC3 C7 06 44 20 01 00
+	MOV	WORD PTR vidmode, 0                  ; 3FB1 C7 06 7C 0A 00 00
+	MOV	WORD PTR colline, 3                  ; 3FB7 C7 06 40 20 03 00
+	MOV	WORD PTR colfill, 2                  ; 3FBD C7 06 42 20 02 00
+	MOV	WORD PTR colhigh, 1                  ; 3FC3 C7 06 44 20 01 00
 L_3FC9:
-	CALL	F_4071                             ; 3FC9 E8 0F FF
+	CALL	mkrowtab                             ; 3FC9 E8 0F FF
 	CMP	WORD PTR [BP+6], 0                  ; 3FCC 83 7E 06 00
 	JE	L_3FF4                               ; 3FD0 74 22
-	CMP	WORD PTR D_082C, 0                  ; 3FD2 83 3E 7C 0A 00
+	CMP	WORD PTR vidmode, 0                  ; 3FD2 83 3E 7C 0A 00
 	JNE	L_3FDE                              ; 3FD7 75 05
-	CALL	F_3547                             ; 3FD9 E8 C4 F0
+	CALL	modecga                             ; 3FD9 E8 C4 F0
 	JMP	SHORT L_3FF4                        ; 3FDC EB 16
 L_3FDE:
-	CMP	WORD PTR D_082C, 1                  ; 3FDE 83 3E 7C 0A 01
+	CMP	WORD PTR vidmode, 1                  ; 3FDE 83 3E 7C 0A 01
 	JNE	L_3FEA                              ; 3FE3 75 05
-	CALL	F_4115                             ; 3FE5 E8 96 0A
+	CALL	modeega                             ; 3FE5 E8 96 0A
 	JMP	SHORT L_3FF4                        ; 3FE8 EB 0A
 L_3FEA:
-	CMP	WORD PTR D_082C, 2                  ; 3FEA 83 3E 7C 0A 02
+	CMP	WORD PTR vidmode, 2                  ; 3FEA 83 3E 7C 0A 02
 	JNE	L_3FF4                              ; 3FEF 75 03
-	CALL	F_40EE                             ; 3FF1 E8 63 0A
+	CALL	modetand                             ; 3FF1 E8 63 0A
 L_3FF4:
 	ADD	SP, 2                               ; 3FF4 83 C4 02
 	POP	BP                                  ; 3FF7 5D

@@ -13,17 +13,17 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_07F2:BYTE
-	EXTRN	D_07F4:BYTE
-	EXTRN	D_0C70:BYTE
+	EXTRN	penx:BYTE
+	EXTRN	peny:BYTE
+	EXTRN	rndseed:BYTE
 DATA	ENDS
 PROG	SEGMENT
 	EXTRN	F_3A1D:NEAR
 PROG	ENDS
-	PUBLIC	F_37FD,F_3812
+	PUBLIC	seedrnd,lineto
 
 PROG	SEGMENT
-F_37FD:
+seedrnd:
 	PUSH	BP                                 ; 37FD 55
 	MOV	BP, SP                              ; 37FE 8B EC
 	PUSH	SI                                 ; 3800 56
@@ -31,22 +31,22 @@ F_37FD:
 	PUSH	DS                                 ; 3802 1E
 	PUSH	ES                                 ; 3803 06
 	MOV	AX, WORD PTR [BP+4]                 ; 3804 8B 46 04
-	MOV	WORD PTR D_0C70, AX                 ; 3807 A3 70 0C
+	MOV	WORD PTR rndseed, AX                 ; 3807 A3 70 0C
 	POP	ES                                  ; 380A 07
 	POP	DS                                  ; 380B 1F
 	POP	DI                                  ; 380C 5F
 	POP	SI                                  ; 380D 5E
 	POP	BP                                  ; 380E 5D
 	RET	2                                   ; 380F C2 02 00
-F_3812:
+lineto:
 	PUSH	BP                                 ; 3812 55
 	MOV	BP, SP                              ; 3813 8B EC
 	PUSH	SI                                 ; 3815 56
 	PUSH	DI                                 ; 3816 57
 	PUSH	DS                                 ; 3817 1E
 	PUSH	ES                                 ; 3818 06
-	MOV	AX, WORD PTR D_07F2                 ; 3819 A1 42 0A
-	MOV	BX, WORD PTR D_07F4                 ; 381C 8B 1E 44 0A
+	MOV	AX, WORD PTR penx                 ; 3819 A1 42 0A
+	MOV	BX, WORD PTR peny                 ; 381C 8B 1E 44 0A
 	MOV	SI, WORD PTR [BP+4]                 ; 3820 8B 76 04
 	MOV	DI, WORD PTR [BP+6]                 ; 3823 8B 7E 06
 	MOV	DX, WORD PTR [BP+8]                 ; 3826 8B 56 08

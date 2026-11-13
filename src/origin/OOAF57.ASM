@@ -13,20 +13,20 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_2046:BYTE
+	EXTRN	coltext:BYTE
 DATA	ENDS
 PROG	SEGMENT
-	EXTRN	F_352C:NEAR
-	EXTRN	F_355D:NEAR
-	EXTRN	F_357C:NEAR
-	EXTRN	F_39C5:NEAR
-	EXTRN	F_4069:NEAR
-	EXTRN	F_A554:NEAR
+	EXTRN	gotoxy:NEAR
+	EXTRN	drawtile:NEAR
+	EXTRN	putch:NEAR
+	EXTRN	waitkey:NEAR
+	EXTRN	rndrange:NEAR
+	EXTRN	animwat:NEAR
 PROG	ENDS
-	PUBLIC	F_AF57,F_B094,F_B0B5,D_24DE
+	PUBLIC	drawview,F_B094,readnum,placeval
 
 PROG	SEGMENT
-F_AF57:
+drawview:
 	PUSH	BP                                 ; AF57 55
 	SUB	SP, 0EH                             ; AF58 83 EC 0E
 	MOV	BP, SP                              ; AF5B 8B EC
@@ -55,7 +55,7 @@ L_AF89:
 	JNE	L_AF9B                              ; AF94 75 05
 	MOV	WORD PTR [BP+0AH], 1                ; AF96 C7 46 0A 01 00
 L_AF9B:
-	CALL	F_A554                             ; AF9B E8 B6 F5
+	CALL	animwat                             ; AF9B E8 B6 F5
 	MOV	WORD PTR [BP+4], 0                  ; AF9E C7 46 04 00 00
 L_AFA3:
 	CMP	WORD PTR [BP+4], 13H                ; AFA3 83 7E 04 13
@@ -84,7 +84,7 @@ L_AFBC:
 	PUSH	WORD PTR [BP+4]                    ; AFD5 FF 76 04
 	XOR	BX, BX                              ; AFD8 33 DB
 	PUSH	BX                                 ; AFDA 53
-	CALL	F_355D                             ; AFDB E8 D6 F5
+	CALL	drawtile                             ; AFDB E8 D6 F5
 	MOV	SP, BP                              ; AFDE 8B E5
 	DB	0E9H
 	DW	L_B083-$-2                  ; AFE0 E9 A0 00
@@ -98,7 +98,7 @@ L_AFE3:
 	PUSH	WORD PTR [BP+6]                    ; AFF5 FF 76 06
 	PUSH	WORD PTR [BP+4]                    ; AFF8 FF 76 04
 	PUSH	AX                                 ; AFFB 50
-	CALL	F_355D                             ; AFFC E8 B5 F5
+	CALL	drawtile                             ; AFFC E8 B5 F5
 	MOV	SP, BP                              ; AFFF 8B E5
 	DB	0E9H
 	DW	L_B083-$-2                  ; B001 E9 7F 00
@@ -112,7 +112,7 @@ L_B004:
 	PUSH	WORD PTR [BP+6]                    ; B016 FF 76 06
 	PUSH	WORD PTR [BP+4]                    ; B019 FF 76 04
 	PUSH	AX                                 ; B01C 50
-	CALL	F_355D                             ; B01D E8 94 F5
+	CALL	drawtile                             ; B01D E8 94 F5
 	MOV	SP, BP                              ; B020 8B E5
 	JMP	SHORT L_B083                        ; B022 EB 5F
 L_B024:
@@ -131,7 +131,7 @@ L_B033:
 	PUSH	WORD PTR [BP+6]                    ; B040 FF 76 06
 	PUSH	WORD PTR [BP+4]                    ; B043 FF 76 04
 	PUSH	BX                                 ; B046 53
-	CALL	F_355D                             ; B047 E8 6A F5
+	CALL	drawtile                             ; B047 E8 6A F5
 	MOV	SP, BP                              ; B04A 8B E5
 	JMP	SHORT L_B083                        ; B04C EB 35
 L_B04E:
@@ -145,7 +145,7 @@ L_B04E:
 	PUSH	AX                                 ; B060 50
 	MOV	AX, 1                               ; B061 B8 01 00
 	PUSH	AX                                 ; B064 50
-	CALL	F_4069                             ; B065 E8 5B 04
+	CALL	rndrange                             ; B065 E8 5B 04
 	MOV	SP, BP                              ; B068 8B E5
 	MOV	BX, 2                               ; B06A BB 02 00
 	CWD                                     ; B06D 99
@@ -156,7 +156,7 @@ L_B04E:
 	PUSH	WORD PTR [BP+6]                    ; B077 FF 76 06
 	PUSH	WORD PTR [BP+4]                    ; B07A FF 76 04
 	PUSH	AX                                 ; B07D 50
-	CALL	F_355D                             ; B07E E8 33 F5
+	CALL	drawtile                             ; B07E E8 33 F5
 	MOV	SP, BP                              ; B081 8B E5
 L_B083:
 	INC	WORD PTR [BP+6]                     ; B083 FF 46 06
@@ -189,7 +189,7 @@ L_B0B0:
 	ADD	SP, 4                               ; B0B0 83 C4 04
 	POP	BP                                  ; B0B3 5D
 	RET                                     ; B0B4 C3
-F_B0B5:
+readnum:
 	PUSH	BP                                 ; B0B5 55
 	SUB	SP, 10H                             ; B0B6 83 EC 10
 	MOV	BP, SP                              ; B0B9 8B EC
@@ -202,10 +202,10 @@ L_B0C6:
 	ADD	AX, WORD PTR [BP+6]                 ; B0C9 03 46 06
 	PUSH	WORD PTR [BP+16H]                  ; B0CC FF 76 16
 	PUSH	AX                                 ; B0CF 50
-	CALL	F_352C                             ; B0D0 E8 03 EF
+	CALL	gotoxy                             ; B0D0 E8 03 EF
 	MOV	SP, BP                              ; B0D3 8B E5
-	PUSH	WORD PTR D_2046                    ; B0D5 FF 36 76 3A
-	CALL	F_39C5                             ; B0D9 E8 41 F7
+	PUSH	WORD PTR coltext                    ; B0D5 FF 36 76 3A
+	CALL	waitkey                             ; B0D9 E8 41 F7
 	MOV	SP, BP                              ; B0DC 8B E5
 	MOV	BYTE PTR [BP+0EH], AL               ; B0DE 88 46 0E
 	DB	30H,0E4H                             ; B0E1 xor ah, ah
@@ -221,9 +221,9 @@ L_B0C6:
 L_B0F9:
 	MOV	AL, BYTE PTR [BP+0EH]               ; B0F9 8A 46 0E
 	DB	30H,0E4H                             ; B0FC xor ah, ah
-	PUSH	WORD PTR D_2046                    ; B0FE FF 36 76 3A
+	PUSH	WORD PTR coltext                    ; B0FE FF 36 76 3A
 	PUSH	AX                                 ; B102 50
-	CALL	F_357C                             ; B103 E8 20 EF
+	CALL	putch                             ; B103 E8 20 EF
 	MOV	SP, BP                              ; B106 8B E5
 	MOV	AL, BYTE PTR [BP+0EH]               ; B108 8A 46 0E
 	MOV	SI, WORD PTR [BP+6]                 ; B10B 8B 76 06
@@ -273,7 +273,7 @@ L_B146:
 	SUB	AX, 30H                             ; B169 2D 30 00
 	MOV	BX, WORD PTR [BP+8]                 ; B16C 8B 5E 08
 	SHL	BX, 1                               ; B16F D1 E3
-	MUL	WORD PTR D_24DE[BX]                 ; B171 F7 A7 DE 24
+	MUL	WORD PTR placeval[BX]                 ; B171 F7 A7 DE 24
 	ADD	WORD PTR [BP+4], AX                 ; B175 01 46 04
 	INC	WORD PTR [BP+8]                     ; B178 FF 46 08
 	JMP	SHORT L_B146                        ; B17B EB C9
@@ -285,7 +285,7 @@ L_B17D:
 PROG	ENDS
 
 DATA	SEGMENT
-D_24DE	DB	1,0,0AH,0,64H,0,0E8H,3	; 24DE
+placeval	DB	1,0,0AH,0,64H,0,0E8H,3	; 24DE
 DATA	ENDS
 
 	END

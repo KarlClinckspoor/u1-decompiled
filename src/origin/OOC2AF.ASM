@@ -13,26 +13,26 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_3AAC:BYTE
-	EXTRN	D_3AAE:BYTE
-	EXTRN	D_3B2C:BYTE
+	EXTRN	worldx:BYTE
+	EXTRN	worldy:BYTE
+	EXTRN	objtab:BYTE
 DATA	ENDS
 PROG	SEGMENT
-	EXTRN	F_355D:NEAR
-	EXTRN	F_A363:NEAR
-	EXTRN	F_B545:NEAR
+	EXTRN	drawtile:NEAR
+	EXTRN	terrain:NEAR
+	EXTRN	findmon:NEAR
 PROG	ENDS
-	PUBLIC	F_C2AF,F_C2EC,F_C31C,F_C34C,F_C380,F_C3CA
+	PUBLIC	objat,viewx,viewy,incview,drawbuf,drawwrld
 
 PROG	SEGMENT
-F_C2AF:
+objat:
 	PUSH	BP                                 ; C2AF 55
 	SUB	SP, 4                               ; C2B0 83 EC 04
 	MOV	BP, SP                              ; C2B3 8B EC
 	PUSH	WORD PTR [BP+0CH]                  ; C2B5 FF 76 0C
 	PUSH	WORD PTR [BP+0AH]                  ; C2B8 FF 76 0A
 	PUSH	WORD PTR [BP+8]                    ; C2BB FF 76 08
-	CALL	F_B545                             ; C2BE E8 84 F2
+	CALL	findmon                             ; C2BE E8 84 F2
 	MOV	SP, BP                              ; C2C1 8B E5
 	CMP	AX, 0FFFFH                          ; C2C3 3D FF FF
 	MOV	WORD PTR [BP+2], AX                 ; C2C6 89 46 02
@@ -40,24 +40,24 @@ F_C2AF:
 	MOV	CL, 4                               ; C2CB B1 04
 	SHL	AX, CL                              ; C2CD D3 E0
 	MOV	SI, AX                              ; C2CF 8B F0
-	MOV	AX, WORD PTR D_3B2C[SI]             ; C2D1 8B 84 2C 3B
+	MOV	AX, WORD PTR objtab[SI]             ; C2D1 8B 84 2C 3B
 	ADD	SP, 4                               ; C2D5 83 C4 04
 	POP	BP                                  ; C2D8 5D
 	RET                                     ; C2D9 C3
 L_C2DA:
 	PUSH	WORD PTR [BP+0AH]                  ; C2DA FF 76 0A
 	PUSH	WORD PTR [BP+8]                    ; C2DD FF 76 08
-	CALL	F_A363                             ; C2E0 E8 80 E0
+	CALL	terrain                             ; C2E0 E8 80 E0
 	MOV	SP, BP                              ; C2E3 8B E5
 	DB	30H,0E4H                             ; C2E5 xor ah, ah
 	ADD	SP, 4                               ; C2E7 83 C4 04
 	POP	BP                                  ; C2EA 5D
 	RET                                     ; C2EB C3
-F_C2EC:
+viewx:
 	PUSH	BP                                 ; C2EC 55
 	SUB	SP, 4                               ; C2ED 83 EC 04
 	MOV	BP, SP                              ; C2F0 8B EC
-	MOV	AX, WORD PTR D_3AAC                 ; C2F2 A1 AC 3A
+	MOV	AX, WORD PTR worldx                 ; C2F2 A1 AC 3A
 	SUB	AX, 9                               ; C2F5 2D 09 00
 	ADD	AX, WORD PTR [BP+8]                 ; C2F8 03 46 08
 	MOV	WORD PTR [BP+2], AX                 ; C2FB 89 46 02
@@ -74,11 +74,11 @@ L_C314:
 	ADD	SP, 4                               ; C317 83 C4 04
 	POP	BP                                  ; C31A 5D
 	RET                                     ; C31B C3
-F_C31C:
+viewy:
 	PUSH	BP                                 ; C31C 55
 	SUB	SP, 4                               ; C31D 83 EC 04
 	MOV	BP, SP                              ; C320 8B EC
-	MOV	AX, WORD PTR D_3AAE                 ; C322 A1 AE 3A
+	MOV	AX, WORD PTR worldy                 ; C322 A1 AE 3A
 	SUB	AX, 4                               ; C325 2D 04 00
 	ADD	AX, WORD PTR [BP+8]                 ; C328 03 46 08
 	MOV	WORD PTR [BP+2], AX                 ; C32B 89 46 02
@@ -95,7 +95,7 @@ L_C344:
 	ADD	SP, 4                               ; C347 83 C4 04
 	POP	BP                                  ; C34A 5D
 	RET                                     ; C34B C3
-F_C34C:
+incview:
 	PUSH	BP                                 ; C34C 55
 	SUB	SP, 2                               ; C34D 83 EC 02
 	MOV	BP, SP                              ; C350 8B EC
@@ -125,7 +125,7 @@ L_C378:
 	ADD	SP, 2                               ; C37B 83 C4 02
 	POP	BP                                  ; C37E 5D
 	RET                                     ; C37F C3
-F_C380:
+drawbuf:
 	PUSH	BP                                 ; C380 55
 	SUB	SP, 6                               ; C381 83 EC 06
 	MOV	BP, SP                              ; C384 8B EC
@@ -148,7 +148,7 @@ L_C396:
 	PUSH	AX                                 ; C3B1 50
 	PUSH	WORD PTR [BP+2]                    ; C3B2 FF 76 02
 	PUSH	BX                                 ; C3B5 53
-	CALL	F_355D                             ; C3B6 E8 FB E1
+	CALL	drawtile                             ; C3B6 E8 FB E1
 	MOV	SP, BP                              ; C3B9 8B E5
 	INC	WORD PTR [BP+4]                     ; C3BB FF 46 04
 	JMP	SHORT L_C396                        ; C3BE EB D6
@@ -159,7 +159,7 @@ L_C3C5:
 	ADD	SP, 6                               ; C3C5 83 C4 06
 	POP	BP                                  ; C3C8 5D
 	RET                                     ; C3C9 C3
-F_C3CA:
+drawwrld:
 	PUSH	BP                                 ; C3CA 55
 	SUB	SP, 0AH                             ; C3CB 83 EC 0A
 	MOV	BP, SP                              ; C3CE 8B EC
@@ -178,17 +178,17 @@ L_C3E0:
 	ADD	SI, WORD PTR [BP+8]                 ; C3F0 03 76 08
 	PUSH	WORD PTR [BP+6]                    ; C3F3 FF 76 06
 	MOV	WORD PTR [BP], SI                   ; C3F6 89 76 00
-	CALL	F_C2EC                             ; C3F9 E8 F0 FE
+	CALL	viewx                             ; C3F9 E8 F0 FE
 	MOV	SP, BP                              ; C3FC 8B E5
 	PUSH	WORD PTR [BP+8]                    ; C3FE FF 76 08
 	MOV	WORD PTR [BP+2], AX                 ; C401 89 46 02
-	CALL	F_C31C                             ; C404 E8 15 FF
+	CALL	viewy                             ; C404 E8 15 FF
 	MOV	SP, BP                              ; C407 8B E5
 	XOR	BX, BX                              ; C409 33 DB
 	PUSH	BX                                 ; C40B 53
 	PUSH	AX                                 ; C40C 50
 	PUSH	WORD PTR [BP+2]                    ; C40D FF 76 02
-	CALL	F_C2AF                             ; C410 E8 9C FE
+	CALL	objat                             ; C410 E8 9C FE
 	MOV	SP, BP                              ; C413 8B E5
 	MOV	SI, WORD PTR [BP]                   ; C415 8B 76 00
 	MOV	BYTE PTR [SI-7524H], AL             ; C418 88 84 DC 8A
@@ -198,7 +198,7 @@ L_C421:
 	INC	WORD PTR [BP+6]                     ; C421 FF 46 06
 	JMP	SHORT L_C3D5                        ; C424 EB AF
 L_C426:
-	CALL	F_C380                             ; C426 E8 57 FF
+	CALL	drawbuf                             ; C426 E8 57 FF
 	ADD	SP, 0AH                             ; C429 83 C4 0A
 	POP	BP                                  ; C42C 5D
 	RET                                     ; C42D C3

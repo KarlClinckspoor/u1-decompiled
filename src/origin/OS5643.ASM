@@ -12,10 +12,10 @@ UDATA	ENDS
 DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
-	PUBLIC	F_5643
+	PUBLIC	textmode
 
 PROG	SEGMENT
-F_5643:
+textmode:
 	PUSH	BP                                 ; 5643 55
 	MOV	BP, SP                              ; 5644 8B EC
 	PUSH	SI                                 ; 5646 56

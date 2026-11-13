@@ -12,22 +12,22 @@ UDATA	ENDS
 DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
-	PUBLIC	F_4069,D_0C70
+	PUBLIC	rndrange,rndseed
 
 PROG	SEGMENT
-F_4069:
+rndrange:
 	PUSH	BP                                 ; 4069 55
 	MOV	BP, SP                              ; 406A 8B EC
 	PUSH	SI                                 ; 406C 56
 	PUSH	DI                                 ; 406D 57
 	PUSH	DS                                 ; 406E 1E
 	PUSH	ES                                 ; 406F 06
-	MOV	AX, WORD PTR D_0C70                 ; 4070 A1 70 0C
+	MOV	AX, WORD PTR rndseed                 ; 4070 A1 70 0C
 	ADD	AX, 9248H                           ; 4073 05 48 92
 	ROR	AX, 1                               ; 4076 D1 C8
 	ROR	AX, 1                               ; 4078 D1 C8
 	ROR	AX, 1                               ; 407A D1 C8
-	MOV	WORD PTR D_0C70, AX                 ; 407C A3 70 0C
+	MOV	WORD PTR rndseed, AX                 ; 407C A3 70 0C
 	AND	AX, 3FFH                            ; 407F 25 FF 03
 	MOV	BX, WORD PTR [BP+4]                 ; 4082 8B 5E 04
 	MOV	DX, WORD PTR [BP+6]                 ; 4085 8B 56 06
@@ -53,7 +53,7 @@ L_409B:
 PROG	ENDS
 
 DATA	SEGMENT
-D_0C70	DB	0,0	; 0C70
+rndseed	DB	0,0	; 0C70
 DATA	ENDS
 
 	END

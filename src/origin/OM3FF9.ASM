@@ -13,7 +13,7 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_082C:BYTE
+	EXTRN	vidmode:BYTE
 DATA	ENDS
 	PUBLIC	F_3FF9,F_4031,D_0C4C,D_0C5E
 
@@ -25,7 +25,7 @@ F_3FF9:
 	PUSH	DI                                 ; 3FFD 57
 	PUSH	DS                                 ; 3FFE 1E
 	PUSH	ES                                 ; 3FFF 06
-	CMP	WORD PTR D_082C, 0                  ; 4000 83 3E 7C 0A 00
+	CMP	WORD PTR vidmode, 0                  ; 4000 83 3E 7C 0A 00
 	JNE	L_401D                              ; 4005 75 16
 	MOV	AH, 0BH                             ; 4007 B4 0B
 	MOV	BH, 0                               ; 4009 B7 00
@@ -61,7 +61,7 @@ F_4031:
 	PUSH	DI                                 ; 4035 57
 	PUSH	DS                                 ; 4036 1E
 	PUSH	ES                                 ; 4037 06
-	CMP	WORD PTR D_082C, 0                  ; 4038 83 3E 7C 0A 00
+	CMP	WORD PTR vidmode, 0                  ; 4038 83 3E 7C 0A 00
 	JNE	L_4055                              ; 403D 75 16
 	MOV	AH, 0BH                             ; 403F B4 0B
 	MOV	BH, 0                               ; 4041 B7 00

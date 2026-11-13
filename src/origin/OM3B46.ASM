@@ -13,29 +13,29 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_2046:BYTE
+	EXTRN	coltext:BYTE
 DATA	ENDS
 PROG	SEGMENT
-	EXTRN	F_352C:NEAR
-	EXTRN	F_3599:NEAR
-	EXTRN	F_3EED:NEAR
+	EXTRN	gotoxy:NEAR
+	EXTRN	putstr:NEAR
+	EXTRN	scrlmsg:NEAR
 PROG	ENDS
-	PUBLIC	F_3B46
+	PUBLIC	msgline
 
 PROG	SEGMENT
-F_3B46:
+msgline:
 	PUSH	BP                                 ; 3B46 55
 	MOV	BP, SP                              ; 3B47 8B EC
-	PUSH	WORD PTR D_2046                    ; 3B49 FF 36 46 20
+	PUSH	WORD PTR coltext                    ; 3B49 FF 36 46 20
 	PUSH	WORD PTR [BP+4]                    ; 3B4D FF 76 04
-	CALL	F_3599                             ; 3B50 E8 9F F5
+	CALL	putstr                             ; 3B50 E8 9F F5
 	MOV	SP, BP                              ; 3B53 8B E5
-	CALL	F_3EED                             ; 3B55 E8 24 01
+	CALL	scrlmsg                             ; 3B55 E8 24 01
 	MOV	AX, 18H                             ; 3B58 B8 18 00
 	PUSH	AX                                 ; 3B5B 50
 	MOV	AX, 1                               ; 3B5C B8 01 00
 	PUSH	AX                                 ; 3B5F 50
-	CALL	F_352C                             ; 3B60 E8 22 F5
+	CALL	gotoxy                             ; 3B60 E8 22 F5
 	MOV	SP, BP                              ; 3B63 8B E5
 	POP	BP                                  ; 3B65 5D
 	RET                                     ; 3B66 C3

@@ -12,11 +12,11 @@ UDATA	ENDS
 DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
-	PUBLIC	F_3C8B,F_3D23,D_07F6,D_07F8,D_07FA,D_07FC
+	PUBLIC	putnum,F_3D23,D_07F6,D_07F8,D_07FA,D_07FC
 	PUBLIC	D_0804,D_0805,D_0806,D_0808
 
 PROG	SEGMENT
-F_3C8B:
+putnum:
 	PUSH	BP                                 ; 3C8B 55
 	MOV	BP, SP                              ; 3C8C 8B EC
 	PUSH	SI                                 ; 3C8E 56

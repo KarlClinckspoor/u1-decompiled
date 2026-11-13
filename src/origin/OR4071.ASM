@@ -13,21 +13,21 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_082C:BYTE
-	EXTRN	D_0830:BYTE
+	EXTRN	vidmode:BYTE
+	EXTRN	vidmarg:BYTE
 DATA	ENDS
-	PUBLIC	F_4071,D_084A
+	PUBLIC	mkrowtab,rowtab
 
 PROG	SEGMENT
-F_4071:
-	MOV	BX, OFFSET DGROUP:D_084A+18EH       ; 4071 BB D8 09
+mkrowtab:
+	MOV	BX, OFFSET DGROUP:rowtab+18EH       ; 4071 BB D8 09
 	MOV	CX, 0C7H                            ; 4074 B9 C7 00
-	CMP	WORD PTR D_082C, 0                  ; 4077 83 3E 2C 08 00
+	CMP	WORD PTR vidmode, 0                  ; 4077 83 3E 2C 08 00
 	JE	L_40B4                               ; 407C 74 36
-	CMP	WORD PTR D_082C, 1                  ; 407E 83 3E 2C 08 01
+	CMP	WORD PTR vidmode, 1                  ; 407E 83 3E 2C 08 01
 	JE	L_40DA                               ; 4083 74 55
 L_4085:
-	MOV	WORD PTR D_0830, 4                  ; 4085 C7 06 30 08 04 00
+	MOV	WORD PTR vidmarg, 4                  ; 4085 C7 06 30 08 04 00
 	PUSH	CX                                 ; 408B 51
 	MOV	AX, CX                              ; 408C 8B C1
 	MOV	DX, CX                              ; 408E 8B D1
@@ -50,7 +50,7 @@ L_4085:
 	LOOP	L_4085                             ; 40B1 E2 D2
 	RET                                     ; 40B3 C3
 L_40B4:
-	MOV	WORD PTR D_0830, 2                  ; 40B4 C7 06 30 08 02 00
+	MOV	WORD PTR vidmarg, 2                  ; 40B4 C7 06 30 08 02 00
 	MOV	AX, CX                              ; 40BA 8B C1
 	MOV	AH, AL                              ; 40BC 8A E0
 	AND	AX, 1FEH                            ; 40BE 25 FE 01
@@ -67,7 +67,7 @@ L_40B4:
 	LOOP	L_40B4                             ; 40D7 E2 DB
 	RET                                     ; 40D9 C3
 L_40DA:
-	MOV	WORD PTR D_0830, 1                  ; 40DA C7 06 30 08 01 00
+	MOV	WORD PTR vidmarg, 1                  ; 40DA C7 06 30 08 01 00
 	MOV	AX, 1F18H                           ; 40E0 B8 18 1F
 L_40E3:
 	MOV	WORD PTR [BX], AX                   ; 40E3 89 07
@@ -78,7 +78,7 @@ L_40E3:
 PROG	ENDS
 
 DATA	SEGMENT
-D_084A	DB	0,0,0,0,0,0,0,0,0,0,0,0	; 084A
+rowtab	DB	0,0,0,0,0,0,0,0,0,0,0,0	; 084A
 	DB	0,0,0,0,0,0,0,0,0,0,0,0	; 0856
 	DB	0,0,0,0,0,0,0,0,0,0,0,0	; 0862
 	DB	0,0,0,0,0,0,0,0,0,0,0,0	; 086E

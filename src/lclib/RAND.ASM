@@ -12,33 +12,33 @@ UDATA	ENDS
 DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
-	PUBLIC	F_91D4,F_91F0,D_17A4
+	PUBLIC	lcrand,lcsrand,randseed
 
 PROG	SEGMENT
-F_91D4:
+lcrand:
 	PUSH	BP                                 ; 91D4 55
 	SUB	SP, 2                               ; 91D5 83 EC 02
 	MOV	BP, SP                              ; 91D8 8B EC
-	MOV	AX, WORD PTR D_17A4                 ; 91DA A1 A4 17
+	MOV	AX, WORD PTR randseed                 ; 91DA A1 A4 17
 	MOV	BX, 0E5DH                           ; 91DD BB 5D 0E
 	MUL	BX                                  ; 91E0 F7 E3
 	ADD	AX, 3                               ; 91E2 05 03 00
 	AND	AX, 7FFFH                           ; 91E5 25 FF 7F
-	MOV	WORD PTR D_17A4, AX                 ; 91E8 A3 A4 17
+	MOV	WORD PTR randseed, AX                 ; 91E8 A3 A4 17
 	ADD	SP, 2                               ; 91EB 83 C4 02
 	POP	BP                                  ; 91EE 5D
 	RET                                     ; 91EF C3
-F_91F0:
+lcsrand:
 	PUSH	BP                                 ; 91F0 55
 	MOV	BP, SP                              ; 91F1 8B EC
 	MOV	AX, WORD PTR [BP+4]                 ; 91F3 8B 46 04
-	MOV	WORD PTR D_17A4, AX                 ; 91F6 A3 A4 17
+	MOV	WORD PTR randseed, AX                 ; 91F6 A3 A4 17
 	POP	BP                                  ; 91F9 5D
 	RET                                     ; 91FA C3
 PROG	ENDS
 
 DATA	SEGMENT
-D_17A4	DB	1,0	; 17A4
+randseed	DB	1,0	; 17A4
 DATA	ENDS
 
 	END

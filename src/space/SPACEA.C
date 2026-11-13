@@ -7,43 +7,43 @@
 struct obj { int x, y, type, f6, f8, dir; };
 struct sector { int count, f2, f4, f6, f8; struct obj o[4]; };
 
-extern struct sector D_26C0[7][7];
-extern int D_01EE, D_01F0;              /* current sector */
-extern int D_5E14;                      /* current ship */
-extern int D_082C, D_0DA6, D_0DA8, D_2044, D_2046, D_5B14;
-extern int D_0126, D_0128, D_012A, D_0134, D_01F2, D_5E18, D_206E, D_2080;
-extern int D_5B0E, D_5B8C, D_5B8E, D_5E10, D_5E12;
+extern struct sector galaxy[7][7];
+extern int sectx, secty;              /* current sector */
+extern int curship;                      /* current ship */
+extern int vidmode, colline, colfill, colhigh, coltext, plnoise;
+extern int speed, velx, vely, redrflag, frontvw, entrspd, plstat, plfood;
+extern int plseed, shutfuel, shutshld, argv1, argv2;
 extern int D_2C30, D_2C32, D_2C34, D_2C36, D_2C38, D_2C3A, D_2C3C, D_2C3E;
 extern int D_2C40, D_2C42, D_2C44, D_2C46, D_2C48, D_2C4A, D_2C4C, D_2C4E;
-extern int D_2C50, D_2C52, D_2C54, D_2C56, D_2C58, D_2C5A, D_2C5C;
-extern char D_2058[];
-extern F_3F62(), F_3D41(), F_352C(), F_3C8B(), F_5643(), F_3DD6();
-extern F_4069(), F_37FD(), F_3E85(), F_3B46(), F_4437(), F_44A2(), F_125C();
-extern F_39FC(), F_3812(), F_35CA(), F_3599(), F_3741(), F_3E5E();
-extern F_19BD(), F_2252();
+extern int D_2C50, D_2C52, D_2C54, D_2C56, D_2C58, D_2C5A, spacebnk;
+extern char plname[];
+extern playsnd(), pixel(), gotoxy(), putnum(), textmode(), abnormal();
+extern rndrange(), seedrnd(), writfile(), msgline(), showhp(), showfood(), diskprmt();
+extern drawline(), lineto(), fillrect(), putstr(), portof(), waittick();
+extern refuse(), cmdlaser();
 extern EXECL(), MEMSET();
-extern unsigned char F_413C();
+extern unsigned char getkey();
 
 /*
  * Initialised data, DGROUP 0124-0B1E (the literals of the functions follow it)
  */
-int D_204A = 4;
-int D_0126 = 5, D_0128 = 0, D_012A = 0, D_012C = 0, D_012E = 0;
+int gmode = 4;
+int speed = 5, velx = 0, vely = 0, exhcnt = 0, exhtog = 0;
 int _STACK = 0x800;
 int D_0132 = 0;
-int D_0134 = 0, D_0136 = 0, D_0138 = 0;
-int D_013A = 0x9F, D_013C = 0x4F;
-char *D_0166[] = { "CgaSpace.Bin", "EgaSpace.Bin", "T1KSpace.Bin" };   /* data files per video mode */
-char *D_0194[] = { "CgaFight.Bin", "EgaFight.Bin", "T1KFight.Bin" };
-char *D_01C4[] = { "", "Counter-Clockwise", "Clockwise", "Thrust", "Retro" };
-char *D_01E4[] = { "", "Left", "Right", "Climb", "Dive" };
-int D_01EE = 3, D_01F0 = 3;
-int D_01F2 = 0, D_01F4 = 0;
-int D_01F6[7] = { 5, 6, 8, 10, 12, 16, 18 };
-int D_0204[7] = { 4, 6, 8, 10, 12, 14, 18 };
-int D_0212[7] = { 1, 1, 1, 1, 0, 0, 0 };
-int D_0220[7] = { 5, 5, 4, 4, 3, 2, 1 };
-int D_022E[18][19] = {
+int redrflag = 0, crosvx = 0, crosvy = 0;
+int crosx = 0x9F, crosy = 0x4F;
+char *spacefil[] = { "CgaSpace.Bin", "EgaSpace.Bin", "T1KSpace.Bin" };   /* data files per video mode */
+char *fightfil[] = { "CgaFight.Bin", "EgaFight.Bin", "T1KFight.Bin" };
+char *flycmd[] = { "", "Counter-Clockwise", "Clockwise", "Thrust", "Retro" };
+char *movecmd[] = { "", "Left", "Right", "Climb", "Dive" };
+int sectx = 3, secty = 3;
+int frontvw = 0, escflag = 0;
+int hitmaxx[7] = { 5, 6, 8, 10, 12, 16, 18 };
+int hitmaxy[7] = { 4, 6, 8, 10, 12, 14, 18 };
+int hitminx[7] = { 1, 1, 1, 1, 0, 0, 0 };
+int hitminy[7] = { 5, 5, 4, 4, 3, 2, 1 };
+int starpic[18][19] = {
     {0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
@@ -63,7 +63,7 @@ int D_022E[18][19] = {
     {0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0},
 };
-int D_04DA[20][20] = {
+int basepic[20][20] = {
     {0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -85,7 +85,7 @@ int D_04DA[20][20] = {
     {0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
 };
-int D_07FA_S[18][21] = {
+int planpic[18][21] = {
     {0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 4, 1, 1, 1, 1, 1, 1, 1, 4, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 4, 1, 1, 1, 2, 3, 2, 3, 2, 3, 1, 1, 4, 0, 0, 0, 0},
@@ -105,53 +105,53 @@ int D_07FA_S[18][21] = {
     {0, 0, 0, 0, 0, 0, 4, 1, 1, 1, 1, 1, 1, 1, 4, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0},
 };
-int D_0AEE[4][3] = { { -17, -15, -15 }, { 18, 18, 18 }, { 0, 1, 2 }, { 0, 1, 2 } };
-int D_0B06[4][3] = { { 1, 1, 1 }, { 1, 1, 1 }, { -17, -16, -16 }, { 18, 17, 17 } };
-char D_0B1E[] = "inuse.u1";
+int portdx[4][3] = { { -17, -15, -15 }, { 18, 18, 18 }, { 0, 1, 2 }, { 0, 1, 2 } };
+int portdy[4][3] = { { 1, 1, 1 }, { 1, 1, 1 }, { -17, -16, -16 }, { 18, 17, 17 } };
+char inusefil[] = "inuse.u1";
 
-extern int D_0126, D_0128, D_012A, D_012C;
-extern int D_0134, D_0136, D_0138, D_013A, D_013C;
-extern int D_01F2;
-extern char *D_01C4[], *D_01E4[];
-extern int D_0DA6, D_0DA8, D_2044, D_2046, D_5AD2;
-extern int D_5FFA, D_5FFE;
-extern int D_5EBA[], D_5F0A[];
-extern int D_5E1A[], D_5E6A[];
-extern F_3B46(), F_0411(), F_0910(), F_0F25(), F_095F(), F_3109();
-extern F_35CA(), F_39FC(), F_3D41(), F_3DD6(), F_254B(), F_3599(), F_3EC4(), F_37FD();
-extern F_68F8(), F_0EBD(), F_614E(), F_450D(), F_0524(), F_0425(), F_04CA(), F_603E();
-extern int D_5B8C, D_5B8E;
-extern int D_01F6[], D_0204[], D_0212[], D_0220[], D_207E, D_20FE, D_082C;
-extern F_3330(), F_3CF1(), F_4224(), F_352C(), F_0FBC(), F_0FE1(), F_3E5E(), F_0F3B(), F_259E();
-extern int D_0DE2;
-extern int F_092D(), F_3741(), F_088E(), F_4069();
-extern int D_01EE, D_01F0, D_01F2, D_5E14;
-extern int D_0126, D_0128, D_012A, D_012C, D_012E;
-extern int D_0134, D_013A, D_013C;
-extern int D_0C92, D_0C94, D_0C96, D_0C98, D_0C9A, D_0C9C, D_0C9E[];
-extern int D_0DE0, D_0DE2, D_0DA6, D_0DA8;
-extern int D_01F6[], D_0204[];
-extern int D_2044, D_2046, D_2048, D_5AD2, D_5B14, D_5B0E, D_5B8C, D_5B8E;
-extern int D_5E10, D_5E12, D_5FFE, D_6000, D_082C, D_2086, D_207C;
-extern char *D_0E18[], *D_0166[], *D_0194[];
+extern int speed, velx, vely, exhcnt;
+extern int redrflag, crosvx, crosvy, crosx, crosy;
+extern int frontvw;
+extern char *flycmd[], *movecmd[];
+extern int colline, colfill, colhigh, coltext, shipcol;
+extern int starquad, starmode;
+extern int starx[], stary[];
+extern int staroffx[], staroffy[];
+extern msgline(), playif(), shldcrsh(), die(), usefuel(), exhaust();
+extern fillrect(), drawline(), pixel(), abnormal(), newenemy(), putstr(), clockrnd(), seedrnd();
+extern plotclip(), toout(), drawfite(), showexp(), drawplan(), drawstar(), drawbase(), drawship();
+extern int shutfuel, shutshld;
+extern int hitmaxx[], hitmaxy[], hitminx[], hitminy[], plexp, plkills, vidmode;
+extern fightfrm(), vwait(), flushkey(), gotoxy(), clrview(), printat(), waittick(), keypoll(), drawtop();
+extern int growcnt;
+extern int getfuel(), portof(), getshld(), rndrange();
+extern int sectx, secty, frontvw, curship;
+extern int speed, velx, vely, exhcnt, exhtog;
+extern int redrflag, crosx, crosy;
+extern int enemyx, enemyy, enemypx, enemypy, enemykd, jumping, speeddly[];
+extern int exhdrawn, growcnt, colline, colfill;
+extern int hitmaxx[], hitmaxy[];
+extern int colhigh, coltext, forcecga, shipcol, plnoise, plseed, shutfuel, shutshld;
+extern int argv1, argv2, starmode, lastdir, vidmode, rdyarm, plcoin;
+extern char *portname[], *spacefil[], *fightfil[];
 
-extern F_27EE(), F_281F(), F_3B46(), F_39FC(), F_0411(), F_3E5E(), F_08C0(), F_0F25();
-extern F_387E(), F_1C2A(), F_3CF1(), F_614E(), F_254B(), F_1BE9(), F_2665(), F_2731();
-extern F_3599(), F_352C(), F_0774(), F_07AB(), F_0682(), F_06FB(), F_4558();
-extern F_3EED(), F_3C8B(), F_3E2F(), F_3F58(), F_37FD(), F_0D88(), F_1DDA(), F_259E();
-extern F_1D0D(), F_1919(), F_19D3(), F_19E1(), F_19EF(), F_19FD(), F_1A0B(), F_163C();
-extern F_1A19(), F_2003(), F_14E5(), F_1A27(), F_1A35(), F_1A43(), F_1A51(), F_1A5F();
-extern F_1A6D(), F_1A7B(), F_10B3(), F_1A89(), F_478E(), F_1A97(), F_0F0E(), F_165C();
-extern F_2B7B(), F_2EC1(), F_3330(), F_31D7(), F_350A(), F_3567(), F_3A4E(), F_3983();
+extern plotvp(), exhaust0(), msgline(), drawline(), playif(), waittick(), useshld(), die();
+extern arrowr(), movestar(), vwait(), drawfite(), newenemy(), drawcros(), starhit(), planhit();
+extern putstr(), gotoxy(), shipfuel(), shipshld(), showfuel(), showshld(), showcoin();
+extern scrlmsg(), putnum(), readfile(), vidinit(), seedrnd(), mkgalaxy(), initstar(), drawtop();
+extern F_1D0D(), cmdarrow(), cmdattk(), cmdboard(), cmdcast(), cmddrop(), cmdenter(), cmdfire();
+extern cmdget(), cmdhyper(), cmdinfo(), cmdklimb(), cmdopen(), cmdquit(), cmdready(), cmdsteal();
+extern cmdtrans(), cmdunlk(), cmdview(), cmdxit(), ztats(), cmdpass(), cmdhuh(), cmdspeed();
+extern exhaust2(), exhaust1(), fightfrm(), alienfir(), crash(), dock(), liftoff(), cmdnoise();
 extern PUTS(), _EXIT();
-extern int F_4069(), F_088E(), F_1BBF(), F_603E(), F_3741(), F_37E0(), F_34A8(), F_34D9();
-extern int F_07E2(), F_0838(), F_063A(), F_3EC4();
-extern char F_4161(), F_39C5(), F_3862();
+extern int rndrange(), getshld(), sign(), drawship(), portof(), shipin(), advx(), advy();
+extern int portx(), porty(), opposite(), clockrnd();
+extern char keywait(), waitkey(), upcase();
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
 /* number of the largest square (1,4,9,..) that fits in the argument */
-F_03E9(a) int a;
+ceilsqrt(a) int a;
 {
     int n;
     n = 0;
@@ -162,69 +162,69 @@ F_03E9(a) int a;
     return n;
 }
 
-/* call F_3F62 if D_5B14 is set */
-F_0411(c) int c;
+/* call playsnd if plnoise is set */
+playif(c) int c;
 {
-    if (D_5B14)
-        F_3F62(c);
+    if (plnoise)
+        playsnd(c);
 }
 
-/* draw 18x19 picture D_022E at (x,y) in two colours */
-F_0425(x, y) int x, y;
+/* draw 18x19 picture starpic at (x,y) in two colours */
+drawstar(x, y) int x, y;
 {
     int a, b, i, j;
     a = 12;
     b = 14;
-    if (D_082C == 0) {
-        a = D_0DA8;
-        b = D_0DA6;
+    if (vidmode == 0) {
+        a = colfill;
+        b = colline;
     }
     for (i = 0; i < 18; i++)
         for (j = 0; j < 19; j++) {
-            if (D_022E[i][j] == 1)
-                F_3D41(x + j, y + i, b);
-            else if (D_022E[i][j] == 2)
-                F_3D41(x + j, y + i, a);
+            if (starpic[i][j] == 1)
+                pixel(x + j, y + i, b);
+            else if (starpic[i][j] == 2)
+                pixel(x + j, y + i, a);
         }
 }
 
-/* draw 20x20 picture D_04DA at (x,y) */
-F_04CA(x, y) int x, y;
+/* draw 20x20 picture basepic at (x,y) */
+drawbase(x, y) int x, y;
 {
     int i, j;
     for (i = 0; i < 20; i++)
         for (j = 0; j < 20; j++)
-            if (D_04DA[i][j])
-                F_3D41(x + j, y + i, D_0DA6);
+            if (basepic[i][j])
+                pixel(x + j, y + i, colline);
 }
 
-/* draw 18x21 picture D_07FA_S at (x,y) in four colours */
-F_0524(x, y) int x, y;
+/* draw 18x21 picture planpic at (x,y) in four colours */
+drawplan(x, y) int x, y;
 {
     int a, b, c, i, j;
     a = 1;
     b = 10;
     c = 7;
-    if (D_082C == 0) {
-        a = D_2044;
-        b = D_0DA8;
-        c = D_0DA6;
+    if (vidmode == 0) {
+        a = colhigh;
+        b = colfill;
+        c = colline;
     }
     for (i = 0; i < 18; i++)
         for (j = 0; j < 21; j++) {
-            if (D_07FA_S[i][j] == 1)
-                F_3D41(x + j, y + i, a);
-            else if (D_07FA_S[i][j] == 2)
-                F_3D41(x + j, y + i, a);
-            else if (D_07FA_S[i][j] == 4)
-                F_3D41(x + j, y + i, c);
-            else if (D_07FA_S[i][j] == 3)
-                F_3D41(x + j, y + i, b);
+            if (planpic[i][j] == 1)
+                pixel(x + j, y + i, a);
+            else if (planpic[i][j] == 2)
+                pixel(x + j, y + i, a);
+            else if (planpic[i][j] == 4)
+                pixel(x + j, y + i, c);
+            else if (planpic[i][j] == 3)
+                pixel(x + j, y + i, b);
         }
 }
 
 /* opposite direction (0<->1, 2<->3) */
-F_063A(d) int d;
+opposite(d) int d;
 {
     if (d == 0)
         return 1;
@@ -234,39 +234,39 @@ F_063A(d) int d;
         return 3;
     if (d == 3)
         return 2;
-    F_5643();
-    F_3DD6();
+    textmode();
+    abnormal();
 }
 
-/* print current ship's f6 (shields?) at (0x24,0x16) */
-F_0682()
+/* print the current ship's f6 (fuel) at (0x24,0x16) */
+showfuel()
 {
     int c, v;
-    v = D_26C0[D_01EE][D_01F0].o[D_5E14].f6;
-    F_352C(0x24, 0x16);
+    v = galaxy[sectx][secty].o[curship].f6;
+    gotoxy(0x24, 0x16);
     if (v < 100)
-        c = D_2044;
+        c = colhigh;
     else
-        c = D_2046;
-    F_3C8B(v, 4, 0x20, c, 0);
-    F_352C(1, 0x18);
+        c = coltext;
+    putnum(v, 4, 0x20, c, 0);
+    gotoxy(1, 0x18);
 }
 
-/* print current ship's f8 at (0x24,0x15) */
-F_06FB()
+/* print the current ship's f8 (shield) at (0x24,0x15) */
+showshld()
 {
     int c, v;
-    v = D_26C0[D_01EE][D_01F0].o[D_5E14].f8;
-    F_352C(0x24, 0x15);
+    v = galaxy[sectx][secty].o[curship].f8;
+    gotoxy(0x24, 0x15);
     if (v < 100)
-        c = D_2044;
+        c = colhigh;
     else
-        c = D_2046;
-    F_3C8B(v, 4, 0x20, c, 0);
-    F_352C(1, 0x18);
+        c = coltext;
+    putnum(v, 4, 0x20, c, 0);
+    gotoxy(1, 0x18);
 }
 
-F_0774(n) int n;
+shipfuel(n) int n;
 {
     if (n == 0)
         return 1000;
@@ -277,7 +277,7 @@ F_0774(n) int n;
     return 0;
 }
 
-F_07AB(n) int n;
+shipshld(n) int n;
 {
     if (n == 0)
         return 1000;
@@ -288,218 +288,218 @@ F_07AB(n) int n;
     return 0;
 }
 
-F_07E2(k, sx, sy, s) int k, sx, sy, s;
+portx(k, sx, sy, s) int k, sx, sy, s;
 {
     int typ;
-    typ = D_26C0[sx][sy].o[s].type;
-    return D_0AEE[k][typ] + D_26C0[sx][sy].f6;
+    typ = galaxy[sx][sy].o[s].type;
+    return portdx[k][typ] + galaxy[sx][sy].f6;
 }
 
-F_0838(k, sx, sy, s) int k, sx, sy, s;
+porty(k, sx, sy, s) int k, sx, sy, s;
 {
     int typ;
-    typ = D_26C0[sx][sy].o[s].type;
-    return D_0B06[k][typ] + D_26C0[sx][sy].f8;
+    typ = galaxy[sx][sy].o[s].type;
+    return portdy[k][typ] + galaxy[sx][sy].f8;
 }
 
-F_088E()
+getshld()
 {
-    return D_26C0[D_01EE][D_01F0].o[D_5E14].f8;
+    return galaxy[sectx][secty].o[curship].f8;
 }
 
-/* reduce fuel (o[ship].f8) by n, not below 0, and redraw it */
-F_08C0(n) int n;
+/* reduce the shield (o[ship].f8) by n, not below 0, and redraw it */
+useshld(n) int n;
 {
     int v;
-    v = F_088E();
+    v = getshld();
     if (v < n)
         v = 0;
     else
         v -= n;
-    D_26C0[D_01EE][D_01F0].o[D_5E14].f8 = v;
-    F_06FB();
+    galaxy[sectx][secty].o[curship].f8 = v;
+    showshld();
 }
 
-F_0910()
+shldcrsh()
 {
-    F_08C0(F_088E() / 4 + 5);
+    useshld(getshld() / 4 + 5);
 }
 
-F_092D()
+getfuel()
 {
-    return D_26C0[D_01EE][D_01F0].o[D_5E14].f6;
+    return galaxy[sectx][secty].o[curship].f6;
 }
 
-F_095F(n) int n;
+usefuel(n) int n;
 {
     int v;
-    v = F_092D();
+    v = getfuel();
     if (v < n)
         v = 0;
     else
         v -= n;
-    D_26C0[D_01EE][D_01F0].o[D_5E14].f6 = v;
-    F_0682();
+    galaxy[sectx][secty].o[curship].f6 = v;
+    showfuel();
 }
 
 /* fill sector (sx,sy) of the galaxy with random contents */
-F_09AF(sx, sy) int sx, sy;
+mksector(sx, sy) int sx, sy;
 {
     int a, b, c, d, e, f, i;
     for (i = 0; i < 4; i++)
-        D_26C0[sx][sy].o[i].type = -1;
-    D_26C0[sx][sy].count = F_4069(0, 0xF0) / 0x28;
-    if (D_26C0[sx][sy].count > 3)
-        D_26C0[sx][sy].count = 0;
+        galaxy[sx][sy].o[i].type = -1;
+    galaxy[sx][sy].count = rndrange(0, 0xF0) / 0x28;
+    if (galaxy[sx][sy].count > 3)
+        galaxy[sx][sy].count = 0;
     d = 0;
     c = 0;
     b = 0;
     a = 0;
-    if (F_4069(1, 200) < 0x4D) {
-        a = F_4069(0x32, 200);
-        b = F_4069(0x32, 0x78);
+    if (rndrange(1, 200) < 0x4D) {
+        a = rndrange(0x32, 200);
+        b = rndrange(0x32, 0x78);
     }
-    D_26C0[sx][sy].f2 = a;
-    D_26C0[sx][sy].f4 = b;
-    if (F_4069(1, 200) < 0x4D) {
-        c = F_4069(0x32, 200);
-        d = F_4069(0x32, 100);
+    galaxy[sx][sy].f2 = a;
+    galaxy[sx][sy].f4 = b;
+    if (rndrange(1, 200) < 0x4D) {
+        c = rndrange(0x32, 200);
+        d = rndrange(0x32, 100);
         if (ABS(c - a) < 0x28 || ABS(d - b) < 0x28) {
             d = 0;
             c = 0;
         }
     }
-    D_26C0[sx][sy].f6 = c;
-    D_26C0[sx][sy].f8 = d;
+    galaxy[sx][sy].f6 = c;
+    galaxy[sx][sy].f8 = d;
     if (c) {
-        a = F_4069(0, 0x62) % 3;
+        a = rndrange(0, 0x62) % 3;
         if (a) {
-            e = F_4069(0, 199) % 4;
-            c = F_4069(0, 0x62) % 3;
-            D_26C0[sx][sy].o[0].type = c;
-            D_26C0[sx][sy].o[0].f6 = F_0774(c);
-            D_26C0[sx][sy].o[0].f8 = F_07AB(c);
-            D_26C0[sx][sy].o[0].x = F_07E2(e, sx, sy, 0);
-            D_26C0[sx][sy].o[0].y = F_0838(e, sx, sy, 0);
-            D_26C0[sx][sy].o[0].dir = F_063A(e);
+            e = rndrange(0, 199) % 4;
+            c = rndrange(0, 0x62) % 3;
+            galaxy[sx][sy].o[0].type = c;
+            galaxy[sx][sy].o[0].f6 = shipfuel(c);
+            galaxy[sx][sy].o[0].f8 = shipshld(c);
+            galaxy[sx][sy].o[0].x = portx(e, sx, sy, 0);
+            galaxy[sx][sy].o[0].y = porty(e, sx, sy, 0);
+            galaxy[sx][sy].o[0].dir = opposite(e);
             if (a == 2) {
                 do
-                    d = F_4069(0, 199) % 3;
+                    d = rndrange(0, 199) % 3;
                 while (d == c);
                 do
-                    f = F_4069(0, 0x62) % 3;
+                    f = rndrange(0, 0x62) % 3;
                 while (e == f);
-                D_26C0[sx][sy].o[1].type = d;
-                D_26C0[sx][sy].o[1].f6 = F_0774(d);
-                D_26C0[sx][sy].o[1].f8 = F_07AB(d);
-                D_26C0[sx][sy].o[1].x = F_07E2(f, sx, sy, 1);
-                D_26C0[sx][sy].o[1].y = F_0838(f, sx, sy, 1);
-                D_26C0[sx][sy].o[1].dir = F_063A(f);
+                galaxy[sx][sy].o[1].type = d;
+                galaxy[sx][sy].o[1].f6 = shipfuel(d);
+                galaxy[sx][sy].o[1].f8 = shipshld(d);
+                galaxy[sx][sy].o[1].x = portx(f, sx, sy, 1);
+                galaxy[sx][sy].o[1].y = porty(f, sx, sy, 1);
+                galaxy[sx][sy].o[1].dir = opposite(f);
             }
         }
     }
 }
 
 /* initialise the galaxy and the ships */
-F_0D88()
+mkgalaxy()
 {
     int i, j;
-    F_37FD(D_5B0E * 3 / 2);
-    MEMSET(D_26C0, 0, 0xB1A);
+    seedrnd(plseed * 3 / 2);
+    MEMSET(galaxy, 0, 0xB1A);
     for (i = 0; i < 7; i++)
         for (j = 0; j < 7; j++)
-            F_09AF(i, j);
-    D_5E14 = 2;
+            mksector(i, j);
+    curship = 2;
     D_2C30 = 0;
     D_2C32 = 0x8C;
     D_2C34 = 0x46;
     D_2C36 = 200;
     D_2C38 = 100;
     D_2C3E = 2;
-    D_2C40 = F_0774(2);
-    D_2C42 = F_07AB(2);
-    D_2C3A = F_07E2(3, 3, 3, 0);
-    D_2C3C = F_0838(3, 3, 3, 0);
-    D_2C44 = F_063A(3);
+    D_2C40 = shipfuel(2);
+    D_2C42 = shipshld(2);
+    D_2C3A = portx(3, 3, 3, 0);
+    D_2C3C = porty(3, 3, 3, 0);
+    D_2C44 = opposite(3);
     D_2C4A = 1;
-    D_2C4C = F_0774(1);
-    D_2C4E = F_07AB(1);
-    D_2C46 = F_07E2(0, 3, 3, 1);
-    D_2C48 = F_0838(0, 3, 3, 1);
-    D_2C50 = F_063A(0);
+    D_2C4C = shipfuel(1);
+    D_2C4E = shipshld(1);
+    D_2C46 = portx(0, 3, 3, 1);
+    D_2C48 = porty(0, 3, 3, 1);
+    D_2C50 = opposite(0);
     D_2C56 = 0;
-    D_2C58 = D_5B8C;
-    D_2C5A = D_5B8E;
+    D_2C58 = shutfuel;
+    D_2C5A = shutshld;
     D_2C52 = 0x104;
     D_2C54 = 0x5A;
-    D_2C5C = 0;
+    spacebnk = 0;
 }
 
 /* leave to OUT.EXE: save state to inuse.u1 and execl("out.exe") forever */
-F_0EBD()
+toout()
 {
     int u;
-    if (D_206E == 0) {
-        F_08C0(F_088E());
-        F_095F(F_092D());
+    if (plstat == 0) {
+        useshld(getshld());
+        usefuel(getfuel());
     }
-    F_3E85(D_0B1E, (int)D_2058, 0x334);
+    writfile(inusefil, (int)plname, 0x334);
     for (;;) {
-        u = EXECL("out.exe", "out.exe", D_5E10, D_5E12, "S", 0);
-        F_125C();
+        u = EXECL("out.exe", "out.exe", argv1, argv2, "S", 0);
+        diskprmt();
     }
 }
 
-F_0F0E()
+cmdhuh()
 {
-    F_3B46("Huh?");
-    F_0411(1);
+    msgline("Huh?");
+    playif(1);
 }
 
-F_0F25()
+die()
 {
-    D_2080 = D_206E = 0;
-    F_4437();
-    F_44A2();
-    F_0EBD();
+    plfood = plstat = 0;
+    showhp();
+    showfood();
+    toout();
 }
 
 /* wait until a key is pressed (or ~10000 polls) */
-F_0F3B()
+keypoll()
 {
     int i;
     i = 0;
-    while (!F_413C(0) && i++ < 10000)
+    while (!getkey(0) && i++ < 10000)
         ;
 }
 
 /* draw the frame of the main viewing window in colour c */
-F_0F62(c) int c;
+viewfram(c) int c;
 {
-    F_39FC(0x22, 0x1A, 0x11C, 0x1A, c);
-    F_3812(0x11C, 0x7C, c);
-    F_3812(0x22, 0x7C, c);
-    F_3812(0x22, 0x1A, c);
-    F_352C(5, 4);
+    drawline(0x22, 0x1A, 0x11C, 0x1A, c);
+    lineto(0x11C, 0x7C, c);
+    lineto(0x22, 0x7C, c);
+    lineto(0x22, 0x1A, c);
+    gotoxy(5, 4);
 }
 
 /* clear the viewing window and draw its frame in colour c */
-F_0FBC(c) int c;
+clrview(c) int c;
 {
-    F_35CA(0x1F, 0x17, 0x11F, 0x7F, 0);
-    F_0F62(c);
+    fillrect(0x1F, 0x17, 0x11F, 0x7F, 0);
+    viewfram(c);
 }
 
 /* print string s at (a,b) */
-F_0FE1(a, b, s) int a, b;
+printat(a, b, s) int a, b;
 char *s;
 {
-    F_352C(a, b);
-    F_3599(s, D_2046);
+    gotoxy(a, b);
+    putstr(s, coltext);
 }
 
 /* round to nearest 100 and to nearest 1000 */
-F_0FFD(n) int n;
+rndspeed(n) int n;
 {
     if (n % 100 > 0x31)
         n += 100;
@@ -508,89 +508,89 @@ F_0FFD(n) int n;
     return n;
 }
 
-F_1031()
+scalevx()
 {
     int k;
-    k = D_0126 * 1000 / D_5E18;
-    D_0128 *= k;
-    D_0128 = F_0FFD(D_0128);
-    D_0128 /= 1000;
-    if (D_0128 > 6)
-        D_0128 = 6;
+    k = speed * 1000 / entrspd;
+    velx *= k;
+    velx = rndspeed(velx);
+    velx /= 1000;
+    if (velx > 6)
+        velx = 6;
 }
 
-F_1072()
+scalevy()
 {
     int k;
-    k = D_0126 * 1000 / D_5E18;
-    D_012A *= k;
-    D_012A = F_0FFD(D_012A);
-    D_012A /= 1000;
-    if (D_012A > 6)
-        D_012A = 6;
+    k = speed * 1000 / entrspd;
+    vely *= k;
+    vely = rndspeed(vely);
+    vely /= 1000;
+    if (vely > 6)
+        vely = 6;
 }
 
 /* View command: switch between the cockpit and the sector view */
-F_10B3()
+cmdview()
 {
-    F_3599("View", D_2046);
-    if (D_01F2 == 0) {
-        if (F_3741(D_5E14) != -1) {
-            F_3B46("?");
-            F_3B46("View can't be changed");
-            F_3B46("whilst in space dock.");
+    putstr("View", coltext);
+    if (frontvw == 0) {
+        if (portof(curship) != -1) {
+            msgline("?");
+            msgline("View can't be changed");
+            msgline("whilst in space dock.");
         } else {
-            F_3B46("");
-            if (F_092D() == 0)
-                F_3B46("Not enough fuel!");
+            msgline("");
+            if (getfuel() == 0)
+                msgline("Not enough fuel!");
             else {
-                D_0134 = D_01F2 = 1;
-                D_0126 = F_03E9(D_0128 * D_0128 + D_012A * D_012A);
-                if (D_0126 > 8)
-                    D_0126 = 8;
-                else if (D_0126 == 0) {
-                    D_0126 = 1;
-                    switch (D_26C0[D_01EE][D_01F0].o[D_5E14].dir) {
+                redrflag = frontvw = 1;
+                speed = ceilsqrt(velx * velx + vely * vely);
+                if (speed > 8)
+                    speed = 8;
+                else if (speed == 0) {
+                    speed = 1;
+                    switch (galaxy[sectx][secty].o[curship].dir) {
                     case 0:
-                        D_0128 = -1;
+                        velx = -1;
                         break;
                     case 1:
-                        D_0128 = 1;
+                        velx = 1;
                         break;
                     case 2:
-                        D_012A = -1;
+                        vely = -1;
                         break;
                     case 3:
-                        D_012A = 1;
+                        vely = 1;
                         break;
                     }
                 }
-                D_5E18 = D_0126;
+                entrspd = speed;
             }
         }
-    } else if (D_26C0[D_01EE][D_01F0].count != 0) {
-        F_3B46("?");
-        F_3B46("Thou must eliminate all");
-        F_3B46("enemy craft first!");
+    } else if (galaxy[sectx][secty].count != 0) {
+        msgline("?");
+        msgline("Thou must eliminate all");
+        msgline("enemy craft first!");
     } else {
-        D_01F2 = 0;
-        F_3B46("");
-        D_0134 = 1;
-        F_1031();
-        F_1072();
-        if (D_0128 == 0 && D_012A == 0) {
-            switch (D_26C0[D_01EE][D_01F0].o[D_5E14].dir) {
+        frontvw = 0;
+        msgline("");
+        redrflag = 1;
+        scalevx();
+        scalevy();
+        if (velx == 0 && vely == 0) {
+            switch (galaxy[sectx][secty].o[curship].dir) {
             case 0:
-                D_0128 = -1;
+                velx = -1;
                 break;
             case 1:
-                D_0128 = 1;
+                velx = 1;
                 break;
             case 2:
-                D_012A = -1;
+                vely = -1;
                 break;
             case 3:
-                D_012A = 1;
+                vely = 1;
                 break;
             }
         }
@@ -598,212 +598,212 @@ F_10B3()
 }
 
 /* draw a sector symbol at (x,y): two vertical bars and a crossbar */
-F_127E(x, y) int x, y;
+symenemy(x, y) int x, y;
 {
     int i;
     for (i = 0; i < 2; i++) {
-        F_39FC(x + i, y, x + i, y + 7, D_0DA6);
-        F_39FC(x + i + 5, y, x + i + 5, y + 7, D_0DA6);
-        F_39FC(x, y + 3 + i, x + 6, y + 3 + i, D_0DA6);
+        drawline(x + i, y, x + i, y + 7, colline);
+        drawline(x + i + 5, y, x + i + 5, y + 7, colline);
+        drawline(x, y + 3 + i, x + 6, y + 3 + i, colline);
     }
 }
 
-F_12F1(x, y) int x, y;
+symbase(x, y) int x, y;
 {
     int i;
     for (i = 0; i < 2; i++) {
-        F_39FC(x + i + 3, y, x + i + 3, y + 7, D_0DA6);
-        F_39FC(x, y + i + 3, x + 7, y + i + 3, D_0DA6);
+        drawline(x + i + 3, y, x + i + 3, y + 7, colline);
+        drawline(x, y + i + 3, x + 7, y + i + 3, colline);
     }
 }
 
-F_1349(x, y) int x, y;
+symstar(x, y) int x, y;
 {
     int i;
     for (i = 0; i < 3; i++) {
-        F_39FC(x + 3 - i, y + i + 1, x + 3 + i, y + i + 1, D_0DA6);
-        F_39FC(x + 3 - i, y + 6 - i, x + 3 + i, y + 6 - i, D_0DA6);
+        drawline(x + 3 - i, y + i + 1, x + 3 + i, y + i + 1, colline);
+        drawline(x + 3 - i, y + 6 - i, x + 3 + i, y + 6 - i, colline);
     }
 }
 
-F_13B3(x, y) int x, y;
+symempty(x, y) int x, y;
 {
-    F_3D41(x + 1, y + 1, D_0DA6);
-    F_3D41(x + 3, y + 3, D_2044);
-    F_3D41(x + 6, y + 2, D_0DA8);
-    F_3D41(x + 4, y + 5, D_0DA6);
-    F_3D41(x + 2, y + 6, D_0DA8);
+    pixel(x + 1, y + 1, colline);
+    pixel(x + 3, y + 3, colhigh);
+    pixel(x + 6, y + 2, colfill);
+    pixel(x + 4, y + 5, colline);
+    pixel(x + 2, y + 6, colfill);
 }
 
 /* draw the map symbol of sector (i,j) */
-F_142B(i, j) int i, j;
+sectsym(i, j) int i, j;
 {
     int px, py;
     px = i * 2 * 5 + 0xA5 - 0x23 + 2;
     py = j * 2 * 5 + 0x4F - 0x23 + 2;
-    if (D_26C0[i][j].count)
-        F_127E(px, py);
-    else if (D_26C0[i][j].f6)
-        F_12F1(px, py);
-    else if (D_26C0[i][j].f2)
-        F_1349(px, py);
+    if (galaxy[i][j].count)
+        symenemy(px, py);
+    else if (galaxy[i][j].f6)
+        symbase(px, py);
+    else if (galaxy[i][j].f2)
+        symstar(px, py);
     else
-        F_13B3(px, py);
+        symempty(px, py);
 }
 
 /* Inform and Search: draw the 7x7 sector map, blink the current sector until a key */
-F_14E5()
+cmdinfo()
 {
     int i, j, px, py;
-    F_3599("Inform and Search", D_2046);
-    F_0FBC(D_0DA8);
-    F_0FE1(5, 4, "Sector Scan:");
-    F_39FC(0x82, 0x2C, 200, 0x2C, D_0DA6);
-    F_3812(200, 0x73, D_0DA6);
-    F_3812(0x82, 0x73, D_0DA6);
-    F_3812(0x82, 0x2C, D_0DA6);
+    putstr("Inform and Search", coltext);
+    clrview(colfill);
+    printat(5, 4, "Sector Scan:");
+    drawline(0x82, 0x2C, 200, 0x2C, colline);
+    lineto(200, 0x73, colline);
+    lineto(0x82, 0x73, colline);
+    lineto(0x82, 0x2C, colline);
     for (i = 0; i < 7; i++)
         for (j = 0; j < 7; j++)
-            F_142B(i, j);
-    px = D_01EE * 2 * 5 + 0xA5 - 0x23 + 2;
-    py = D_01F0 * 2 * 5 + 0x4F - 0x23 + 2;
+            sectsym(i, j);
+    px = sectx * 2 * 5 + 0xA5 - 0x23 + 2;
+    py = secty * 2 * 5 + 0x4F - 0x23 + 2;
     do {
-        if (!(j = F_413C(0))) {
-            F_3E5E(7);
+        if (!(j = getkey(0))) {
+            waittick(7);
             for (i = 0; i < 8; i++)
-                F_39FC(px + i, py, px + i, py + 8, 0);
-            if (!(j = F_413C(0))) {
-                F_3E5E(7);
-                F_142B(D_01EE, D_01F0);
+                drawline(px + i, py, px + i, py + 8, 0);
+            if (!(j = getkey(0))) {
+                waittick(7);
+                sectsym(sectx, secty);
             }
         }
     } while (j == 0);
-    D_0134 = 1;
-    F_3B46("");
+    redrflag = 1;
+    msgline("");
 }
 
 /* Fire (in space) or Fire? / space-dock action */
-F_163C()
+cmdfire()
 {
-    if (D_01F2 == 0)
-        F_19BD("Fire?");
+    if (frontvw == 0)
+        refuse("Fire?");
     else
-        F_2252();
+        cmdlaser();
 }
 
 /* Speed command: set speed to n, costing fuel */
-F_165C(n) int n;
+cmdspeed(n) int n;
 {
     int k;
-    F_3599("Speed ", D_2046);
-    F_3C8B(n, 1, 0x20, D_2046, 1);
-    F_3B46("");
-    k = ABS(n - D_0126) * 4;
-    if (k > F_092D())
-        F_3B46("Not enough fuel!");
+    putstr("Speed ", coltext);
+    putnum(n, 1, 0x20, coltext, 1);
+    msgline("");
+    k = ABS(n - speed) * 4;
+    if (k > getfuel())
+        msgline("Not enough fuel!");
     else {
-        D_0126 = n;
-        F_095F(k);
+        speed = n;
+        usefuel(k);
     }
 }
 
-int D_0BD2[2][4] = { { 3, 2, 0, 1 }, { 2, 3, 1, 0 } };      /* direction changes */
+int turntab[2][4] = { { 3, 2, 0, 1 }, { 2, 3, 1, 0 } };      /* direction changes */
 
 /* fly: turn, thrust or retro (k 1..4); costs fuel, may crash into an object */
-F_16D3(k)
+fly(k)
 unsigned char k;
 {
     int cost, delta;
 
     cost = 5;
     delta = -1;
-    F_3B46(D_01C4[k]);
+    msgline(flycmd[k]);
     if (k == 1 || k == 2)
         cost = 2;
-    if (F_092D() == 0) {
-        F_3B46("No fuel!!");
-        F_3B46("Wilt thou drift forever?!?");
+    if (getfuel() == 0) {
+        msgline("No fuel!!");
+        msgline("Wilt thou drift forever?!?");
     } else {
-        if (F_092D() < cost)
-            cost = F_092D();
-        if (F_3741(D_5E14) != -1 && k != 4) {
-            F_3B46("Crunch!");
-            F_0411(0);
-            F_0910();
-            if (!F_088E()) {
-                F_3B46("Thy shield is drained!");
-                F_0F25();
+        if (getfuel() < cost)
+            cost = getfuel();
+        if (portof(curship) != -1 && k != 4) {
+            msgline("Crunch!");
+            playif(0);
+            shldcrsh();
+            if (!getshld()) {
+                msgline("Thy shield is drained!");
+                die();
             }
         } else {
-            F_095F(cost);
-            cost = D_26C0[D_01EE][D_01F0].o[D_5E14].dir;
+            usefuel(cost);
+            cost = galaxy[sectx][secty].o[curship].dir;
             if (k == 1 || k == 2) {
-                if (D_012C)
-                    F_3109(&D_26C0[D_01EE][D_01F0].o[D_5E14], 0);
-                D_26C0[D_01EE][D_01F0].o[D_5E14].dir = D_0BD2[k - 1][cost];
-                delta = D_012C = 0;
+                if (exhcnt)
+                    exhaust(&galaxy[sectx][secty].o[curship], 0);
+                galaxy[sectx][secty].o[curship].dir = turntab[k - 1][cost];
+                delta = exhcnt = 0;
             } else if (k == 3)
                 delta = 1;
             switch (cost) {
             case 2:
-                D_012A -= delta;
+                vely -= delta;
                 break;
             case 3:
-                D_012A += delta;
+                vely += delta;
                 break;
             case 0:
-                D_0128 -= delta;
+                velx -= delta;
                 break;
             case 1:
-                D_0128 += delta;
+                velx += delta;
                 break;
             }
-            if (D_0128 > -1)
-                D_0128 = D_0128 <= 9 ? D_0128 : 9;
+            if (velx > -1)
+                velx = velx <= 9 ? velx : 9;
             else
-                D_0128 = D_0128 > -9 ? D_0128 : -9;
-            if (D_012A > -1)
-                D_012A = D_012A <= 9 ? D_012A : 9;
+                velx = velx > -9 ? velx : -9;
+            if (vely > -1)
+                vely = vely <= 9 ? vely : 9;
             else
-                D_012A = D_012A > -9 ? D_012A : -9;
+                vely = vely > -9 ? vely : -9;
             if (k == 3)
-                D_012C += 10;
+                exhcnt += 10;
             else if (k == 4) {
-                F_3109(&D_26C0[D_01EE][D_01F0].o[D_5E14], 0);
-                D_012C = 0;
+                exhaust(&galaxy[sectx][secty].o[curship], 0);
+                exhcnt = 0;
             }
         }
     }
 }
 
 /* move in combat view (k 1..4: left, right, climb, dive); outside combat fly instead */
-F_1919(k)
+cmdarrow(k)
 unsigned char k;
 {
-    if (D_01F2 == 0)
-        F_16D3(k);
+    if (frontvw == 0)
+        fly(k);
     else {
-        F_3B46(D_01E4[k]);
-        if (F_092D() < 2)
-            F_3B46("Not enough fuel!");
+        msgline(movecmd[k]);
+        if (getfuel() < 2)
+            msgline("Not enough fuel!");
         else {
-            F_095F(2);
+            usefuel(2);
             switch (k) {
             case 1:
-                D_0136 = -4;
-                D_0138 = 0;
+                crosvx = -4;
+                crosvy = 0;
                 break;
             case 2:
-                D_0136 = 4;
-                D_0138 = 0;
+                crosvx = 4;
+                crosvy = 0;
                 break;
             case 3:
-                D_0138 = -4;
-                D_0136 = 0;
+                crosvy = -4;
+                crosvx = 0;
                 break;
             case 4:
-                D_0138 = 4;
-                D_0136 = 0;
+                crosvy = 4;
+                crosvx = 0;
                 break;
             }
         }
@@ -811,72 +811,72 @@ unsigned char k;
 }
 
 /* print a command name and make the "not here" sound */
-F_19BD(s)
+refuse(s)
 char *s;
 {
-    F_3B46(s);
-    F_0411(1);
+    msgline(s);
+    playif(1);
 }
 
-F_19D3() { F_19BD("Attack?"); }
-F_19E1() { F_19BD("Board?"); }
-F_19EF() { F_19BD("Cast?"); }
-F_19FD() { F_19BD("Drop?"); }
-F_1A0B() { F_19BD("Enter?"); }
-F_1A19() { F_19BD("Get?"); }
-F_1A27() { F_19BD("Klimb?"); }
-F_1A35() { F_19BD("Open?"); }
-F_1A43() { F_19BD("Quit?"); }
-F_1A51() { F_19BD("Ready?"); }
-F_1A5F() { F_19BD("Steal?"); }
-F_1A6D() { F_19BD("Transact?"); }
-F_1A7B() { F_19BD("Unlock?"); }
-F_1A89() { F_19BD("X-it?"); }
+cmdattk() { refuse("Attack?"); }
+cmdboard() { refuse("Board?"); }
+cmdcast() { refuse("Cast?"); }
+cmddrop() { refuse("Drop?"); }
+cmdenter() { refuse("Enter?"); }
+cmdget() { refuse("Get?"); }
+cmdklimb() { refuse("Klimb?"); }
+cmdopen() { refuse("Open?"); }
+cmdquit() { refuse("Quit?"); }
+cmdready() { refuse("Ready?"); }
+cmdsteal() { refuse("Steal?"); }
+cmdtrans() { refuse("Transact?"); }
+cmdunlk() { refuse("Unlock?"); }
+cmdxit() { refuse("X-it?"); }
 
 /* pass; in combat: center the crosshair and stop sideways motion */
-F_1A97()
+cmdpass()
 {
-    if (D_01F2 == 0)
-        F_3B46("Pass");
+    if (frontvw == 0)
+        msgline("Pass");
     else {
-        F_1BE9(0);
-        D_013A = 0x9f;
-        D_013C = 0x4f;
-        D_0136 = D_0138 = 0;
-        F_35CA(16, 16, 0x12f, 0x8f, 0);
-        F_1BE9(D_0DA6);
-        F_3B46("Center");
+        drawcros(0);
+        crosx = 0x9f;
+        crosy = 0x4f;
+        crosvx = crosvy = 0;
+        fillrect(16, 16, 0x12f, 0x8f, 0);
+        drawcros(colline);
+        msgline("Center");
     }
 }
 
 /* is (x, y) inside the combat viewport? */
-F_1AF5(x, y)
+inview(x, y)
 int x, y;
 {
     return x < 300 && x > 20 && y < 140 && y > 20;
 }
 
 /* place star i at a random offset from the crosshair */
-F_1B21(i)
+newstar(i)
 int i;
 {
     int dx, dy;
 
-    D_5FFA = F_4069(0, 255) / 64;
-    dx = F_4069(2, 255) / 2;
-    dy = F_4069(4, 255) / 4;
-    if (D_5FFA == 1 || D_5FFA == 2)
+    starquad = rndrange(0, 255) / 64;
+    dx = rndrange(2, 255) / 2;
+    dy = rndrange(4, 255) / 4;
+    if (starquad == 1 || starquad == 2)
         dx = -dx;
-    if (D_5FFA > 1)
+    if (starquad > 1)
         dy = -dy;
-    if (!F_1AF5(dx + D_013A, dy + D_013C))
+    if (!inview(dx + crosx, dy + crosy))
         dx = dy = 5000;
-    D_5E1A[i] = dx;
-    D_5E6A[i] = dy;
+    staroffx[i] = dx;
+    staroffy[i] = dy;
 }
 
 /* sign of v */
-F_1BBF(v)
+sign(v)
 int v;
 {
     if (v > 0)
@@ -887,78 +887,78 @@ int v;
 }
 
 /* draw the crosshair in colour c */
-F_1BE9(c)
+drawcros(c)
 int c;
 {
-    F_39FC(D_013A - 2, D_013C, D_013A + 2, D_013C, c);
-    F_39FC(D_013A, D_013C - 2, D_013A, D_013C + 2, c);
+    drawline(crosx - 2, crosy, crosx + 2, crosy, c);
+    drawline(crosx, crosy - 2, crosx, crosy + 2, c);
 }
 
 /* move the 40 stars one step, redraw them and the crosshair, update the crosshair position */
-F_1C2A()
+movestar()
 {
     int i, dx, dy, moving;
 
-    F_0411(9);
-    moving = D_0136 || D_0138 || D_5FFE != 2;
+    playif(9);
+    moving = crosvx || crosvy || starmode != 2;
     if (moving)
-        F_1BE9(0);
+        drawcros(0);
     for (i = 0; i < 40; i++) {
-        dx = D_5E1A[i] / 8;
-        dy = D_5E6A[i] / 6;
+        dx = staroffx[i] / 8;
+        dy = staroffy[i] / 6;
         if (dx == 0)
-            dx = F_1BBF(D_5E1A[i]);
+            dx = sign(staroffx[i]);
         if (dy == 0)
-            dy = F_1BBF(D_5E6A[i]);
-        if (D_5FFE != 1 && F_1AF5(D_5EBA[i], D_5F0A[i]))
-            F_3D41(D_5EBA[i], D_5F0A[i], 0);
-        D_5E1A[i] += dx;
-        D_5E6A[i] += dy;
-        if (!F_1AF5(D_5E1A[i] + D_013A, D_5E6A[i] + D_013C))
-            F_1B21(i);
+            dy = sign(staroffy[i]);
+        if (starmode != 1 && inview(starx[i], stary[i]))
+            pixel(starx[i], stary[i], 0);
+        staroffx[i] += dx;
+        staroffy[i] += dy;
+        if (!inview(staroffx[i] + crosx, staroffy[i] + crosy))
+            newstar(i);
         else
-            F_3D41(D_5E1A[i] + D_013A, D_5E6A[i] + D_013C, D_0DA6);
-        D_5EBA[i] = D_5E1A[i] + D_013A;
-        D_5F0A[i] = D_5E6A[i] + D_013C;
+            pixel(staroffx[i] + crosx, staroffy[i] + crosy, colline);
+        starx[i] = staroffx[i] + crosx;
+        stary[i] = staroffy[i] + crosy;
     }
-    if (D_5FFE == 2) {
-        D_013A += D_0136;
-        D_013C += D_0138;
-        if (D_013A >= 300 || D_013A <= 20) {
-            D_013A -= D_0136;
-            D_0136 = 0;
+    if (starmode == 2) {
+        crosx += crosvx;
+        crosy += crosvy;
+        if (crosx >= 300 || crosx <= 20) {
+            crosx -= crosvx;
+            crosvx = 0;
         }
-        if (D_013C >= 140 || D_013C <= 20) {
-            D_013C -= D_0138;
-            D_0138 = 0;
+        if (crosy >= 140 || crosy <= 20) {
+            crosy -= crosvy;
+            crosvy = 0;
         }
         if (moving)
-            F_1BE9(D_0DA6);
+            drawcros(colline);
     }
-    F_0411(9);
+    playif(9);
 }
 
 /* place all 40 stars */
-F_1DDA()
+initstar()
 {
     int i;
 
-    D_5FFA = 0;
+    starquad = 0;
     for (i = 0; i < 40; i++) {
-        F_1B21(i);
-        D_5EBA[i] = D_013A + 3;
-        D_5F0A[i] = D_013C + 3;
+        newstar(i);
+        starx[i] = crosx + 3;
+        stary[i] = crosy + 3;
     }
 }
 
 /* leave the sector through the edge: wrap the galaxy, move the ship object to a free slot of the new sector */
-F_1E1C()
+newsect()
 {
     int dx, dy, k, ox, oy;
 
-    k = D_26C0[D_01EE][D_01F0].o[D_5E14].dir;
-    dx = F_1BBF(D_0128);
-    dy = F_1BBF(D_012A);
+    k = galaxy[sectx][secty].o[curship].dir;
+    dx = sign(velx);
+    dy = sign(vely);
     if (dx == 0 && dy == 0) {
         if (k == 0)
             dx--;
@@ -969,225 +969,225 @@ F_1E1C()
         else if (k == 3)
             dy++;
     }
-    ox = D_01EE;
-    oy = D_01F0;
-    D_01EE += dx;
-    D_01F0 += dy;
-    if (D_01EE < 0)
-        D_01EE = 6;
+    ox = sectx;
+    oy = secty;
+    sectx += dx;
+    secty += dy;
+    if (sectx < 0)
+        sectx = 6;
     else
-        D_01EE = D_01EE % 7;
-    if (D_01F0 < 0)
-        D_01F0 = 6;
+        sectx = sectx % 7;
+    if (secty < 0)
+        secty = 6;
     else
-        D_01F0 = D_01F0 % 7;
-    for (k = 0; k < 4 && D_26C0[D_01EE][D_01F0].o[k].type != -1; k++)
+        secty = secty % 7;
+    for (k = 0; k < 4 && galaxy[sectx][secty].o[k].type != -1; k++)
         ;
     if (k == 4)
-        F_3DD6();
-    D_26C0[D_01EE][D_01F0].o[k] = D_26C0[ox][oy].o[D_5E14];
-    D_26C0[ox][oy].o[D_5E14].type = -1;
-    D_5E14 = k;
-    D_26C0[D_01EE][D_01F0].o[D_5E14].x = 260;
-    D_26C0[D_01EE][D_01F0].o[D_5E14].y = 90;
-    if (D_26C0[D_01EE][D_01F0].count)
-        F_254B();
+        abnormal();
+    galaxy[sectx][secty].o[k] = galaxy[ox][oy].o[curship];
+    galaxy[ox][oy].o[curship].type = -1;
+    curship = k;
+    galaxy[sectx][secty].o[curship].x = 260;
+    galaxy[sectx][secty].o[curship].y = 90;
+    if (galaxy[sectx][secty].count)
+        newenemy();
 }
 
-int D_0C92 = 0, D_0C94 = 0, D_0C96 = 0, D_0C98 = 0, D_0C9A = 0, D_0C9C = 0;
-int D_0C9E[9] = { 0, 8, 7, 6, 5, 4, 3, 2, 1 };
+int enemyx = 0, enemyy = 0, enemypx = 0, enemypy = 0, enemykd = 0, jumping = 0;
+int speeddly[9] = { 0, 8, 7, 6, 5, 4, 3, 2, 1 };
 
 /* Hyperjump command: only from front view; costs fuel; lightspeed animation, then new sector */
-F_2003()
+cmdhyper()
 {
     int i, j, x, n, r;
 
-    F_3599("HyperJump", D_2046);
-    if (D_01F2 == 0) {
-        F_3B46("?");
-        F_3B46("Hyperjump can only be made");
-        F_3B46("from front view.");
-    } else if (F_092D() < 100) {
-        F_3B46("");
-        F_3B46("Not enough fuel!");
+    putstr("HyperJump", coltext);
+    if (frontvw == 0) {
+        msgline("?");
+        msgline("Hyperjump can only be made");
+        msgline("from front view.");
+    } else if (getfuel() < 100) {
+        msgline("");
+        msgline("Not enough fuel!");
     } else {
-        D_0DE2 = 20;
-        F_3599("...", D_2046);
-        r = F_3EC4() | 0xBBBB;
-        x = D_0126;
-        D_0136 = D_0138 = 0;
+        growcnt = 20;
+        putstr("...", coltext);
+        r = clockrnd() | 0xBBBB;
+        x = speed;
+        crosvx = crosvy = 0;
         if (x < 4)
             n = 10;
         else
             n = 15;
-        D_0C9C = 1;
+        jumping = 1;
         for (j = x; j < 9; j++) {
-            D_0126 = j;
+            speed = j;
             for (i = 0; i <= n; i++)
-                F_3330();
+                fightfrm();
         }
-        D_0126 = 0;
+        speed = 0;
         for (i = 0; i < 40; i++)
-            if (F_1AF5(D_5EBA[i], D_5F0A[i]))
-                F_3D41(D_5EBA[i], D_5F0A[i], 0);
-        F_3599("Lightspeed!", D_2046);
-        F_352C(10, 24);
-        F_37FD(r);
-        F_1DDA();
-        D_5FFE = 1;
+            if (inview(starx[i], stary[i]))
+                pixel(starx[i], stary[i], 0);
+        putstr("Lightspeed!", coltext);
+        gotoxy(10, 24);
+        seedrnd(r);
+        initstar();
+        starmode = 1;
         for (i = 0; i <= 200; i++)
-            F_1C2A();
-        F_37FD(r);
-        F_1DDA();
-        D_5FFE = 3;
+            movestar();
+        seedrnd(r);
+        initstar();
+        starmode = 3;
         for (i = 0; i <= 199; i++)
-            F_1C2A();
-        D_5FFE = 2;
+            movestar();
+        starmode = 2;
         for (j = 8; j > x; j--) {
-            D_0126 = j;
+            speed = j;
             for (i = 0; i <= n; i++) {
-                F_1C2A();
-                F_3CF1(D_0C9E[D_0126]);
+                movestar();
+                vwait(speeddly[speed]);
             }
         }
-        F_1BE9(D_0DA6);
-        F_3B46(" completed.     ");
-        F_095F(100);
-        F_37FD(F_3EC4() + 1234);
-        D_0126 = x;
-        F_4224();
-        D_0C92 = D_0C94 = D_0C96 = D_0C98 = 0;
-        F_1E1C();
-        D_012C = D_0C9C = 0;
+        drawcros(colline);
+        msgline(" completed.     ");
+        usefuel(100);
+        seedrnd(clockrnd() + 1234);
+        speed = x;
+        flushkey();
+        enemyx = enemyy = enemypx = enemypy = 0;
+        newsect();
+        exhcnt = jumping = 0;
     }
 }
 
 /* victory screen: "Thou hast achieved the rank of Space Ace!" */
-F_21FC()
+spaceace()
 {
-    F_4224();
-    F_0FBC(D_0DA8);
-    F_0FE1(11, 6, "Thou hast achieved");
-    F_0FE1(14, 8, "the rank of");
-    F_0FE1(15, 10, "Space Ace!");
-    F_3E5E(5);
-    F_4224();
-    F_0F3B();
-    F_259E();
+    flushkey();
+    clrview(colfill);
+    printat(11, 6, "Thou hast achieved");
+    printat(14, 8, "the rank of");
+    printat(15, 10, "Space Ace!");
+    waittick(5);
+    flushkey();
+    keypoll();
+    drawtop();
 }
 
 /* Fire command: laser bolts from both sides to the crosshair; hit test against the target */
-F_2252()
+cmdlaser()
 {
     int px, py, xhi, yhi;
 
-    F_3B46("Fire!");
-    if (F_092D() < 10)
-        F_3B46("Thou hast not enough fuel!");
+    msgline("Fire!");
+    if (getfuel() < 10)
+        msgline("Thou hast not enough fuel!");
     else {
-        F_095F(10);
-        if (D_0C92) {
-            F_614E(D_0C92, D_0C94, D_0C9A, 1);
-            px = D_013A - D_0C92;
-            py = D_013C - D_0C94;
+        usefuel(10);
+        if (enemyx) {
+            drawfite(enemyx, enemyy, enemykd, 1);
+            px = crosx - enemyx;
+            py = crosy - enemyy;
         } else
             px = py = -100;
-        F_39FC(20, 140, D_013A, D_013C, D_2044);
-        F_39FC(300, 140, D_013A, D_013C, D_2044);
-        F_0411(8);
-        xhi = D_01F6[D_0C9A];
-        yhi = D_0204[D_0C9A];
-        if (D_0C92)
-            F_614E(D_0C92, D_0C94, D_0C9A, 0);
-        if (D_0212[D_0C9A] <= px && px <= xhi && py >= D_0220[D_0C9A] && py <= yhi) {
-            F_0411(2);
-            F_3B46("Hit!!!");
-            D_207E += 100;
-            F_450D();
-            D_20FE++;
-            if (D_20FE == 20)
-                F_21FC();
-            else if (D_20FE > 20)
-                F_3B46("Thou art still a Space ace!");
-            if (--D_26C0[D_01EE][D_01F0].count)
-                F_254B();
+        drawline(20, 140, crosx, crosy, colhigh);
+        drawline(300, 140, crosx, crosy, colhigh);
+        playif(8);
+        xhi = hitmaxx[enemykd];
+        yhi = hitmaxy[enemykd];
+        if (enemyx)
+            drawfite(enemyx, enemyy, enemykd, 0);
+        if (hitminx[enemykd] <= px && px <= xhi && py >= hitminy[enemykd] && py <= yhi) {
+            playif(2);
+            msgline("Hit!!!");
+            plexp += 100;
+            showexp();
+            plkills++;
+            if (plkills == 20)
+                spaceace();
+            else if (plkills > 20)
+                msgline("Thou art still a Space ace!");
+            if (--galaxy[sectx][secty].count)
+                newenemy();
             else
-                D_0C92 = D_0C94 = 0;
+                enemyx = enemyy = 0;
         }
-        F_39FC(20, 140, D_013A, D_013C, 0);
-        F_39FC(300, 140, D_013A, D_013C, 0);
-        F_1BE9(D_0DA6);
+        drawline(20, 140, crosx, crosy, 0);
+        drawline(300, 140, crosx, crosy, 0);
+        drawcros(colline);
     }
 }
 
 /* draw the cockpit frame and its rivets */
-F_23F3()
+cockpit()
 {
     int i, c;
 
     c = 7;
-    if (D_082C == 0)
-        c = D_0DA6;
-    F_35CA(8, 8, 311, 15, c);
-    F_35CA(8, 144, 311, 151, c);
-    F_35CA(8, 16, 15, 144, c);
-    F_35CA(304, 16, 311, 144, c);
+    if (vidmode == 0)
+        c = colline;
+    fillrect(8, 8, 311, 15, c);
+    fillrect(8, 144, 311, 151, c);
+    fillrect(8, 16, 15, 144, c);
+    fillrect(304, 16, 311, 144, c);
     for (i = 1; i < 20; i++) {
-        F_3D41(i * 15 + 10, 10, 0);
-        F_3D41(i * 15 + 10, 13, 0);
-        F_3D41(i * 15 + 10, 146, 0);
-        F_3D41(i * 15 + 10, 149, 0);
+        pixel(i * 15 + 10, 10, 0);
+        pixel(i * 15 + 10, 13, 0);
+        pixel(i * 15 + 10, 146, 0);
+        pixel(i * 15 + 10, 149, 0);
     }
     for (i = 1; i < 10; i++) {
-        F_3D41(10, i * 15 + 3, 0);
-        F_3D41(13, i * 15 + 3, 0);
-        F_3D41(306, i * 15 + 3, 0);
-        F_3D41(309, i * 15 + 3, 0);
+        pixel(10, i * 15 + 3, 0);
+        pixel(13, i * 15 + 3, 0);
+        pixel(306, i * 15 + 3, 0);
+        pixel(309, i * 15 + 3, 0);
     }
 }
 
 /* put a target in view: random position, unless one is already there */
-F_254B()
+newenemy()
 {
-    if (D_0C9C == 0) {
-        D_0C92 = F_4069(40, 280);
-        D_0C94 = F_4069(40, 120);
-        D_0C9A = 0;
+    if (jumping == 0) {
+        enemyx = rndrange(40, 280);
+        enemyy = rndrange(40, 120);
+        enemykd = 0;
     } else
-        D_0C92 = D_0C94 = 0;
+        enemyx = enemyy = 0;
 }
 
 /* redraw the combat view: stars and crosshair */
-F_258D()
+redrfrnt()
 {
-    F_1DDA();
-    F_1BE9(D_0DA6);
+    initstar();
+    drawcros(colline);
 }
 
 /* draw the front view of the current sector: frame, base, planet/sun, ships */
-F_259E()
+drawtop()
 {
     int i;
     struct sector *s;
     struct obj *p;
 
-    D_0134 = 0;
-    F_35CA(16, 16, 303, 143, 0);
-    F_23F3();
-    if (D_01F2 == 1)
-        F_258D();
+    redrflag = 0;
+    fillrect(16, 16, 303, 143, 0);
+    cockpit();
+    if (frontvw == 1)
+        redrfrnt();
     else {
-        if (D_01EE == 3 && D_01F0 == 3)
-            F_0524(60, 75);
-        s = &D_26C0[D_01EE][D_01F0];
+        if (sectx == 3 && secty == 3)
+            drawplan(60, 75);
+        s = &galaxy[sectx][secty];
         if (s->f2)
-            F_0425(s->f2, s->f4);
+            drawstar(s->f2, s->f4);
         if (s->f6)
-            F_04CA(s->f6, s->f8);
+            drawbase(s->f6, s->f8);
         for (i = 0; i < 4; i++) {
             p = &s->o[i];
             if (p->type > -1)
-                F_603E(p->type, p->dir, p->x, p->y);
+                drawship(p->type, p->dir, p->x, p->y);
         }
     }
 }
@@ -1195,52 +1195,52 @@ F_259E()
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
 /* collision check with the object at (f2,f4) of the sector: closer than 25 in both axes */
-F_2665()
+starhit()
 {
     struct sector *s;
 
-    s = &D_26C0[D_01EE][D_01F0];
+    s = &galaxy[sectx][secty];
     if (s->f2) {
-        if (ABS(s->f2 - s->o[D_5E14].x) < 25 && ABS(s->f4 - s->o[D_5E14].y) < 25) {
-            F_3B46("Thy ship melts near the star!");
-            F_0F25();
+        if (ABS(s->f2 - s->o[curship].x) < 25 && ABS(s->f4 - s->o[curship].y) < 25) {
+            msgline("Thy ship melts near the star!");
+            die();
         }
     }
 }
 
 /* is the ship near the planet (60,75) of sector 3,3? landing on a planet, or melting */
-F_2731()
+planhit()
 {
     struct obj *p;
 
-    p = &D_26C0[D_01EE][D_01F0].o[D_5E14];
-    if (D_01EE == 3 && D_01F0 == 3) {
+    p = &galaxy[sectx][secty].o[curship];
+    if (sectx == 3 && secty == 3) {
         if (ABS(p->x - 60) < 25 && ABS(p->y - 75) < 25) {
             if (p->type == 0) {
-                F_3B46("Thou hast landed safely!");
-                D_5B8C = p->f6;
-                D_5B8E = p->f8;
-                F_0EBD();
+                msgline("Thou hast landed safely!");
+                shutfuel = p->f6;
+                shutshld = p->f8;
+                toout();
             } else {
-                F_3B46("Only space shuttles are heat");
-                F_3B46("shielded for landings!");
-                D_5B8C = D_5B8E = 0;
-                F_0F25();
+                msgline("Only space shuttles are heat");
+                msgline("shielded for landings!");
+                shutfuel = shutshld = 0;
+                die();
             }
         }
     }
 }
 
 /* plot a pixel if inside the viewport */
-F_27EE(x, y, c)
+plotvp(x, y, c)
 int x, y, c;
 {
     if (x > 20 && x < 300 && y > 18 && y < 141)
-        F_68F8(x, y, c);
+        plotclip(x, y, c);
 }
 
 /* draw a small ship (a sel = 0..3: facing) with its lights at (x,y) */
-F_281F(sel, x, y)
+exhaust0(sel, x, y)
 unsigned sel;
 int x, y;
 {
@@ -1249,57 +1249,57 @@ int x, y;
     switch (sel) {
     case 1:
         for (i = 0; i < 3; i++) {
-            F_27EE(x - 1, y + 4 + i, D_5AD2);
-            F_27EE(x - 1, y + 11 + i, D_5AD2);
+            plotvp(x - 1, y + 4 + i, shipcol);
+            plotvp(x - 1, y + 11 + i, shipcol);
         }
-        F_27EE(x - 2, y + 5, D_0DA6);
-        F_27EE(x - 2, y + 6, D_0DA6);
-        F_27EE(x - 2, y + 11, D_0DA6);
-        F_27EE(x - 2, y + 12, D_0DA6);
-        F_27EE(x - 3, y + 6, D_5AD2);
-        F_27EE(x - 3, y + 11, D_5AD2);
+        plotvp(x - 2, y + 5, colline);
+        plotvp(x - 2, y + 6, colline);
+        plotvp(x - 2, y + 11, colline);
+        plotvp(x - 2, y + 12, colline);
+        plotvp(x - 3, y + 6, shipcol);
+        plotvp(x - 3, y + 11, shipcol);
         break;
     case 0:
         for (i = 0; i < 3; i++) {
-            F_27EE(x + 19, y + 4 + i, D_5AD2);
-            F_27EE(x + 19, y + 11 + i, D_5AD2);
+            plotvp(x + 19, y + 4 + i, shipcol);
+            plotvp(x + 19, y + 11 + i, shipcol);
         }
-        F_27EE(x + 20, y + 5, D_0DA6);
-        F_27EE(x + 20, y + 6, D_0DA6);
-        F_27EE(x + 20, y + 11, D_0DA6);
-        F_27EE(x + 20, y + 12, D_0DA6);
-        F_27EE(x + 21, y + 6, D_5AD2);
-        F_27EE(x + 21, y + 11, D_5AD2);
+        plotvp(x + 20, y + 5, colline);
+        plotvp(x + 20, y + 6, colline);
+        plotvp(x + 20, y + 11, colline);
+        plotvp(x + 20, y + 12, colline);
+        plotvp(x + 21, y + 6, shipcol);
+        plotvp(x + 21, y + 11, shipcol);
         break;
     case 2:
         for (i = 0; i < 3; i++) {
-            F_27EE(x + 5 + i, y + 19, D_5AD2);
-            F_27EE(x + 12 + i, y + 19, D_5AD2);
+            plotvp(x + 5 + i, y + 19, shipcol);
+            plotvp(x + 12 + i, y + 19, shipcol);
         }
-        F_27EE(x + 6, y + 20, D_0DA6);
-        F_27EE(x + 7, y + 20, D_0DA6);
-        F_27EE(x + 12, y + 20, D_0DA6);
-        F_27EE(x + 13, y + 20, D_0DA6);
-        F_27EE(x + 7, y + 21, D_5AD2);
-        F_27EE(x + 12, y + 21, D_5AD2);
+        plotvp(x + 6, y + 20, colline);
+        plotvp(x + 7, y + 20, colline);
+        plotvp(x + 12, y + 20, colline);
+        plotvp(x + 13, y + 20, colline);
+        plotvp(x + 7, y + 21, shipcol);
+        plotvp(x + 12, y + 21, shipcol);
         break;
     case 3:
         for (i = 0; i < 3; i++) {
-            F_27EE(x + 5 + i, y - 1, D_5AD2);
-            F_27EE(x + 12 + i, y - 1, D_5AD2);
+            plotvp(x + 5 + i, y - 1, shipcol);
+            plotvp(x + 12 + i, y - 1, shipcol);
         }
-        F_27EE(x + 6, y - 2, D_0DA6);
-        F_27EE(x + 7, y - 2, D_0DA6);
-        F_27EE(x + 12, y - 2, D_0DA6);
-        F_27EE(x + 13, y - 2, D_0DA6);
-        F_27EE(x + 7, y - 3, D_5AD2);
-        F_27EE(x + 12, y - 3, D_5AD2);
+        plotvp(x + 6, y - 2, colline);
+        plotvp(x + 7, y - 2, colline);
+        plotvp(x + 12, y - 2, colline);
+        plotvp(x + 13, y - 2, colline);
+        plotvp(x + 7, y - 3, shipcol);
+        plotvp(x + 12, y - 3, shipcol);
         break;
     }
 }
 
 /* draw ship (sel = facing 0..3) at x,y: big wedge design */
-F_2B7B(sel, x, y)
+exhaust2(sel, x, y)
 unsigned sel;
 int x, y;
 {
@@ -1308,57 +1308,57 @@ int x, y;
     switch (sel) {
     case 1:
         for (i = 0; i < 2; i++) {
-            F_27EE(x - 1 - i, y + 1, D_5AD2);
-            F_27EE(x - 1 - i, y + 2, D_5AD2);
-            F_27EE(x - 1 - i, y + 15, D_5AD2);
-            F_27EE(x - 1 - i, y + 16, D_5AD2);
+            plotvp(x - 1 - i, y + 1, shipcol);
+            plotvp(x - 1 - i, y + 2, shipcol);
+            plotvp(x - 1 - i, y + 15, shipcol);
+            plotvp(x - 1 - i, y + 16, shipcol);
         }
         for (i = 0; i < 4; i++)
-            F_27EE(x - 1, y + 7 + i, D_5AD2);
-        F_27EE(x - 2, y + 6, D_5AD2);
-        F_27EE(x - 2, y + 11, D_5AD2);
+            plotvp(x - 1, y + 7 + i, shipcol);
+        plotvp(x - 2, y + 6, shipcol);
+        plotvp(x - 2, y + 11, shipcol);
         break;
     case 0:
         for (i = 0; i < 2; i++) {
-            F_27EE(x + 17 + i, y + 1, D_5AD2);
-            F_27EE(x + 17 + i, y + 2, D_5AD2);
-            F_27EE(x + 17 + i, y + 15, D_5AD2);
-            F_27EE(x + 17 + i, y + 16, D_5AD2);
+            plotvp(x + 17 + i, y + 1, shipcol);
+            plotvp(x + 17 + i, y + 2, shipcol);
+            plotvp(x + 17 + i, y + 15, shipcol);
+            plotvp(x + 17 + i, y + 16, shipcol);
         }
         for (i = 0; i < 4; i++)
-            F_27EE(x + 17, y + 7 + i, D_5AD2);
-        F_27EE(x + 18, y + 6, D_5AD2);
-        F_27EE(x + 18, y + 11, D_5AD2);
+            plotvp(x + 17, y + 7 + i, shipcol);
+        plotvp(x + 18, y + 6, shipcol);
+        plotvp(x + 18, y + 11, shipcol);
         break;
     case 2:
         for (i = 0; i < 2; i++) {
-            F_27EE(x + i, y + 18, D_5AD2);
-            F_27EE(x + i, y + 19, D_5AD2);
-            F_27EE(x + 14 + i, y + 18, D_5AD2);
-            F_27EE(x + 14 + i, y + 19, D_5AD2);
+            plotvp(x + i, y + 18, shipcol);
+            plotvp(x + i, y + 19, shipcol);
+            plotvp(x + 14 + i, y + 18, shipcol);
+            plotvp(x + 14 + i, y + 19, shipcol);
         }
         for (i = 0; i < 4; i++)
-            F_27EE(x + 6 + i, y + 18, D_5AD2);
-        F_27EE(x + 5, y + 19, D_5AD2);
-        F_27EE(x + 10, y + 19, D_5AD2);
+            plotvp(x + 6 + i, y + 18, shipcol);
+        plotvp(x + 5, y + 19, shipcol);
+        plotvp(x + 10, y + 19, shipcol);
         break;
     case 3:
         for (i = 0; i < 2; i++) {
-            F_27EE(x + i, y, D_5AD2);
-            F_27EE(x + i, y - 1, D_5AD2);
-            F_27EE(x + 14 + i, y, D_5AD2);
-            F_27EE(x + 14 + i, y - 1, D_5AD2);
+            plotvp(x + i, y, shipcol);
+            plotvp(x + i, y - 1, shipcol);
+            plotvp(x + 14 + i, y, shipcol);
+            plotvp(x + 14 + i, y - 1, shipcol);
         }
         for (i = 0; i < 4; i++)
-            F_27EE(x + 6 + i, y, D_5AD2);
-        F_27EE(x + 5, y - 1, D_5AD2);
-        F_27EE(x + 10, y - 1, D_5AD2);
+            plotvp(x + 6 + i, y, shipcol);
+        plotvp(x + 5, y - 1, shipcol);
+        plotvp(x + 10, y - 1, shipcol);
         break;
     }
 }
 
 /* draw ship (sel = facing 0..3) at x,y: second design (alien) */
-F_2EC1(sel, x, y)
+exhaust1(sel, x, y)
 unsigned sel;
 int x, y;
 {
@@ -1367,45 +1367,45 @@ int x, y;
     switch (sel) {
     case 1:
         for (i = 0; i < 2; i++) {
-            F_27EE(x - 1, y + 7 + i, D_5AD2);
-            F_27EE(x - 1, y + 9 + i, D_5AD2);
-            F_27EE(x - 2, y + 8 + i, D_5AD2);
+            plotvp(x - 1, y + 7 + i, shipcol);
+            plotvp(x - 1, y + 9 + i, shipcol);
+            plotvp(x - 2, y + 8 + i, shipcol);
         }
         for (i = 0; i < 6; i++)
-            F_27EE(x - 3, y + 6 + i, D_5AD2);
+            plotvp(x - 3, y + 6 + i, shipcol);
         break;
     case 0:
         for (i = 0; i < 2; i++) {
-            F_27EE(x + 17, y + 7 + i, D_5AD2);
-            F_27EE(x + 17, y + 9 + i, D_5AD2);
-            F_27EE(x + 18, y + 8 + i, D_5AD2);
+            plotvp(x + 17, y + 7 + i, shipcol);
+            plotvp(x + 17, y + 9 + i, shipcol);
+            plotvp(x + 18, y + 8 + i, shipcol);
         }
         for (i = 0; i < 6; i++)
-            F_27EE(x + 19, y + 6 + i, D_5AD2);
+            plotvp(x + 19, y + 6 + i, shipcol);
         break;
     case 2:
         for (i = 0; i < 2; i++) {
-            F_27EE(x + 7 + i, y + 18, D_5AD2);
-            F_27EE(x + 9 + i, y + 18, D_5AD2);
-            F_27EE(x + 8 + i, y + 19, D_5AD2);
+            plotvp(x + 7 + i, y + 18, shipcol);
+            plotvp(x + 9 + i, y + 18, shipcol);
+            plotvp(x + 8 + i, y + 19, shipcol);
         }
         for (i = 0; i < 6; i++)
-            F_27EE(x + 6 + i, y + 20, D_5AD2);
+            plotvp(x + 6 + i, y + 20, shipcol);
         break;
     case 3:
         for (i = 0; i < 2; i++) {
-            F_27EE(x + 7 + i, y, D_5AD2);
-            F_27EE(x + 9 + i, y, D_5AD2);
-            F_27EE(x + 8 + i, y - 1, D_5AD2);
+            plotvp(x + 7 + i, y, shipcol);
+            plotvp(x + 9 + i, y, shipcol);
+            plotvp(x + 8 + i, y - 1, shipcol);
         }
         for (i = 0; i < 6; i++)
-            F_27EE(x + 6 + i, y - 2, D_5AD2);
+            plotvp(x + 6 + i, y - 2, shipcol);
         break;
     }
 }
 
 /* toggle drawing of the alien ship object p: erase (k=0) or draw (k=1) by type */
-F_3109(p, k)
+exhaust(p, k)
 struct obj *p;
 int k;
 {
@@ -1415,29 +1415,29 @@ int k;
     x = p->x;
     y = p->y;
     if (k == 0)
-        D_012C--;
-    if (D_0DE0 && k == 0 || D_0DE0 == 0 && k != 0) {
-        D_0DE0 = !D_0DE0;
+        exhcnt--;
+    if (exhdrawn && k == 0 || exhdrawn == 0 && k != 0) {
+        exhdrawn = !exhdrawn;
         switch (p->type) {
         case 0:
-            F_281F(dir, x, y);
+            exhaust0(dir, x, y);
             break;
         case 1:
-            F_2EC1(dir, x, y);
+            exhaust1(dir, x, y);
             break;
         case 2:
-            F_2B7B(dir, x, y);
+            exhaust2(dir, x, y);
             break;
         }
     }
 }
 
 /* random turn: 1, -1 or 0 */
-F_319F()
+randturn()
 {
     int r;
 
-    r = F_4069(1, 255);
+    r = rndrange(1, 255);
     if (r > 129)
         return 1;
     if (r < 125)
@@ -1445,17 +1445,17 @@ F_319F()
     return 0;
 }
 
-int D_0DE0 = 0, D_0DE2 = 0;
+int exhdrawn = 0, growcnt = 0;
 
 /* alien ship fires at the player (random), may drain shield */
-F_31D7()
+alienfir()
 {
     int a, r, px, py;
 
     a = 321;
-    if (F_4069(1, 200) < 4 && D_0C9A && !D_0C9C && D_0C92) {
-        F_3B46("Alien fires!");
-        r = F_4069(1, 255);
+    if (rndrange(1, 200) < 4 && enemykd && !jumping && enemyx) {
+        msgline("Alien fires!");
+        r = rndrange(1, 255);
         if (r < 64) {
             px = 159;
             py = 135;
@@ -1469,21 +1469,21 @@ F_31D7()
             px = 290;
             py = 79;
         }
-        F_39FC(D_0C92 + D_01F6[D_0C9A] / 2, D_0C94 + D_0204[D_0C9A], px, py, D_2044);
-        F_0411(8);
-        F_3E5E(2);
-        F_39FC(D_0C92 + D_01F6[D_0C9A] / 2, D_0C94 + D_0204[D_0C9A], px, py, 0);
+        drawline(enemyx + hitmaxx[enemykd] / 2, enemyy + hitmaxy[enemykd], px, py, colhigh);
+        playif(8);
+        waittick(2);
+        drawline(enemyx + hitmaxx[enemykd] / 2, enemyy + hitmaxy[enemykd], px, py, 0);
         if (r < 64) {
-            F_3B46("You've been hit!");
-            F_0411(2);
-            if (F_088E() < 321)
-                a = F_088E();
-            F_08C0(a);
-            if (F_088E() == 0) {
-                F_3B46("Thy shield is drained!");
-                F_0F25();
+            msgline("You've been hit!");
+            playif(2);
+            if (getshld() < 321)
+                a = getshld();
+            useshld(a);
+            if (getshld() == 0) {
+                msgline("Thy shield is drained!");
+                die();
             }
         }
-        F_387E(0, 24);
+        arrowr(0, 24);
     }
 }

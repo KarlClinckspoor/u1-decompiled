@@ -8,244 +8,244 @@
 #include <stdio.h>
 
 /* Origin support routines (ORIGIN.ASM) and their data */
-extern int D_082C, D_082E, D_0830;
-extern int F_34BF();
-extern F_3547(), F_4115(), F_40EE(), F_4071(), F_3EC4(), F_3EED(), F_3AD7();
-extern F_35CA(), F_39FC(), F_3D41(), F_352C(), F_3599(), F_3C8B(), F_357C();
-extern F_387E(), F_3920(), F_3F62();
-extern unsigned char F_39C5(), F_3862();
+extern int vidmode, D_082E, vidmarg;
+extern int detvid();
+extern modecga(), modeega(), modetand(), mkrowtab(), clockrnd(), scrlmsg(), gamefram();
+extern fillrect(), drawline(), pixel(), gotoxy(), putstr(), putnum(), putch();
+extern arrowr(), arrowl(), playsnd();
+extern unsigned char waitkey(), upcase();
 /* Lattice library */
 extern F_1D0D();                        /* ONERROR */
 
 /*
  * Initialised data (DGROUP 0124-01B2)
  */
-char *D_013C[] = { "Human", "Elf", "Dwarf", "Bobbit" };        /* race names */
-char *D_0160[] = { "Fighter", "Cleric", "Wizard", "Thief" };   /* class names */
-char *D_0194[] = { "player1.u1", "player2.u1", "player3.u1", "player4.u1" };
-char *D_01A0 = "out";                   /* the game, run with execl */
-char *D_01A4 = "C";                     /* its arguments: video mode (C, E, T) */
-unsigned char *D_01A8 = "0";            /*   and character number */
-int D_01AA[4] = { 0, 0, 0, 0 };         /* which player files exist */
+char *racenam[] = { "Human", "Elf", "Dwarf", "Bobbit" };        /* race names */
+char *classnam[] = { "Fighter", "Cleric", "Wizard", "Thief" };   /* class names */
+char *plfiles[] = { "player1.u1", "player2.u1", "player3.u1", "player4.u1" };
+char *outname = "out";                   /* the game, run with execl */
+char *vidarg = "C";                     /* its arguments: video mode (C, E, T) */
+unsigned char *slotarg = "0";            /*   and character number */
+int slotused[4] = { 0, 0, 0, 0 };         /* which player files exist */
 
 /*
  * The character record, written to playerN.u1 in two blocks (DGROUP 0A30-0DB0)
  */
-char D_0A30[16];                        /* name */
-int D_0A40;                             /* race */
-int D_0A42;                             /* class */
-int D_0A44;                             /* sex */
-int D_0A46[7];                          /* hit points, then Str Agi Sta Cha Wis Int */
-int D_0A54, D_0A56, D_0A58, D_0A5A, D_0A5C, D_0A5E, D_0A60, D_0A62;
-int D_0A64, D_0A66, D_0A68;
-int D_0A6A[9];
-int D_0A7C[4];
-int D_0A84[6];
-int D_0A90[16];
-int D_0AB0[11];
-int D_0AC6[8];
-int D_0AD6, D_0AD8, D_0ADA;
-long D_0ADC;
-int D_0AE0[2];
-int D_0AE4, D_0AE6, D_0AE8, D_0AEA;     /* second block: 0x280 bytes from D_0AE4 */
-int D_0AEC[316];
-char D_0D64[4][15];                     /* names of the saved characters */
-int D_0DA0;                             /* points left to distribute */
+char plname[16];                        /* name */
+int plrace;                             /* race */
+int plclass;                             /* class */
+int plsex;                             /* sex */
+int plstat[7];                          /* hit points, then Str Agi Sta Cha Wis Int */
+int plcoin, plexp, plfood, rdyweap, rdyspel, rdyarm, plveh, plseed;
+int worldx, worldy, plnoise;
+int plquest[9];
+int gems[4];
+int ownarm[6];
+int ownweap[16];
+int ownspel[11];
+int ownveh[8];
+int plkills, lastmnmt, savlast;
+long savturns;
+int shuttle[2];
+int objtype, objterr, objx, objy;     /* second block: 0x280 bytes from objtype */
+int objrest[316];
+char rosternm[4][15];                     /* names of the saved characters */
+int ptsleft;                             /* points left to distribute */
 int D_0DA2;
-int D_0DA4;                             /* number of saved characters */
-int D_0DA6, D_0DA8, D_0DAA, D_0DAC;     /* colours */
-int D_0DAE;                             /* forced CGA (command line "C") */
+int nsaved;                             /* number of saved characters */
+int colline, colfill, colhigh, coltext;     /* colours */
+int forcecga;                             /* forced CGA (command line "C") */
 
-/* pick colours for the machine type (F_34BF: BIOS model byte) and, if setmode,
-   switch to the graphics mode in D_082C (0 CGA, 1 EGA, 2 Tandy/PCjr) */
-F_03E9(setmode)
+/* pick colours for the machine type (detvid: BIOS model byte) and, if setmode,
+   switch to the graphics mode in vidmode (0 CGA, 1 EGA, 2 Tandy/PCjr) */
+setvid(setmode)
 int setmode;
 {
-    switch (F_34BF()) {
+    switch (detvid()) {
     case 0:
-        D_0DA6 = 3;
-        D_0DA8 = 2;
-        D_0DAA = 1;
-        D_0DAC = 3;
+        colline = 3;
+        colfill = 2;
+        colhigh = 1;
+        coltext = 3;
         D_082E = 6;
         break;
     case 1:
     case 2:
-        D_0DA6 = 15;
-        D_0DA8 = 1;
-        D_0DAA = 12;
-        D_0DAC = 11;
+        colline = 15;
+        colfill = 1;
+        colhigh = 12;
+        coltext = 11;
         D_082E = 7;
         break;
     }
-    if (D_0DAE) {
-        D_082C = 0;
-        D_0DA6 = 3;
-        D_0DA8 = 2;
-        D_0DAA = 1;
+    if (forcecga) {
+        vidmode = 0;
+        colline = 3;
+        colfill = 2;
+        colhigh = 1;
     }
-    F_4071();
+    mkrowtab();
     if (setmode) {
-        if (D_082C == 0)
-            F_3547();
-        else if (D_082C == 1)
-            F_4115();
-        else if (D_082C == 2)
-            F_40EE();
+        if (vidmode == 0)
+            modecga();
+        else if (vidmode == 1)
+            modeega();
+        else if (vidmode == 2)
+            modetand();
     }
 }
 
 /* rounded corners of the border */
-F_048A()
+bordcorn()
 {
     int i;
 
     for (i = 1; i <= 4; i++) {
-        F_39FC(i, 0, 0, i, 0);
-        F_39FC(0x13f - i, 0, 0x13f, i, 0);
-        F_39FC(0, 0xc7 - i, i, 0xc7, 0);
-        F_39FC(0x13f, 0xc7 - i, 0x13f - i, 0xc7, 0);
+        drawline(i, 0, 0, i, 0);
+        drawline(0x13f - i, 0, 0x13f, i, 0);
+        drawline(0, 0xc7 - i, i, 0xc7, 0);
+        drawline(0x13f, 0xc7 - i, 0x13f - i, 0xc7, 0);
     }
-    F_3D41(0, 0, 0);
-    F_3D41(0, 5, 0);
-    F_3D41(5, 0, 0);
-    F_3D41(0x13f, 0, 0);
-    F_3D41(0x13a, 0, 0);
-    F_3D41(0x13f, 5, 0);
-    F_3D41(0, 0xc7, 0);
-    F_3D41(0, 0xc2, 0);
-    F_3D41(5, 0xc7, 0);
-    F_3D41(0x13f, 0xc7, 0);
-    F_3D41(0x13f, 0xc2, 0);
-    F_3D41(0x13a, 0xc7, 0);
+    pixel(0, 0, 0);
+    pixel(0, 5, 0);
+    pixel(5, 0, 0);
+    pixel(0x13f, 0, 0);
+    pixel(0x13a, 0, 0);
+    pixel(0x13f, 5, 0);
+    pixel(0, 0xc7, 0);
+    pixel(0, 0xc2, 0);
+    pixel(5, 0xc7, 0);
+    pixel(0x13f, 0xc7, 0);
+    pixel(0x13f, 0xc2, 0);
+    pixel(0x13a, 0xc7, 0);
 }
 
 /* draw the screen border */
-F_05B2()
+drawbord()
 {
-    F_35CA(0, 0, 0x13c, 6, D_0DA8);
-    F_35CA(0, 6, 6, 0xc7, D_0DA8);
-    F_35CA(0x139, 2, 0x13f, 0xc7, D_0DA8);
-    F_35CA(0, 0xc1, 0x13f, 0xc7, D_0DA8);
-    F_39FC(7, 7, 0x138, 7, D_0DA6);
-    F_39FC(7, 7, 7, 0xc0, D_0DA6);
-    F_39FC(0x138, 7, 0x138, 0xc0, D_0DA6);
-    F_39FC(7, 0xc0, 0x138, 0xc0, D_0DA6);
-    F_048A();
+    fillrect(0, 0, 0x13c, 6, colfill);
+    fillrect(0, 6, 6, 0xc7, colfill);
+    fillrect(0x139, 2, 0x13f, 0xc7, colfill);
+    fillrect(0, 0xc1, 0x13f, 0xc7, colfill);
+    drawline(7, 7, 0x138, 7, colline);
+    drawline(7, 7, 7, 0xc0, colline);
+    drawline(0x138, 7, 0x138, 0xc0, colline);
+    drawline(7, 0xc0, 0x138, 0xc0, colline);
+    bordcorn();
 }
 
 /* clear the inside of the frame and draw the title bar */
-F_0670()
+clrframe()
 {
-    F_35CA(8, 8, 0x137, 0xbf, 0);
-    F_35CA(0x1e, 0, 0x12c, 6, D_0DA8);
-    F_39FC(0x1e, 7, 0x12c, 7, D_0DA6);
+    fillrect(8, 8, 0x137, 0xbf, 0);
+    fillrect(0x1e, 0, 0x12c, 6, colfill);
+    drawline(0x1e, 7, 0x12c, 7, colline);
 }
 
 /* main menu: generate new character / continue previous game / quit */
-unsigned char F_06BB()
+unsigned char mainmenu()
 {
     unsigned char c;
 
-    F_352C(12, 6);
-    F_3599("*** Ultima I ***", D_0DA6);
-    F_352C(14, 9);
-    F_3599("from darkest", D_0DA6);
-    F_352C(14, 10);
-    F_3599("dungeons, to", D_0DA6);
-    F_352C(13, 11);
-    F_3599("deepest space!", D_0DA6);
-    F_352C(8, 14);
-    F_3599("a) Generate new character", D_0DAC);
-    F_352C(8, 15);
-    F_3599("b) Continue previous game", D_0DAC);
-    F_352C(13, 18);
-    F_3599("Thy choice: ", D_0DAC);
+    gotoxy(12, 6);
+    putstr("*** Ultima I ***", colline);
+    gotoxy(14, 9);
+    putstr("from darkest", colline);
+    gotoxy(14, 10);
+    putstr("dungeons, to", colline);
+    gotoxy(13, 11);
+    putstr("deepest space!", colline);
+    gotoxy(8, 14);
+    putstr("a) Generate new character", coltext);
+    gotoxy(8, 15);
+    putstr("b) Continue previous game", coltext);
+    gotoxy(13, 18);
+    putstr("Thy choice: ", coltext);
     do
-        c = F_3862(F_39C5(D_0DAC));
+        c = upcase(waitkey(coltext));
     while (c != 'A' && c != 'B' && c != 'Q');
     return c;
 }
 
 /* print the value of attribute n */
-F_07A8(n)
+showattr(n)
 int n;
 {
-    F_352C(0x1c, n + 5);
-    F_3C8B(D_0A46[n], 2, ' ', D_0DAC, 0);
+    gotoxy(0x1c, n + 5);
+    putnum(plstat[n], 2, ' ', coltext, 0);
 }
 
 /* choose the race; adjusts attributes, returns 0..3 */
-F_07E2()
+pickrace()
 {
     int done, race;
 
-    F_35CA(0x30, 0x20, 0x12c, 0x28, 0);
-    F_35CA(0xe, 0x80, 0x12e, 0xb0, 0);
-    F_352C(3, 0x11);
-    F_3599("Select thy race: ", D_0DAC);
-    F_352C(12, 0x13);
-    F_3599("a) Human", D_0DAC);
-    F_352C(12, 0x14);
-    F_3599("b) Elf", D_0DAC);
-    F_352C(12, 0x15);
-    F_3599("c) Dwarf", D_0DAC);
-    F_352C(12, 0x16);
-    F_3599("d) Bobbit", D_0DAC);
-    F_352C(0x14, 0x11);
+    fillrect(0x30, 0x20, 0x12c, 0x28, 0);
+    fillrect(0xe, 0x80, 0x12e, 0xb0, 0);
+    gotoxy(3, 0x11);
+    putstr("Select thy race: ", coltext);
+    gotoxy(12, 0x13);
+    putstr("a) Human", coltext);
+    gotoxy(12, 0x14);
+    putstr("b) Elf", coltext);
+    gotoxy(12, 0x15);
+    putstr("c) Dwarf", coltext);
+    gotoxy(12, 0x16);
+    putstr("d) Bobbit", coltext);
+    gotoxy(0x14, 0x11);
     do {
-        switch (F_3862(F_39C5(D_0DAC))) {
+        switch (upcase(waitkey(coltext))) {
         case 'A':
             race = 0;
-            D_0A46[6] += 5;
-            F_07A8(6);
+            plstat[6] += 5;
+            showattr(6);
             done = 1;
             break;
         case 'B':
             race = 1;
-            D_0A46[2] += 5;
-            F_07A8(2);
+            plstat[2] += 5;
+            showattr(2);
             done = 1;
             break;
         case 'C':
             race = 2;
-            D_0A46[1] += 5;
-            F_07A8(1);
+            plstat[1] += 5;
+            showattr(1);
             done = 1;
             break;
         case 'D':
             race = 3;
-            D_0A46[5] += 10;
-            D_0A46[1] -= 5;
-            F_07A8(5);
-            F_07A8(1);
+            plstat[5] += 10;
+            plstat[1] -= 5;
+            showattr(5);
+            showattr(1);
             done = 1;
             break;
         default:
             done = 0;
         }
     } while (!done);
-    F_352C(0xe, 0xd);
-    F_3599("Race: ", D_0DAC);
-    F_3599(D_013C[race], D_0DAC);
+    gotoxy(0xe, 0xd);
+    putstr("Race: ", coltext);
+    putstr(racenam[race], coltext);
     return race;
 }
 
 /* choose the sex, returns 0 male, 1 female */
-F_0995()
+picksex()
 {
     int done, sex;
 
-    F_35CA(0x18, 0x91, 0x12c, 0xb8, 0);
-    F_352C(3, 0x11);
-    F_3599("Select thy sex: ", D_0DAC);
-    F_352C(12, 0x13);
-    F_3599("a) Male", D_0DAC);
-    F_352C(12, 0x14);
-    F_3599("b) Female", D_0DAC);
-    F_352C(0x13, 0x11);
+    fillrect(0x18, 0x91, 0x12c, 0xb8, 0);
+    gotoxy(3, 0x11);
+    putstr("Select thy sex: ", coltext);
+    gotoxy(12, 0x13);
+    putstr("a) Male", coltext);
+    gotoxy(12, 0x14);
+    putstr("b) Female", coltext);
+    gotoxy(0x13, 0x11);
     do {
-        switch (F_3862(F_39C5(D_0DAC))) {
+        switch (upcase(waitkey(coltext))) {
         case 'A':
             sex = 0;
             done = 1;
@@ -258,124 +258,124 @@ F_0995()
             done = 0;
         }
     } while (!done);
-    F_352C(0xf, 0xe);
-    F_3599("Sex: ", D_0DAC);
+    gotoxy(0xf, 0xe);
+    putstr("Sex: ", coltext);
     if (sex == 0)
-        F_3599("Male", D_0DAC);
+        putstr("Male", coltext);
     else
-        F_3599("Female", D_0DAC);
+        putstr("Female", coltext);
     return sex;
 }
 
 /* choose the class; adjusts attributes, returns 0..3 */
-F_0A91()
+pickclas()
 {
     int done, cls;
 
-    F_35CA(0x18, 0x91, 0x12c, 0xb8, 0);
-    F_352C(3, 0x11);
-    F_3599("Select thy class: ", D_0DAC);
-    F_352C(12, 0x13);
-    F_3599("a) Fighter", D_0DAC);
-    F_352C(12, 0x14);
-    F_3599("b) Cleric", D_0DAC);
-    F_352C(12, 0x15);
-    F_3599("c) Wizard", D_0DAC);
-    F_352C(12, 0x16);
-    F_3599("d) Thief", D_0DAC);
-    F_352C(0x15, 0x11);
+    fillrect(0x18, 0x91, 0x12c, 0xb8, 0);
+    gotoxy(3, 0x11);
+    putstr("Select thy class: ", coltext);
+    gotoxy(12, 0x13);
+    putstr("a) Fighter", coltext);
+    gotoxy(12, 0x14);
+    putstr("b) Cleric", coltext);
+    gotoxy(12, 0x15);
+    putstr("c) Wizard", coltext);
+    gotoxy(12, 0x16);
+    putstr("d) Thief", coltext);
+    gotoxy(0x15, 0x11);
     do {
-        switch (F_3862(F_39C5(D_0DAC))) {
+        switch (upcase(waitkey(coltext))) {
         case 'A':
             cls = 0;
-            D_0A46[1] += 10;
-            D_0A46[2] += 10;
-            F_07A8(1);
-            F_07A8(2);
+            plstat[1] += 10;
+            plstat[2] += 10;
+            showattr(1);
+            showattr(2);
             done = 1;
             break;
         case 'B':
             cls = 1;
-            D_0A46[5] += 10;
-            F_07A8(5);
+            plstat[5] += 10;
+            showattr(5);
             done = 1;
             break;
         case 'C':
             cls = 2;
-            D_0A46[6] += 10;
-            F_07A8(6);
+            plstat[6] += 10;
+            showattr(6);
             done = 1;
             break;
         case 'D':
             cls = 3;
-            D_0A46[2] += 10;
-            F_07A8(2);
+            plstat[2] += 10;
+            showattr(2);
             done = 1;
             break;
         default:
             done = 0;
         }
     } while (!done);
-    F_352C(0xd, 0xf);
-    F_3599("Class: ", D_0DAC);
-    F_3599(D_0160[cls], D_0DAC);
+    gotoxy(0xd, 0xf);
+    putstr("Class: ", coltext);
+    putstr(classnam[cls], coltext);
     return cls;
 }
 
-/* read the character's name into D_0A30 */
-F_0C2C()
+/* read the character's name into plname */
+readname()
 {
     int done, len;
     unsigned char c;
 
     len = done = 0;
-    F_35CA(0x18, 0x80, 0x12c, 0xb8, 0);
-    F_352C(3, 0x11);
-    F_3599("Enter thy name: ", D_0DAC);
+    fillrect(0x18, 0x80, 0x12c, 0xb8, 0);
+    gotoxy(3, 0x11);
+    putstr("Enter thy name: ", coltext);
     do {
-        c = F_39C5(D_0DAC);
+        c = waitkey(coltext);
         if (c > ' ' && len < 14 || c == ' ' && len != 0 && len < 14) {
-            D_0A30[len] = c;
+            plname[len] = c;
             len++;
-            F_357C(c, D_0DAC);
+            putch(c, coltext);
         } else if ((c == 1 || c == 8) && len != 0) {
             len--;
-            F_352C(len + 0x13, 0x11);
+            gotoxy(len + 0x13, 0x11);
         } else if (c == '\r' && len != 0) {
-            D_0A30[len] = 0;
+            plname[len] = 0;
             done = 1;
         }
     } while (!done);
-    F_352C(12, 4);
-    F_3599(D_0A30, D_0DAC);
+    gotoxy(12, 4);
+    putstr(plname, coltext);
 }
 
 /* title bar text */
-F_0D18()
+titlebar()
 {
-    F_387E(8, 0);
-    F_3599(" Character Generation ", D_0DA6);
-    F_3920(0x1f, 0);
+    arrowr(8, 0);
+    putstr(" Character Generation ", colline);
+    arrowl(0x1f, 0);
 }
 
-/* graphics driver call 1 (dispatch table in F_3F62) */
-F_0D42()
+/* graphics driver call 1 (dispatch table in playsnd) */
+beep()
 {
-    F_3F62(1);
+    playsnd(1);
 }
 
 /* ask whether to save the character: 1 yes, 0 no */
-F_0D50()
+asksave()
 {
     unsigned char c;
 
-    F_35CA(0x18, 0x80, 0x12c, 0xb8, 0);
-    F_352C(3, 0x16);
-    F_3599("Save this character? (Y-N) ", D_0DAC);
+    fillrect(0x18, 0x80, 0x12c, 0xb8, 0);
+    gotoxy(3, 0x16);
+    putstr("Save this character? (Y-N) ", coltext);
     for (;;) {
-        c = F_3862(F_39C5(D_0DAC));
+        c = upcase(waitkey(coltext));
         if (c == 'Y') {
-            F_3599("Yes", D_0DAC);
+            putstr("Yes", coltext);
             return 1;
         }
         if (c == 'N')
@@ -384,107 +384,107 @@ F_0D50()
 }
 
 /* erase the cursor marks around attribute line n */
-F_0DC2(n)
+curoff(n)
 int n;
 {
-    F_352C(0xb, n + 5);
-    F_3599(" ", D_0DAC);
-    F_352C(0x1e, n + 5);
-    F_3599(" ", D_0DAC);
+    gotoxy(0xb, n + 5);
+    putstr(" ", coltext);
+    gotoxy(0x1e, n + 5);
+    putstr(" ", coltext);
 }
 
 /* draw the cursor marks around attribute line n */
-F_0E07(n)
+curon(n)
 int n;
 {
-    F_387E(0xb, n + 5);
-    F_3920(0x1e, n + 5);
+    arrowr(0xb, n + 5);
+    arrowl(0x1e, n + 5);
 }
 
 /* decrease attribute n (not below 10); 1 if done */
-F_0E32(n)
+attrdec(n)
 int n;
 {
-    if (D_0A46[n] > 10) {
-        D_0A46[n]--;
-        F_07A8(n);
+    if (plstat[n] > 10) {
+        plstat[n]--;
+        showattr(n);
         return 1;
     }
     return 0;
 }
 
 /* increase attribute n (not above 25, needs points left); 1 if done */
-F_0E61(n)
+attrinc(n)
 int n;
 {
-    if (D_0A46[n] < 25 && D_0DA0) {
-        D_0A46[n]++;
-        F_07A8(n);
+    if (plstat[n] < 25 && ptsleft) {
+        plstat[n]++;
+        showattr(n);
         return 1;
     }
     return 0;
 }
 
 /* move the cursor up one attribute (wraps) */
-F_0E9E(n)
+curup(n)
 int n;
 {
-    F_0DC2(n);
+    curoff(n);
     n--;
     if (n < 1)
         n = 6;
-    F_0E07(n);
+    curon(n);
     return n;
 }
 
 /* move the cursor down one attribute (wraps) */
-F_0ECA(n)
+curdown(n)
 int n;
 {
-    F_0DC2(n);
+    curoff(n);
     n++;
     if (n > 6)
         n = 1;
-    F_0E07(n);
+    curon(n);
     return n;
 }
 
 /* attribute screen: labels, help text, all attributes to 10 */
-F_0EF6()
+attrscr()
 {
     int i;
 
-    F_35CA(10, 10, 0x136, 0xb9, 0);
-    F_352C(6, 4);
-    F_3599("Points left to distribute:", D_0DAC);
-    F_352C(12, 6);
-    F_3599("Strength........10", D_0DAC);
-    F_352C(12, 7);
-    F_3599("Agility.........10", D_0DAC);
-    F_352C(12, 8);
-    F_3599("Stamina.........10", D_0DAC);
-    F_352C(12, 9);
-    F_3599("Charisma........10", D_0DAC);
-    F_352C(12, 10);
-    F_3599("Wisdom..........10", D_0DAC);
-    F_352C(12, 11);
-    F_3599("Intelligence....10", D_0DAC);
-    F_352C(2, 0x10);
-    F_3599("Move cursor with up and down arrows;", D_0DAC);
-    F_352C(2, 0x11);
-    F_3599("increase and decrease attributes", D_0DAC);
-    F_352C(2, 0x12);
-    F_3599("with left and right arrows.  Press", D_0DAC);
-    F_352C(2, 0x13);
-    F_3599("space bar when finished, or escape", D_0DAC);
-    F_352C(2, 0x14);
-    F_3599("to return to the main menu.", D_0DAC);
+    fillrect(10, 10, 0x136, 0xb9, 0);
+    gotoxy(6, 4);
+    putstr("Points left to distribute:", coltext);
+    gotoxy(12, 6);
+    putstr("Strength........10", coltext);
+    gotoxy(12, 7);
+    putstr("Agility.........10", coltext);
+    gotoxy(12, 8);
+    putstr("Stamina.........10", coltext);
+    gotoxy(12, 9);
+    putstr("Charisma........10", coltext);
+    gotoxy(12, 10);
+    putstr("Wisdom..........10", coltext);
+    gotoxy(12, 11);
+    putstr("Intelligence....10", coltext);
+    gotoxy(2, 0x10);
+    putstr("Move cursor with up and down arrows;", coltext);
+    gotoxy(2, 0x11);
+    putstr("increase and decrease attributes", coltext);
+    gotoxy(2, 0x12);
+    putstr("with left and right arrows.  Press", coltext);
+    gotoxy(2, 0x13);
+    putstr("space bar when finished, or escape", coltext);
+    gotoxy(2, 0x14);
+    putstr("to return to the main menu.", coltext);
     for (i = 1; i <= 6; i++)
-        D_0A46[i] = 10;
+        plstat[i] = 10;
 }
 
 /* Character generation screen: build a character and save it to slot */
-F_106A(slot)
+chargen(slot)
 int slot;
 {
     int sel, done, esc, j, n;
@@ -492,99 +492,99 @@ int slot;
     FILE *fp;
 
     do {
-        F_0D18();
-        F_0EF6();
-        F_0E07(sel = 1);
-        D_0DA0 = 30;
+        titlebar();
+        attrscr();
+        curon(sel = 1);
+        ptsleft = 30;
         done = esc = 0;
         do {
-            F_352C(32, 4);
-            F_3C8B(D_0DA0, 3, 32, D_0DAC, 0);
-            switch (F_39C5(0)) {
+            gotoxy(32, 4);
+            putnum(ptsleft, 3, 32, coltext, 0);
+            switch (waitkey(0)) {
             case 1:
-                if (F_0E32(sel))
-                    D_0DA0++;
+                if (attrdec(sel))
+                    ptsleft++;
                 break;
             case 2:
-                if (F_0E61(sel))
-                    D_0DA0--;
+                if (attrinc(sel))
+                    ptsleft--;
                 break;
             case 3:
-                sel = F_0E9E(sel);
+                sel = curup(sel);
                 break;
             case 4:
-                sel = F_0ECA(sel);
+                sel = curdown(sel);
                 break;
             case 0x1b:
                 esc = 1;
                 break;
             case ' ':
-                if (!(done = (D_0DA0 == 0)))
-                    F_0D42();
+                if (!(done = (ptsleft == 0)))
+                    beep();
                 break;
             }
         } while (!done && !esc);
         if (esc)
             break;
-        F_0DC2(sel);
-        D_0A40 = F_07E2();
-        D_0A44 = F_0995();
-        D_0A42 = F_0A91();
-        F_0C2C();
-        if (done = F_0D50()) {
-            D_0A62 = F_3EC4() + D_0A46[5] + D_0A42;
-            D_0A46[0] = 150;
-            D_0A54 = 100;
-            D_0A56 = 0;
-            D_0A58 = 200;
-            D_0A5A = 1;
-            D_0A5C = 0;
-            D_0A5E = 1;
-            D_0A60 = 0;
-            D_0A64 = 49;
-            D_0A66 = 40;
-            D_0A68 = 1;
+        curoff(sel);
+        plrace = pickrace();
+        plsex = picksex();
+        plclass = pickclas();
+        readname();
+        if (done = asksave()) {
+            plseed = clockrnd() + plstat[5] + plclass;
+            plstat[0] = 150;
+            plcoin = 100;
+            plexp = 0;
+            plfood = 200;
+            rdyweap = 1;
+            rdyspel = 0;
+            rdyarm = 1;
+            plveh = 0;
+            worldx = 49;
+            worldy = 40;
+            plnoise = 1;
             for (sel = 1; sel <= 8; sel++)
-                D_0A6A[sel] = 0;
+                plquest[sel] = 0;
             for (sel = 0; sel <= 3; sel++)
-                D_0A7C[sel] = 0;
-            D_0AB0[0] = -1;
+                gems[sel] = 0;
+            ownspel[0] = -1;
             for (sel = 1; sel <= 10; sel++)
-                D_0AB0[sel] = 0;
-            D_0A84[0] = -1;
-            D_0A84[1] = 1;
+                ownspel[sel] = 0;
+            ownarm[0] = -1;
+            ownarm[1] = 1;
             for (sel = 2; sel <= 5; sel++)
-                D_0A84[sel] = 0;
-            D_0A90[0] = -1;
-            D_0A90[1] = 2;
+                ownarm[sel] = 0;
+            ownweap[0] = -1;
+            ownweap[1] = 2;
             for (sel = 2; sel <= 15; sel++)
-                D_0A90[sel] = 0;
-            D_0AC6[0] = -1;
+                ownweap[sel] = 0;
+            ownveh[0] = -1;
             for (sel = 1; sel <= 7; sel++)
-                D_0AC6[sel] = 0;
-            D_0AD6 = 0;
-            D_0ADA = 0;
-            D_0ADC = 0;
-            D_0AD8 = -1;
-            D_0AE4 = 10;
-            D_0AE6 = 1;
-            D_0AE8 = D_0A64;
-            D_0AEA = D_0A66;
-            if ((fp = fopen(D_0194[slot], "wb")) != NULL) {
-                n = fwrite((char *)&D_0A30, 0xb4, 1, fp);
-                n = fwrite((char *)&D_0AE4, 0x280, 1, fp);
+                ownveh[sel] = 0;
+            plkills = 0;
+            savlast = 0;
+            savturns = 0;
+            lastmnmt = -1;
+            objtype = 10;
+            objterr = 1;
+            objx = worldx;
+            objy = worldy;
+            if ((fp = fopen(plfiles[slot], "wb")) != NULL) {
+                n = fwrite((char *)&plname, 0xb4, 1, fp);
+                n = fwrite((char *)&objtype, 0x280, 1, fp);
                 fclose(fp);
-                D_01AA[slot] = 1;
-                D_0DA4++;
+                slotused[slot] = 1;
+                nsaved++;
                 for (j = 0; j <= 14; j++)
-                    D_0D64[slot][j] = D_0A30[j];
+                    rosternm[slot][j] = plname[j];
             } else {
-                F_352C(7, 18);
-                F_3599("Error writing out character", D_0DAA);
-                F_352C(14, 19);
-                F_3599("Press RETURN", D_0DAA);
+                gotoxy(7, 18);
+                putstr("Error writing out character", colhigh);
+                gotoxy(14, 19);
+                putstr("Press RETURN", colhigh);
                 do {
-                    c = F_39C5(D_0DAA);
+                    c = waitkey(colhigh);
                 } while (c != '\r');
             }
         }
@@ -592,30 +592,30 @@ int slot;
 }
 
 /* Load the names of the saved characters (player1..4.u1) */
-F_13B2()
+ldnames()
 {
     int i, n;
     FILE *fp;
 
-    D_0DA4 = 0;
+    nsaved = 0;
     for (i = 0; i <= 3; i++) {
-        if ((fp = fopen(D_0194[i], "rb")) != NULL) {
-            n = fread(D_0D64[i], 15, 1, fp);
+        if ((fp = fopen(plfiles[i], "rb")) != NULL) {
+            n = fread(rosternm[i], 15, 1, fp);
             fclose(fp);
-            D_01AA[i] = 1;
-            D_0DA4++;
+            slotused[i] = 1;
+            nsaved++;
         }
     }
 }
 
 /* Return the first free roster slot, or -1 */
-F_1423()
+freeslot()
 {
     int i;
 
     i = 0;
     do {
-        if (D_01AA[i] == 0)
+        if (slotused[i] == 0)
             return i;
         i++;
     } while (i < 4);
@@ -623,40 +623,40 @@ F_1423()
 }
 
 /* Print the roster: "n) name" for the four slots */
-F_1455()
+showrost()
 {
     int i;
 
     for (i = 0; i <= 3; i++) {
-        F_352C(15, i + 6);
-        F_3C8B(i + 1, 1, 32, D_0DA6, 1);
-        F_3599(") ", D_0DA6);
-        F_3599(D_0D64[i], D_0DA6);
+        gotoxy(15, i + 6);
+        putnum(i + 1, 1, 32, colline, 1);
+        putstr(") ", colline);
+        putstr(rosternm[i], colline);
     }
 }
 
 /* Roster full: ask which character to replace; returns slot or -1 */
-F_14BB()
+askrepl()
 {
     unsigned char c;
 
-    F_35CA(10, 10, 300, 180, 0);
-    F_387E(8, 0);
-    F_3599(" Character Replacement ", D_0DA6);
-    F_3920(32, 0);
-    F_1455();
-    F_352C(4, 14);
-    F_3599("The roster is full.  Type the", D_0DAC);
-    F_352C(4, 15);
-    F_3599("number of the character to wish", D_0DAC);
-    F_352C(4, 16);
-    F_3599("to replace with a new one.", D_0DAC);
-    F_352C(4, 17);
-    F_3599("Press ESCAPE to return to the", D_0DAC);
-    F_352C(4, 18);
-    F_3599("main menu...", D_0DAC);
+    fillrect(10, 10, 300, 180, 0);
+    arrowr(8, 0);
+    putstr(" Character Replacement ", colline);
+    arrowl(32, 0);
+    showrost();
+    gotoxy(4, 14);
+    putstr("The roster is full.  Type the", coltext);
+    gotoxy(4, 15);
+    putstr("number of the character to wish", coltext);
+    gotoxy(4, 16);
+    putstr("to replace with a new one.", coltext);
+    gotoxy(4, 17);
+    putstr("Press ESCAPE to return to the", coltext);
+    gotoxy(4, 18);
+    putstr("main menu...", coltext);
     do {
-        c = F_39C5(D_0DAC);
+        c = waitkey(coltext);
         if (c >= '1' && c < '5')
             return c - '1';
     } while (c != 0x1b);
@@ -664,93 +664,93 @@ F_14BB()
 }
 
 /* Ask for the Ultima I diskette */
-F_15B3()
+askdisk()
 {
-    F_3EED();
-    F_352C(1, 23);
-    F_3599("Insert Ultima I diskette", D_0DAC);
-    F_352C(1, 24);
-    F_3599("Hit space to continue...", D_0DAC);
-    while (F_39C5(D_0DAC) != ' ')
+    scrlmsg();
+    gotoxy(1, 23);
+    putstr("Insert Ultima I diskette", coltext);
+    gotoxy(1, 24);
+    putstr("Hit space to continue...", coltext);
+    while (waitkey(coltext) != ' ')
         ;
-    F_352C(1, 23);
-    F_3599("                        ", D_0DAC);
-    F_352C(1, 24);
-    F_3599("                        ", D_0DAC);
-    F_352C(1, 23);
+    gotoxy(1, 23);
+    putstr("                        ", coltext);
+    gotoxy(1, 24);
+    putstr("                        ", coltext);
+    gotoxy(1, 23);
 }
 
 /* Run the game (OUT.EXE) with video mode and character number */
-F_1643(n)
+runout(n)
 int n;
 {
-    if (D_082C == 1)
-        *D_01A4 = 'E';
-    else if (D_082C == 2)
-        *D_01A4 = 'T';
+    if (vidmode == 1)
+        *vidarg = 'E';
+    else if (vidmode == 2)
+        *vidarg = 'T';
     {
         register unsigned char *num;    /* the character number argument */
 
-        num = D_01A8;
+        num = slotarg;
         *num += n;
     }
-    F_35CA(0, 0, 319, 199, 0);
-    F_3AD7();
-    F_352C(11, 8);
-    F_3599("Please wait whilst", D_0DA6);
-    F_352C(13, 10);
-    F_3599("thy game loads", D_0DA6);
+    fillrect(0, 0, 319, 199, 0);
+    gamefram();
+    gotoxy(11, 8);
+    putstr("Please wait whilst", colline);
+    gotoxy(13, 10);
+    putstr("thy game loads", colline);
     for (;;) {
         int rc;
 
-        rc = execl(D_01A0, D_01A0, D_01A4, D_01A8, 0);
-        F_15B3();
+        rc = execl(outname, outname, vidarg, slotarg, 0);
+        askdisk();
     }
 }
 
 /* Continue previous game: pick a saved character and start the game */
-F_16DC()
+contgame()
 {
     unsigned char c;
 
-    F_35CA(10, 10, 309, 189, 0);
-    F_387E(9, 0);
-    F_3599(" Character Selection ", D_0DA6);
-    F_3920(31, 0);
-    if (D_0DA4 == 0) {
-        F_352C(4, 10);
-        F_3599("There are no Ultima I characters", D_0DA6);
-        F_352C(4, 11);
-        F_3599("saved on this disk.  Press RETURN", D_0DA6);
-        F_352C(4, 12);
-        F_3599("to generate a character or ESCAPE", D_0DA6);
-        F_352C(4, 13);
-        F_3599("to return to the main menu...", D_0DA6);
+    fillrect(10, 10, 309, 189, 0);
+    arrowr(9, 0);
+    putstr(" Character Selection ", colline);
+    arrowl(31, 0);
+    if (nsaved == 0) {
+        gotoxy(4, 10);
+        putstr("There are no Ultima I characters", colline);
+        gotoxy(4, 11);
+        putstr("saved on this disk.  Press RETURN", colline);
+        gotoxy(4, 12);
+        putstr("to generate a character or ESCAPE", colline);
+        gotoxy(4, 13);
+        putstr("to return to the main menu...", colline);
         do {
-            c = F_39C5(D_0DA6);
+            c = waitkey(colline);
         } while (c != '\r' && c != 0x1b);
         if (c == '\r')
-            F_106A(0);
+            chargen(0);
     } else {
-        F_1455();
-        F_352C(4, 14);
-        F_3599("Type number of character you wish", D_0DAC);
-        F_352C(4, 15);
-        F_3599("to use in Ultima I.  Press ESCAPE", D_0DAC);
-        F_352C(4, 16);
-        F_3599("to go to the main menu...", D_0DAC);
+        showrost();
+        gotoxy(4, 14);
+        putstr("Type number of character you wish", coltext);
+        gotoxy(4, 15);
+        putstr("to use in Ultima I.  Press ESCAPE", coltext);
+        gotoxy(4, 16);
+        putstr("to go to the main menu...", coltext);
         do {
-            c = F_39C5(D_0DAC);
+            c = waitkey(coltext);
             if (c >= '1' && c <= '4') {
-                if (D_01AA[c - '1'])
-                    F_1643(c - '0');
+                if (slotused[c - '1'])
+                    runout(c - '0');
             }
         } while (c != 0x1b);
     }
 }
 
 /* main: main menu loop (a = generate new character, b = continue game) */
-F_1853(argc, argv)
+main(argc, argv)
 int argc;
 unsigned char **argv;
 {
@@ -758,31 +758,31 @@ unsigned char **argv;
     unsigned char c;
 
     F_1D0D(1);
-    D_0DAE = F_3862(argv[1][0]) == 'C';
-    F_13B2();
-    F_03E9(0);
-    F_35CA(0, 0, 319, 199, 0);
-    D_0830 = 0;
-    F_05B2();
+    forcecga = upcase(argv[1][0]) == 'C';
+    ldnames();
+    setvid(0);
+    fillrect(0, 0, 319, 199, 0);
+    vidmarg = 0;
+    drawbord();
     for (;;) {
-        c = F_3862(F_06BB());
+        c = upcase(mainmenu());
         switch (c) {
         case 'A':
-            if ((slot = F_1423()) == -1) {
-                slot = F_14BB();
-                F_35CA(256, 0, 264, 6, D_0DA8);
-                F_39FC(256, 7, 264, 7, D_0DA6);
+            if ((slot = freeslot()) == -1) {
+                slot = askrepl();
+                fillrect(256, 0, 264, 6, colfill);
+                drawline(256, 7, 264, 7, colline);
             }
             if (slot != -1)
-                F_106A(slot);
-            F_0670();
+                chargen(slot);
+            clrframe();
             break;
         case 'B':
-            F_16DC();
-            F_0670();
+            contgame();
+            clrframe();
             break;
         }
         if (c == 'A' || c == 'B')
-            F_35CA(10, 10, 300, 190, 0);
+            fillrect(10, 10, 300, 190, 0);
     }
 }

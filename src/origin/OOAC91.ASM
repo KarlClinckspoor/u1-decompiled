@@ -13,17 +13,17 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_07F2:BYTE
-	EXTRN	D_07F4:BYTE
+	EXTRN	penx:BYTE
+	EXTRN	peny:BYTE
 DATA	ENDS
 PROG	SEGMENT
-	EXTRN	F_3812:NEAR
+	EXTRN	lineto:NEAR
 	EXTRN	F_3D61:NEAR
 PROG	ENDS
-	PUBLIC	F_AC91,F_AD06,D_2480,D_24BC,D_24C6,D_24C8
+	PUBLIC	drawdmon,F_AD06,D_2480,D_24BC,D_24C6,D_24C8
 
 PROG	SEGMENT
-F_AC91:
+drawdmon:
 	PUSH	BP                                 ; AC91 55
 	MOV	BP, SP                              ; AC92 8B EC
 	PUSH	SI                                 ; AC94 56
@@ -62,7 +62,7 @@ L_ACC5:
 	PUSH	DX                                 ; ACD9 52
 	PUSH	DI                                 ; ACDA 57
 	PUSH	SI                                 ; ACDB 56
-	CALL	F_3812                             ; ACDC E8 8A FB
+	CALL	lineto                             ; ACDC E8 8A FB
 	POP	BX                                  ; ACDF 5B
 	POP	CX                                  ; ACE0 59
 	JMP	SHORT L_ACC5                        ; ACE1 EB E2
@@ -70,8 +70,8 @@ L_ACE3:
 	MOV	AL, BYTE PTR [BX]                   ; ACE3 8A 07
 	INC	BX                                  ; ACE5 43
 	CALL	F_AD06                             ; ACE6 E8 1D 00
-	MOV	WORD PTR D_07F2, SI                 ; ACE9 89 36 92 19
-	MOV	WORD PTR D_07F4, DI                 ; ACED 89 3E 94 19
+	MOV	WORD PTR penx, SI                 ; ACE9 89 36 92 19
+	MOV	WORD PTR peny, DI                 ; ACED 89 3E 94 19
 	MOV	DX, WORD PTR D_24C8                 ; ACF1 8B 16 C8 24
 	PUSH	CX                                 ; ACF5 51
 	PUSH	BX                                 ; ACF6 53

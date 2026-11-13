@@ -1,6 +1,6 @@
 /* opts: -ms -v -w -cs */
 /*
- * OUT.EXE - the game, part C of 3 (game code 63F2-908B: weapon/armour/spell shops, the king, chests, unlock, monsters, main loop (F_63F2-F_1853)).
+ * OUT.EXE - the game, part C of 3 (game code 63F2-908B: weapon/armour/spell shops, the king, chests, unlock, monsters, main loop (sellweap-main)).
  * The three parts are one program split for the compiler's memory (LC1 stops at about 2200 lines);
  * string literals used in more than one part are named arrays (D_xxxx = their DGROUP address).
  * Builds byte-identical with Lattice C 3.10 (lc -ms -v -w -cs).
@@ -8,17 +8,17 @@
  */
 
 /* Origin library and Lattice library */
-extern F_1D0D(), F_352C(), F_353A(), F_355D(), F_357C(), F_3599(), F_35CA();
-extern F_37FD(), F_3812(), F_387E(), F_3920(), F_39FC(), F_3AE2(), F_3B46();
-extern F_3BF6(), F_3C46(), F_3C8B(), F_3E2F(), F_3E5E(), F_3E85(), F_3EC4(), F_3EED();
-extern F_3F58(), F_3F62(), F_4069(), F_40A8(), F_40E9(), F_40FE(), F_43C8(), F_4437();
-extern F_44A2(), F_450D(), F_4558(), F_45A3(), F_478E(), F_5643(), F_91D4(), F_A363();
-extern F_A3BA(), F_A554(), F_AC91(), F_AF57(), F_B0B5(), F_B34F(), F_B502(), F_B545();
-extern F_B58E(), F_B5E1(), F_B617(), F_B665(), F_B70F(), F_B7CD(), F_B884(), F_C2AF();
-extern F_C2EC(), F_C31C(), F_C3CA(), F_C47C();
+extern F_1D0D(), gotoxy(), strlen2(), drawtile(), putch(), putstr(), fillrect();
+extern seedrnd(), lineto(), arrowr(), arrowl(), drawline(), presskey(), msgline();
+extern botbar(), topbar(), putnum(), readfile(), waittick(), writfile(), clockrnd(), scrlmsg();
+extern vidinit(), playsnd(), rndrange(), isvowel(), getlevel(), quadrant(), readycmd(), showhp();
+extern showfood(), showexp(), showcoin(), showstat(), ztats(), textmode(), lcrand(), terrain();
+extern placeat(), animwat(), drawdmon(), drawview(), readnum(), towntile(), addmon(), findmon();
+extern delmon(), cntmon(), cntveh(), scrolln(), scrolls(), scrolle(), scrollw(), objat();
+extern viewx(), viewy(), drawwrld(), death();
 extern EXECL(), EXIT();
-extern unsigned char F_33BB(), F_3862(), F_39C5(), F_4127(), F_413C(), F_4161();
-extern char F_411C();
+extern unsigned char lowcase(), upcase(), waitkey(), keyup(), getkey(), keywait();
+extern char drawable();
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
@@ -27,62 +27,62 @@ struct mon { int type, f2, x, y, f8, fa, fc, fe; };
 struct ent { int f0, f2, f4, f6; };
 
 /* data of the Origin text module (OM4437): tables of names and messages */
-extern int D_082C;
-extern int D_0CD2[];
-extern unsigned char *D_0D72[], *D_0DF8[], *D_0FD8[];
-extern char *D_0E9E[], *D_0F04[], *D_0F5C[], *D_0FA2[];
-extern int D_1DC8[];
+extern int vidmode;
+extern int wrange[];
+extern unsigned char *wnamelng[], *wnames[], *strtab[];
+extern char *attrnam[], *spellnam[], *armornam[], *vehnam[];
+extern int dirtab[];
 /* tables inside that module that have no label of their own (absolute names in OUTSYM.ASM) */
-extern struct ent D_31DC[][15];
-extern int D_368C[], D_3698[], D_36E8[], D_36F8[], D_31CC[], D_3708[], D_3808[], D_3814[];
-extern char *D_307C[], *D_3174[], *D_37AE[], *D_3930[];
+extern struct ent enttmpl[][15];
+extern int dmgfact[], hpfact[], movechan[], foodper[], princnam[], mntattr[], persp1[], persp2[];
+extern char *placenam[], *landnam[], *blockmsg[], *dmonname[];
 
 /* BSS (defined in OUTBSS.C) */
-extern int D_0DA6, D_0DA8, D_2044, D_2046, D_2048, D_204A, D_204E;
-extern char D_2058[];
-extern int D_206A, D_206C, D_206E[];
-extern int D_207C, D_207E, D_2080, D_2082, D_2084, D_2086, D_2088;
-extern int D_20A4, D_20AC[], D_20B8[], D_20D8[], D_20EE[], D_20FE;
-extern int D_3A90, D_3A92, D_3A94, D_3A96, D_3A98, D_3A9A;
-extern int D_3AAA, D_3AAC, D_3AAE, D_3AB0, D_3AB2[];
-extern int D_3AC6, D_3AC8, D_3ACA, D_3AFA[];
-extern int D_3B1A, D_3B1C, D_3B20, D_3B22, D_3B28, D_3B2A;
-extern long D_3B24;
-extern struct mon D_3B2C[];
-extern char D_3DAC[], D_238C[];
-extern int D_8B88, D_8B8A, D_8B8C, D_8B8E, D_8B90, D_8B92, D_8B94, D_8B96, D_8B98;
-extern int D_8B9C, D_8B9E, D_8BA0, D_8BA2, D_8BA4, D_8BA6;
-extern long D_8BA8;
-extern unsigned char D_8B31, D_8BAE[][38][18];
-extern struct ent D_ACC6[];
-extern int D_AD3E, D_AD40, D_AD42, D_AD46, D_AD48, D_AD4A, D_AD4C, D_AD4E;
-extern int D_AD50, D_AD52, D_AD54;
-extern struct cell D_AD56[][11];
+extern int colline, colfill, colhigh, coltext, forcecga, gmode, redraw;
+extern char plname[];
+extern int plclass, plsex, plstat[];
+extern int plcoin, plexp, plfood, rdyweap, rdyspel, rdyarm, plveh;
+extern int gemred, ownarm[], ownweap[], ownspel[], ownveh[], plkills;
+extern int plstr, plagi, plsta, plcha, plwis, plint;
+extern int plseed, worldx, worldy, plnoise, plquest[];
+extern int gemgreen, gemblue, gemwhite, ownspl1[];
+extern int ownshutl, owntimem, lastmnmt, savlast, shutfuel, shutshld;
+extern long savturns;
+extern struct mon objtab[];
+extern char mapbin[], tilegfx[];
+extern int argv1, argv2, argv3, foodcnt, nmons, nvehs, nwater, ngrass, nwoods;
+extern int prevmode, doorunl, hasjkey, isbrit, takeleft, lastmon;
+extern long turns;
+extern unsigned char viewctr, tcdbin[][38][18];
+extern struct ent ents[];
+extern int townx, towny, townmap, hostile, alesdrnk, castlenr, kingnr, lockkey;
+extern int dunglvl, dungdir, dungbon;
+extern struct cell dungmap[][11];
 extern int D_ADB6, D_ADBE, D_AE96, D_AFD6;
-extern char D_B11E[];
+extern char dmontype[];
 
-extern char D_018D[];
-extern char D_019B[];
-extern char D_01AC[];
-extern char D_01C7[];
-extern char D_01D8[];
-extern char D_01E1[];
-extern char D_020C[];
-extern char D_0220[];
-extern char D_0235[];
-extern char D_0237[];
-extern char D_03DF[];
-extern char D_03E4[];
-extern char D_0417[];
-extern char D_0CE3[];
-extern char D_0D20[];
+extern char sbang[];
+extern char sempty[];
+extern char shit[];
+extern char sfind[];
+extern char sdamagex[];
+extern char smissed[];
+extern char sdamage[];
+extern char snothing[];
+extern char squest[];
+extern char scolon[];
+extern char snone[];
+extern char snotmuch[];
+extern char sparen[];
+extern char swhat[];
+extern char snonehr[];
 
-#define MT ((int (*)[8])D_3B2C)
+#define MT ((int (*)[8])objtab)
 
-extern char *D_0172, *D_0180;
-extern int D_0182;
+extern char *msgleave, *plfile;
+extern int escflag;
 /* weapon shop, selling side: list own weapons, sell one */
-F_63F2(top)
+sellweap(top)
 int top;
 {
     int i, n, y;
@@ -93,68 +93,68 @@ int top;
     c = 'b';
     i = 1;
     while (i <= 15) {
-        if (D_20B8[i])
+        if (ownweap[i])
             n++;
         i++;
     }
     if (n == 0) {
-        F_21E7(5, top + 1, "Thou hast no weaponry to sell!");
-        F_2141();
-        F_352C(16, 24);
-        F_3599(D_0220, D_2046);
+        boxtext(5, top + 1, "Thou hast no weaponry to sell!");
+        waitpoll();
+        gotoxy(16, 24);
+        putstr(snothing, coltext);
     } else {
         i = 1;
         do {
-            if (D_20B8[i]) {
-                F_352C(9, top + y);
-                F_357C(c, D_2046);
-                F_3599(D_0417, D_2046);
-                F_3599(D_0D72[i], D_2046);
-                F_352C(26, top + y);
-                F_3599("- ", D_2046);
-                F_3C8B(F_63D4(i), 3, ' ', D_2046, 1);
+            if (ownweap[i]) {
+                gotoxy(9, top + y);
+                putch(c, coltext);
+                putstr(sparen, coltext);
+                putstr(wnamelng[i], coltext);
+                gotoxy(26, top + y);
+                putstr("- ", coltext);
+                putnum(sellpric(i), 3, ' ', coltext, 1);
                 y++;
             }
             c++;
             i++;
         } while (i <= 15 && y < 8);
-        m = F_3862(c) - 1;
-        F_352C(16, 24);
-        c = F_3862(F_39C5(D_2046));
+        m = upcase(c) - 1;
+        gotoxy(16, 24);
+        c = upcase(waitkey(coltext));
         if (c < 'B' || c > m)
-            F_3599(D_0220, D_2046);
-        else if (D_20B8[c - 'A'] == 0)
-            F_3599(D_0220, D_2046);
+            putstr(snothing, coltext);
+        else if (ownweap[c - 'A'] == 0)
+            putstr(snothing, coltext);
         else {
-            D_207C += F_63D4(c - 'A');
-            D_20B8[c - 'A']--;
-            if (D_2082 == c - 'A')
-                D_2082 = 0;
-            F_3599(D_0D72[c - 'A'], D_2046);
-            F_4558();
-            F_5E88();
+            plcoin += sellpric(c - 'A');
+            ownweap[c - 'A']--;
+            if (rdyweap == c - 'A')
+                rdyweap = 0;
+            putstr(wnamelng[c - 'A'], coltext);
+            showcoin();
+            msgdone();
         }
     }
 }
 
 /* print one line of the weapons-for-sale list: letter, name, price */
-F_65CE(top, i, cnt)
+weapln1(top, i, cnt)
 int top, i, cnt;
 {
     unsigned char c;
 
     c = i + 'a';
-    F_352C(9, top + cnt);
-    F_357C(c, D_2046);
-    F_3599(D_0417, D_2046);
-    F_3599(D_0D72[i], D_2046);
-    F_352C(26, top + cnt);
-    F_3599("- ", D_2046);
-    F_3C8B(F_63B3(i), 3, ' ', D_2046, 1);
+    gotoxy(9, top + cnt);
+    putch(c, coltext);
+    putstr(sparen, coltext);
+    putstr(wnamelng[i], coltext);
+    gotoxy(26, top + cnt);
+    putstr("- ", coltext);
+    putnum(buyprice(i), 3, ' ', coltext, 1);
 }
 
 /* weapon shop: sell (arg 'S') or buy a weapon */
-F_665D(a)
+weapshop(a)
 char a;
 {
     int r, n;
@@ -162,60 +162,60 @@ char a;
     int cnt;
 
     cnt = 0;
-    r = F_30C0(D_AD42 - 2);
+    r = signweap(townmap - 2);
     if (a == 'S')
-        F_63F2(r);
+        sellweap(r);
     else {
-        lo = ((D_AD42 - 1) & 1) + 'b';
-        n = D_8BA8 % 0x7FFFL / 1500L;
-        if (n > 3 || D_8BA8 > 3000L)
+        lo = ((townmap - 1) & 1) + 'b';
+        n = turns % 0x7FFFL / 1500L;
+        if (n > 3 || turns > 3000L)
             n = 3;
         n++;
         hi = lo + n * 2;
         n = lo;
         while (hi >= n) {
-            F_65CE(r, n - 'a', cnt);
+            weapln1(r, n - 'a', cnt);
             cnt++;
             n += 2;
         }
-        F_352C(15, 24);
-        c = F_33BB(F_39C5(D_2046));
+        gotoxy(15, 24);
+        c = lowcase(waitkey(coltext));
         if (c < lo || c > hi)
-            F_3599(D_0220, D_2046);
-        else if (((c - 'a') & 1) != (D_AD42 & 1))
-            F_3599(D_0220, D_2046);
-        else if (F_63B3(c - 'a') > D_207C) {
-            F_3599(D_0220, D_2046);
-            F_5EA4();
+            putstr(snothing, coltext);
+        else if (((c - 'a') & 1) != (townmap & 1))
+            putstr(snothing, coltext);
+        else if (buyprice(c - 'a') > plcoin) {
+            putstr(snothing, coltext);
+            msgpoor();
         } else {
-            D_207C -= F_63B3(c - 'a');
-            if (D_20B8[c - 'a'] < 255)
-                D_20B8[c - 'a']++;
-            F_3599(D_0D72[c - 'a'], D_2046);
-            F_4558();
-            F_5E6C();
+            plcoin -= buyprice(c - 'a');
+            if (ownweap[c - 'a'] < 255)
+                ownweap[c - 'a']++;
+            putstr(wnamelng[c - 'a'], coltext);
+            showcoin();
+            msgsold();
         }
     }
-    F_3B46(D_019B);
+    msgline(sempty);
 }
 
-/* quarter of (200 - D_3A9A) times n */
-F_67F1(n)
+/* quarter of (200 - plint) times n */
+price1(n)
 int n;
 {
-    return (200 - D_3A9A) / 4 * n;
+    return (200 - plint) / 4 * n;
 }
 
-/* quarter of D_3A96 times n */
-F_680C(n)
+/* quarter of plcha times n */
+price2(n)
 int n;
 {
-    return D_3A96 / 4 * n;
+    return plcha / 4 * n;
 }
 
 /* ---- ou_6823 ---- */
 /* armour shop, sell side: list owned armour, sell the chosen one for its price */
-F_6823(y)
+armsell(y)
 int y;
 {
     int i, n, row;
@@ -225,124 +225,124 @@ int y;
     i = row = 1;
     c = 'b';
     for (i = 1; i <= 5; i++)
-        if (D_20AC[i])
+        if (ownarm[i])
             n++;
     if (n == 0) {
-        F_21E7(5, y + 1, "  Thou hast no armour to sell!");
-        F_2141();
-        F_352C(16, 24);
-        F_3599(D_0220, D_2046);
+        boxtext(5, y + 1, "  Thou hast no armour to sell!");
+        waitpoll();
+        gotoxy(16, 24);
+        putstr(snothing, coltext);
     } else {
         for (i = 1; i <= 5; c++, i++) {
-            if (D_20AC[i]) {
-                F_352C(9, y + row);
-                F_357C(c, D_2046);
-                F_3599(D_0417, D_2046);
-                F_3599(D_0F5C[i], D_2046);
-                F_352C(26, y + row);
-                F_3599("- ", D_2046);
-                F_3C8B(F_680C(i), 3, 32, D_2046, 1);
+            if (ownarm[i]) {
+                gotoxy(9, y + row);
+                putch(c, coltext);
+                putstr(sparen, coltext);
+                putstr(armornam[i], coltext);
+                gotoxy(26, y + row);
+                putstr("- ", coltext);
+                putnum(price2(i), 3, 32, coltext, 1);
                 row++;
             }
         }
-        F_352C(16, 24);
-        c = F_3862(F_39C5(D_2046));
+        gotoxy(16, 24);
+        c = upcase(waitkey(coltext));
         if (c < 'B' || c > 'F') {
-            F_3599(D_0220, D_2046);
-        } else if (D_20AC[c - 'A'] == 0) {
-            F_3599(D_0220, D_2046);
+            putstr(snothing, coltext);
+        } else if (ownarm[c - 'A'] == 0) {
+            putstr(snothing, coltext);
         } else {
-            D_207C += F_680C(c - 'A');
-            D_20AC[c - 'A']--;
-            if (D_2086 == c - 'A')
-                D_2086 = 0;
-            F_3599(D_0F5C[c - 'A'], D_2046);
-            F_4558();
-            F_5E88();
+            plcoin += price2(c - 'A');
+            ownarm[c - 'A']--;
+            if (rdyarm == c - 'A')
+                rdyarm = 0;
+            putstr(armornam[c - 'A'], coltext);
+            showcoin();
+            msgdone();
         }
     }
 }
 
 /* armour shop: print list line i (letter, name, price) at row y+i */
-F_69E8(y, i)
+armline(y, i)
 int y, i;
 {
     unsigned char c;
 
     c = i + 'a';
-    F_352C(9, y + i);
-    F_357C(c, D_2046);
-    F_3599(D_0417, D_2046);
-    F_3599(D_0F5C[i], D_2046);
-    F_352C(26, y + i);
-    F_3599("- ", D_2046);
-    F_3C8B(F_67F1(i), 3, 32, D_2046, 1);
+    gotoxy(9, y + i);
+    putch(c, coltext);
+    putstr(sparen, coltext);
+    putstr(armornam[i], coltext);
+    gotoxy(26, y + i);
+    putstr("- ", coltext);
+    putnum(price1(i), 3, 32, coltext, 1);
 }
 
 /* armour shop (buy 'B' / sell 'S') */
-F_6A77(cmd)
+armshop(cmd)
 unsigned char cmd;
 {
     int shop;
     unsigned char c, max;
 
     max = 'd';
-    shop = F_2FF6(D_AD42 - 2);
+    shop = signarm(townmap - 2);
     if (cmd == 'S') {
-        F_6823(shop);
+        armsell(shop);
     } else {
-        F_69E8(shop, 1);
-        F_69E8(shop, 2);
-        F_69E8(shop, 3);
-        if (D_8BA8 > 3000L) {
-            F_69E8(shop, 4);
-            F_69E8(shop, 5);
+        armline(shop, 1);
+        armline(shop, 2);
+        armline(shop, 3);
+        if (turns > 3000L) {
+            armline(shop, 4);
+            armline(shop, 5);
             max = 'f';
         }
-        F_352C(15, 24);
-        c = F_33BB(F_39C5(D_2046));
+        gotoxy(15, 24);
+        c = lowcase(waitkey(coltext));
         if (c < 'b' || c > max) {
-            F_3599(D_0220, D_2046);
-        } else if (F_67F1(c - 'a') > D_207C) {
-            F_3599(D_0220, D_2046);
-            F_5EA4();
+            putstr(snothing, coltext);
+        } else if (price1(c - 'a') > plcoin) {
+            putstr(snothing, coltext);
+            msgpoor();
         } else {
-            D_207C -= F_67F1(c - 'a');
-            if (D_20AC[c - 'a'] < 255)
-                D_20AC[c - 'a']++;
-            F_3599(D_0F5C[c - 'a'], D_2046);
-            F_4558();
-            F_5E6C();
+            plcoin -= price1(c - 'a');
+            if (ownarm[c - 'a'] < 255)
+                ownarm[c - 'a']++;
+            putstr(armornam[c - 'a'], coltext);
+            showcoin();
+            msgsold();
         }
     }
-    F_3B46(D_019B);
+    msgline(sempty);
 }
 
-/* weapon price for item i: (200 - D_3A98) / 32 * i */
-F_6BAC(i)
+/* weapon price for item i: (200 - plwis) / 32 * i */
+weapprc(i)
 int i;
 {
-    return (200 - D_3A98) / 32 * i;
+    return (200 - plwis) / 32 * i;
 }
 
 /* weapon shop: print list line i (letter, name, price) at row y+row */
-F_6BC7(y, i, row)
+weapln2(y, i, row)
 int y, i, row;
 {
     unsigned char c;
 
-    F_352C(9, y + row);
+    gotoxy(9, y + row);
     c = i + 'a';
-    F_357C(c, D_2046);
-    F_3599(D_0417, D_2046);
-    F_3599(D_0F04[i], D_2046);
-    F_352C(26, y + row);
-    F_3599("- ", D_2046);
-    F_3C8B(F_6BAC(i), 3, 32, D_2046, 1);
+    putch(c, coltext);
+    putstr(sparen, coltext);
+    putstr(spellnam[i], coltext);
+    gotoxy(26, y + row);
+    putstr("- ", coltext);
+    putnum(weapprc(i), 3, 32, coltext, 1);
 }
 
 /* weapon shop (buy; we do not buy used weapons) */
-F_6C53(cmd)
+weapbuy(cmd)
 unsigned char cmd;
 {
     int shop;
@@ -351,111 +351,111 @@ unsigned char cmd;
     int row;
 
     row = 0;
-    shop = F_31B1(D_AD42 - 2);
+    shop = signmagi(townmap - 2);
     if (cmd == 'S') {
-        F_21E7(5, shop + 2, "  Sorry, we don't buy spells!");
-        F_2141();
-        F_352C(16, 24);
-        F_3599(D_0220, D_2046);
+        boxtext(5, shop + 2, "  Sorry, we don't buy spells!");
+        waitpoll();
+        gotoxy(16, 24);
+        putstr(snothing, coltext);
     } else {
-        i = D_AD42 & 1;
+        i = townmap & 1;
         first = i + 'b';
         last = i + 'f';
-        if (D_206A == 2)
+        if (plclass == 2)
             last = i + 'j';
         for (i = first; last >= i; i += 2) {
             if (i != 'e') {
-                F_6BC7(shop, i - 'a', row);
+                weapln2(shop, i - 'a', row);
                 row++;
             }
         }
-        F_352C(15, 24);
-        c = F_33BB(F_39C5(D_2046));
+        gotoxy(15, 24);
+        c = lowcase(waitkey(coltext));
         if (c < first || c > last) {
-            F_3599(D_0220, D_2046);
-        } else if (((c - 'a') & 1) == (D_AD42 & 1)) {
-            F_3599(D_0220, D_2046);
-        } else if (F_6BAC(c - 'a') > D_207C) {
-            F_3599(D_0220, D_2046);
-            F_5EA4();
+            putstr(snothing, coltext);
+        } else if (((c - 'a') & 1) == (townmap & 1)) {
+            putstr(snothing, coltext);
+        } else if (weapprc(c - 'a') > plcoin) {
+            putstr(snothing, coltext);
+            msgpoor();
         } else {
-            D_207C -= F_6BAC(c - 'a');
-            if (D_20D8[c - 'a'] < 255)
-                D_20D8[c - 'a']++;
-            F_3599(D_0F04[c - 'a'], D_2046);
-            F_4558();
-            F_5E6C();
+            plcoin -= weapprc(c - 'a');
+            if (ownspel[c - 'a'] < 255)
+                ownspel[c - 'a']++;
+            putstr(spellnam[c - 'a'], coltext);
+            showcoin();
+            msgsold();
         }
     }
-    F_3B46(D_019B);
+    msgline(sempty);
 }
 
 /* food shop: buy packs of 10 food (no selling) */
-F_6DE3(cmd)
+foodshop(cmd)
 unsigned char cmd;
 {
     int n, cost;
 
-    n = F_3240(D_AD42 - 2);
+    n = signfood(townmap - 2);
     if (cmd == 'S') {
-        F_21E7(9, n + 2, "Used food?  No thanks!");
-        F_2141();
-        F_352C(15, 24);
-        F_3599(D_0220, D_2046);
+        boxtext(9, n + 2, "Used food?  No thanks!");
+        waitpoll();
+        gotoxy(15, 24);
+        putstr(snothing, coltext);
     } else {
-        cost = 5 - D_3A9A / 20;
-        F_352C(5, n + 2);
-        F_3599(" Packs of 10 food cost ", D_2046);
-        F_3C8B(cost, 1, 32, D_2046, 1);
-        F_3599(" pence", D_2046);
-        F_352C(8, n + 3);
-        F_3599("each.  How many dost thou", D_2046);
-        F_352C(11, n + 4);
-        F_3599("wish to purchase?", D_2046);
-        F_352C(15, 24);
-        n = F_B0B5(15, 24);
+        cost = 5 - plint / 20;
+        gotoxy(5, n + 2);
+        putstr(" Packs of 10 food cost ", coltext);
+        putnum(cost, 1, 32, coltext, 1);
+        putstr(" pence", coltext);
+        gotoxy(8, n + 3);
+        putstr("each.  How many dost thou", coltext);
+        gotoxy(11, n + 4);
+        putstr("wish to purchase?", coltext);
+        gotoxy(15, 24);
+        n = readnum(15, 24);
         cost = cost * n;
         if (cost < 0)
-            cost = D_207C + 1;
-        if (n == 0 || cost > D_207C) {
-            F_352C(15, 24);
-            F_3599(D_0220, D_2046);
-            if (cost > D_207C)
-                F_5EA4();
+            cost = plcoin + 1;
+        if (n == 0 || cost > plcoin) {
+            gotoxy(15, 24);
+            putstr(snothing, coltext);
+            if (cost > plcoin)
+                msgpoor();
         } else {
-            F_3599(" packs food", D_2046);
-            D_207C -= cost;
-            F_4558();
-            D_2080 += n * 10;
-            F_44A2();
-            F_5E6C();
+            putstr(" packs food", coltext);
+            plcoin -= cost;
+            showcoin();
+            plfood += n * 10;
+            showfood();
+            msgsold();
         }
     }
-    F_3B46(D_019B);
+    msgline(sempty);
 }
 
 /* transport bought (k: 1-2 horse/cart, 3-4, 5-6): update counts, redraw one transport on the map */
-F_6F58(k)
+transbgt(k)
 int k;
 {
     int t, a, b, f;
 
-    D_20EE[k]++;
-    if (k <= 2 && D_8B98) {
-        D_8B98--;
+    ownveh[k]++;
+    if (k <= 2 && nwoods) {
+        nwoods--;
         t = 2;
     } else if (k == 4 || k == 3) {
-        D_8B94--;
+        nwater--;
         t = 0;
     } else {
         t = 1;
-        D_8B96--;
+        ngrass--;
     }
     b = -1;
     do {
         a = -1;
         do {
-            f = F_C2AF(D_3AAC + a, D_3AAE + b, 1) == t;
+            f = objat(worldx + a, worldy + b, 1) == t;
             a++;
         } while (a < 2 && !f);
         if (!f)
@@ -463,512 +463,512 @@ int k;
         else
             a--;
     } while (b < 2 && !f);
-    F_B502(k + 11 - 1 + (k > 4), t, D_3AAC + a, D_3AAE + b, 0);
+    addmon(k + 11 - 1 + (k > 4), t, worldx + a, worldy + b, 0);
 }
 
-/* transport price for item i: ((200 - D_3A9A) / 5 * i) * i */
-F_7034(i)
+/* transport price for item i: ((200 - plint) / 5 * i) * i */
+transprc(i)
 int i;
 {
-    return (200 - D_3A9A) / 5 * i * i;
+    return (200 - plint) / 5 * i * i;
 }
 
 /* transport shop: print list line i (letter c, name, price) at row y */
-F_7052(i, y, c)
+transln(i, y, c)
 int i, y;
 unsigned char c;
 {
-    F_352C(12, y);
-    F_357C(c, D_2046);
-    F_3599(D_0417, D_2046);
-    F_3599(D_0FA2[i], D_2046);
-    F_352C(23, y);
-    F_3599("- ", D_2046);
-    F_3C8B(F_7034(i), 4, 32, D_2046, 0);
+    gotoxy(12, y);
+    putch(c, coltext);
+    putstr(sparen, coltext);
+    putstr(vehnam[i], coltext);
+    gotoxy(23, y);
+    putstr("- ", coltext);
+    putnum(transprc(i), 4, 32, coltext, 0);
 }
 
 /* transport shop (buy; we do not deal in used stuff) */
-F_70CF(cmd)
+transshp(cmd)
 unsigned char cmd;
 {
     int shop, i, cost, flag;
     char x[6];
     unsigned char c;
 
-    shop = F_2F3B(D_AD42 - 2);
+    shop = signship(townmap - 2);
     if (cmd == 'S') {
-        F_21E7(9, shop + 2, "Sorry, we don't deal in");
-        F_21E7(15, shop + 3, "used stuff.");
-        F_2141();
-        F_352C(16, 24);
-        F_3599(D_0220, D_2046);
+        boxtext(9, shop + 2, "Sorry, we don't deal in");
+        boxtext(15, shop + 3, "used stuff.");
+        waitpoll();
+        gotoxy(16, 24);
+        putstr(snothing, coltext);
     } else {
         for (i = 0; i < 6; i++)
             x[i] = 0;
-        flag = D_8B96 || D_8B98 || D_8B94;
-        if (!flag || (D_3B1A && D_8B92 == 15) || (!D_8B96 && D_8B92 == 15)) {
-            F_21E7(11, shop + 2, "Closed for the day.");
-            F_2141();
+        flag = ngrass || nwoods || nwater;
+        if (!flag || (ownshutl && nvehs == 15) || (!ngrass && nvehs == 15)) {
+            boxtext(11, shop + 2, "Closed for the day.");
+            waitpoll();
         } else {
-            flag = D_3B1A == 0 && D_8B92 == 15;
-            if ((D_8B98 || D_8B96) && !flag) {
-                F_7052(1, shop, 'a');
+            flag = ownshutl == 0 && nvehs == 15;
+            if ((nwoods || ngrass) && !flag) {
+                transln(1, shop, 'a');
                 shop++;
                 x[0]++;
-                F_7052(2, shop, 'b');
+                transln(2, shop, 'b');
                 shop++;
                 x[1]++;
             }
-            if (D_8B94 && !flag) {
-                F_7052(3, shop, 'c');
+            if (nwater && !flag) {
+                transln(3, shop, 'c');
                 shop++;
                 x[2]++;
-                F_7052(4, shop, 'd');
+                transln(4, shop, 'd');
                 shop++;
                 x[3]++;
             }
-            if (D_8BA8 > 3000L && D_8B96) {
+            if (turns > 3000L && ngrass) {
                 if (!flag) {
-                    F_7052(5, shop, 'e');
+                    transln(5, shop, 'e');
                     shop++;
                     x[4]++;
                 }
-                if (D_3B1A == 0)
-                    F_7052(6, shop, 'f');
+                if (ownshutl == 0)
+                    transln(6, shop, 'f');
                 x[5]++;
             }
-            F_352C(15, 24);
-            c = F_3862(F_39C5(D_2046));
+            gotoxy(15, 24);
+            c = upcase(waitkey(coltext));
             if (c < 'A' || c > 'F') {
-                F_3599(D_0220, D_2046);
+                putstr(snothing, coltext);
             } else if (!x[c - 'A']) {
-                F_3599(D_0220, D_2046);
+                putstr(snothing, coltext);
             } else {
-                cost = F_7034(c + 1 - 'A');
-                if (cost > D_207C) {
-                    F_3599(D_0220, D_2046);
-                    F_5EA4();
+                cost = transprc(c + 1 - 'A');
+                if (cost > plcoin) {
+                    putstr(snothing, coltext);
+                    msgpoor();
                 } else {
-                    F_3599(D_0FA2[c + 1 - 'A'], D_2046);
-                    D_207C -= cost;
-                    F_4558();
-                    D_8B92++;
-                    F_5E6C();
+                    putstr(vehnam[c + 1 - 'A'], coltext);
+                    plcoin -= cost;
+                    showcoin();
+                    nvehs++;
+                    msgsold();
                     if (c == 'F')
-                        D_3B28 = D_3B2A = 1000;
-                    F_6F58(c + 1 - 'A');
+                        shutfuel = shutshld = 1000;
+                    transbgt(c + 1 - 'A');
                 }
             }
         }
     }
-    F_3B46(D_019B);
+    msgline(sempty);
 }
 
 /* Transact command in town: at a shop counter (tile 54-62) buy or sell, dispatch by shop type */
-F_7377()
+shopdisp()
 {
     int t;
     unsigned char c;
 
-    F_3599("Transact", D_2046);
-    if (D_AD46) {
-        F_3B46(D_019B);
-        F_3B46("None will talk to thee!");
+    putstr("Transact", coltext);
+    if (hostile) {
+        msgline(sempty);
+        msgline("None will talk to thee!");
     } else {
-        t = D_8BAE[D_AD42][D_AD3E][D_AD40];
+        t = tcdbin[townmap][townx][towny];
         if (t < 54 || t > 62) {
-            F_3B46(D_019B);
-            F_3B46("Thou art not by a counter!");
-            F_0476(1);
+            msgline(sempty);
+            msgline("Thou art not by a counter!");
+            playif(1);
         } else {
-            F_3599("-Buy, Sell: ", D_2046);
-            c = F_3862(F_39C5(D_2046));
+            putstr("-Buy, Sell: ", coltext);
+            c = upcase(waitkey(coltext));
             if (c != 'B' && c != 'S') {
-                F_352C(9, 24);
-                F_3B46(" nothing      ");
+                gotoxy(9, 24);
+                msgline(" nothing      ");
             } else {
                 if (c == 'B') {
-                    F_352C(13, 24);
-                    F_3599("         ", D_2046);
-                    F_352C(13, 24);
-                    F_3599(D_0237, D_2046);
+                    gotoxy(13, 24);
+                    putstr("         ", coltext);
+                    gotoxy(13, 24);
+                    putstr(scolon, coltext);
                 } else {
-                    F_352C(10, 24);
-                    F_3599("            ", D_2046);
-                    F_352C(10, 24);
-                    F_3599("Sell: ", D_2046);
+                    gotoxy(10, 24);
+                    putstr("            ", coltext);
+                    gotoxy(10, 24);
+                    putstr("Sell: ", coltext);
                 }
                 switch (t) {
                 case 54:
                 case 55:
-                    F_6A77(c);
+                    armshop(c);
                     break;
                 case 56:
                 case 57:
-                    F_6DE3(c);
+                    foodshop(c);
                     break;
                 case 58:
                 case 59:
-                    F_665D(c);
+                    weapshop(c);
                     break;
                 case 60:
-                    F_6C53(c);
+                    weapbuy(c);
                     break;
                 case 61:
-                    F_622C(c);
+                    tavern(c);
                     break;
                 case 62:
-                    F_70CF(c);
+                    transshp(c);
                     break;
                 }
-                D_204E = 1;
+                redraw = 1;
             }
         }
     }
 }
 
-/* king's audience, quest given: show the quest text by king (D_AD4C) */
-F_7526()
+/* king's audience, quest given: show the quest text by king (kingnr) */
+questtxt()
 {
-    F_21C2(D_0DA8);
-    D_3AB2[D_AD4C] = -1;
-    if (!(D_AD4C & 1)) {
-        F_21E7(12, 6, "Go now and kill a");
-        F_352C(12, 8);
-        switch (D_AD4C) {
+    boxclr(colfill);
+    plquest[kingnr] = -1;
+    if (!(kingnr & 1)) {
+        boxtext(12, 6, "Go now and kill a");
+        gotoxy(12, 8);
+        switch (kingnr) {
         case 2:
-            F_3599(" Gelatinous Cube", D_2046);
+            putstr(" Gelatinous Cube", coltext);
             break;
         case 4:
-            F_3599(" Carrion Creeper", D_2046);
+            putstr(" Carrion Creeper", coltext);
             break;
         case 6:
-            F_3599("     Lich", D_2046);
+            putstr("     Lich", coltext);
             break;
         case 8:
-            F_3599("    Balron", D_2046);
+            putstr("    Balron", coltext);
             break;
         }
     } else {
-        F_21E7(11, 6, "Go forth and find");
-        switch (D_AD4C) {
+        boxtext(11, 6, "Go forth and find");
+        switch (kingnr) {
         case 7:
-            F_21E7(9, 8, D_307C[42]);
+            boxtext(9, 8, placenam[42]);
             break;
         case 5:
-            F_21E7(9, 8, D_307C[44]);
+            boxtext(9, 8, placenam[44]);
             break;
         case 3:
-            F_21E7(10, 8, D_307C[46]);
+            boxtext(10, 8, placenam[46]);
             break;
         case 1:
-            F_21E7(8, 8, D_307C[48]);
+            boxtext(8, 8, placenam[48]);
             break;
         }
     }
-    F_21E7(11, 10, "Do not return until");
-    F_21E7(11, 11, "thy quest is done!");
-    F_3AE2();
-    D_204E = 1;
+    boxtext(11, 10, "Do not return until");
+    boxtext(11, 11, "thy quest is done!");
+    presskey();
+    redraw = 1;
 }
 
-/* has the king's quest of king D_AD4C not been given yet (flag -1 set when given) */
-F_767D()
+/* has the king's quest of king kingnr not been given yet (flag -1 set when given) */
+questnew()
 {
-    return D_3AB2[D_AD4C] == -1;
+    return plquest[kingnr] == -1;
 }
 
 /* quest reward for a monster quest (odd kings): strength points */
-F_769D()
+rewardst()
 {
     int n;
 
-    n = (99 - D_3A90) / 8;
-    if (n == 0 && D_3A90 != 99)
+    n = (99 - plstr) / 8;
+    if (n == 0 && plstr != 99)
         n = 1;
-    F_21E7(8, 8, "For this I will give thee");
-    F_352C(10, 9);
-    F_3C8B(n, 1, 32, D_2046, 1);
-    F_3599(" point", D_2046);
+    boxtext(8, 8, "For this I will give thee");
+    gotoxy(10, 9);
+    putnum(n, 1, 32, coltext, 1);
+    putstr(" point", coltext);
     if (n != 1)
-        F_357C('s', D_2046);
-    F_3599(" of strength.", D_2046);
-    D_3A90 += n;
-    F_3AE2();
-    D_204E = 1;
+        putch('s', coltext);
+    putstr(" of strength.", coltext);
+    plstr += n;
+    presskey();
+    redraw = 1;
 }
 
 /* quest reward (even kings): a gem and a hint, by king type */
-F_7738()
+rewardgm()
 {
     int t;
 
-    t = F_40FE(D_3AAC, D_3AAE);
-    F_21E7(7, 8, "For this I shall tell thee");
+    t = quadrant(worldx, worldy);
+    boxtext(7, 8, "For this I shall tell thee");
     switch (t) {
     case 0:
-        F_21E7(5, 9, "that it requires all four gems");
-        F_21E7(5, 10, "  to launch a time machine!");
-        F_21E7(5, 12, "The king gives thee a red gem.");
-        D_20A4++;
+        boxtext(5, 9, "that it requires all four gems");
+        boxtext(5, 10, "  to launch a time machine!");
+        boxtext(5, 12, "The king gives thee a red gem.");
+        gemred++;
         break;
     case 1:
-        F_21E7(5, 9, "that the time machine must be");
-        F_21E7(5, 10, "     used in order to win.");
-        F_21E7(5, 12, "     The king gives thee a");
-        F_21E7(5, 13, "           green gem!");
-        D_3AC6++;
+        boxtext(5, 9, "that the time machine must be");
+        boxtext(5, 10, "     used in order to win.");
+        boxtext(5, 12, "     The king gives thee a");
+        boxtext(5, 13, "           green gem!");
+        gemgreen++;
         break;
     case 2:
-        F_21E7(5, 9, "   the princess will help a");
-        F_21E7(5, 10, "   space ace through time!");
-        F_21E7(5, 12, "    The king gives thee a");
-        F_21E7(5, 13, "          blue gem!");
-        D_3AC8++;
+        boxtext(5, 9, "   the princess will help a");
+        boxtext(5, 10, "   space ace through time!");
+        boxtext(5, 12, "    The king gives thee a");
+        boxtext(5, 13, "          blue gem!");
+        gemblue++;
         break;
     case 3:
-        F_21E7(5, 9, "   to take nine items from my");
-        F_21E7(5, 10, "  storerooms - but only nine!");
-        F_21E7(5, 12, "   The king also gives thee a");
-        F_21E7(5, 13, "          white gem!");
-        D_3ACA++;
-        D_8BA4 = 9;
+        boxtext(5, 9, "   to take nine items from my");
+        boxtext(5, 10, "  storerooms - but only nine!");
+        boxtext(5, 12, "   The king also gives thee a");
+        boxtext(5, 13, "          white gem!");
+        gemwhite++;
+        takeleft = 9;
         break;
     }
-    F_3E5E(10);
-    F_3AE2();
-    D_204E = 1;
+    waittick(10);
+    presskey();
+    redraw = 1;
 }
 
 /* quest completed: congratulate the player; returns 1 if it was (reward given), else 0 */
-F_78AF()
+questdon()
 {
     int n;
 
-    n = 7 - F_353A(D_2058) / 2;
-    if (D_3AB2[D_AD4C] != 1)
+    n = 7 - strlen2(plname) / 2;
+    if (plquest[kingnr] != 1)
         return 0;
-    D_3AB2[D_AD4C] = 0;
-    F_21C2(D_0DA8);
-    F_21E7(n + 5, 5, "Ah, ");
-    F_3599(D_2058, D_2046);
-    F_3599("!  Thou hast", D_2046);
-    F_21E7(10, 6, "completed thy quest.");
-    if (D_AD4C & 1)
-        F_769D();
+    plquest[kingnr] = 0;
+    boxclr(colfill);
+    boxtext(n + 5, 5, "Ah, ");
+    putstr(plname, coltext);
+    putstr("!  Thou hast", coltext);
+    boxtext(10, 6, "completed thy quest.");
+    if (kingnr & 1)
+        rewardst();
     else
-        F_7738();
+        rewardgm();
     return 1;
 }
 
 /* Transact with the king: offer pence (for hit points) or service (a quest) */
-F_794E()
+kingtrns()
 {
     unsigned char c;
     int amt, k;
 
-    k = F_40FE(D_3AAC, D_3AAE) * 2 + D_AD42;
-    F_3B46("Transact with king");
-    if (D_8BAE[D_AD42][D_AD3E][D_AD40] != 62) {
-        F_3B46("He is not here!");
-    } else if (D_AD46) {
-        F_3B46("He rejects thine offer!");
-    } else if (F_78AF(k)) {
+    k = quadrant(worldx, worldy) * 2 + townmap;
+    msgline("Transact with king");
+    if (tcdbin[townmap][townx][towny] != 62) {
+        msgline("He is not here!");
+    } else if (hostile) {
+        msgline("He rejects thine offer!");
+    } else if (questdon(k)) {
     } else {
-        F_3B46("Dost thou offer pence");
-        F_3599("or service: ", D_2046);
-        c = F_3862(F_39C5(D_2046));
+        msgline("Dost thou offer pence");
+        putstr("or service: ", coltext);
+        c = upcase(waitkey(coltext));
         if (c != 'P' && c != 'S') {
-            F_3B46("neither");
+            msgline("neither");
         } else {
             switch (c) {
             case 'P':
-                F_3B46("pence");
-                F_3599("How much? ", D_2046);
-                amt = F_B0B5(11, 24);
+                msgline("pence");
+                putstr("How much? ", coltext);
+                amt = readnum(11, 24);
                 if (amt == 0) {
-                    F_352C(11, 24);
-                    F_3B46(D_03DF);
-                } else if (amt > D_207C) {
-                    F_3B46(D_019B);
-                    F_3B46(D_03E4);
-                    F_0476(1);
+                    gotoxy(11, 24);
+                    msgline(snone);
+                } else if (amt > plcoin) {
+                    msgline(sempty);
+                    msgline(snotmuch);
+                    playif(1);
                 } else {
-                    D_207C -= amt;
+                    plcoin -= amt;
                     amt *= 3;
                     amt /= 2;
-                    F_3B46(D_019B);
-                    F_3B46("In return I give unto");
-                    F_3599("thee ", D_2046);
-                    F_3C8B(amt, 1, 32, D_2046, 1);
-                    F_3B46(" hit points");
-                    D_206E[0] += amt;
-                    F_4437();
-                    F_4558();
+                    msgline(sempty);
+                    msgline("In return I give unto");
+                    putstr("thee ", coltext);
+                    putnum(amt, 1, 32, coltext, 1);
+                    msgline(" hit points");
+                    plstat[0] += amt;
+                    showhp();
+                    showcoin();
                 }
                 break;
             case 'S':
-                if (F_767D()) {
-                    F_3B46(D_019B);
-                    F_3B46("Thou art on a quest");
-                    F_3B46("for me already!");
+                if (questnew()) {
+                    msgline(sempty);
+                    msgline("Thou art on a quest");
+                    msgline("for me already!");
                 } else
-                    F_7526();
+                    questtxt();
                 break;
             }
         }
     }
 }
 
-/* Transact command: dispatch by mode (D_204A 1 town, 2 castle) */
-F_7B17()
+/* Transact command: dispatch by mode (gmode 1 town, 2 castle) */
+cmdtrans()
 {
-    if (D_204A == 1)
-        F_7377();
-    else if (D_204A == 2)
-        F_794E();
+    if (gmode == 1)
+        shopdisp();
+    else if (gmode == 2)
+        kingtrns();
     else {
-        F_3B46("Transact?");
-        F_0476(1);
+        msgline("Transact?");
+        playif(1);
     }
 }
 
 /* View command: not available here */
-F_7B4C()
+cmdview()
 {
-    F_3B46("View?");
-    F_0476(1);
+    msgline("View?");
+    playif(1);
 }
 
-/* open a chest in the dungeon cell: trap (if arg > D_3A92) or treasure */
-F_7B63(lvl)
+/* open a chest in the dungeon cell: trap (if arg > plagi) or treasure */
+dungchst(lvl)
 int lvl;
 {
-    F_3599(" chest", D_2046);
-    if (D_AD56[D_AD3E][D_AD40].c != 4) {
-        F_3B46(D_0D20);
-        F_0476(1);
+    putstr(" chest", coltext);
+    if (dungmap[townx][towny].c != 4) {
+        msgline(snonehr);
+        playif(1);
     } else {
-    F_3B46(D_019B);
-    if (lvl > D_3A92 && D_206A != 3) {
-        F_3599("Thou hast set off a trap!", D_2046);
-        F_0476(2);
-        F_3B46(D_019B);
-        D_206E[0] -= D_AD50;
-        F_4437();
+    msgline(sempty);
+    if (lvl > plagi && plclass != 3) {
+        putstr("Thou hast set off a trap!", coltext);
+        playif(2);
+        msgline(sempty);
+        plstat[0] -= dunglvl;
+        showhp();
     } else {
-        D_AD56[D_AD3E][D_AD40].c = 0;
-        F_3599(D_01C7, D_2046);
-        F_0761(F_4069(3, D_AD50 * D_AD50 + 9), 0);
+        dungmap[townx][towny].c = 0;
+        putstr(sfind, coltext);
+        givecoin(rndrange(3, dunglvl * dunglvl + 9), 0);
     }
     }
 }
 
 /* ---- ou_7c31 ---- */
 /* Unlock a castle door: needs the right key (tile 60/61 ahead), opens the door */
-F_7C31()
+unlkdoor()
 {
     int t;
 
-    t = D_8BAE[D_AD42][D_AD3E][D_AD40];
+    t = tcdbin[townmap][townx][towny];
     if (t != 60 && t != 61) {
-        F_3B46(D_0CE3);
-        F_0476(1);
+        msgline(swhat);
+        playif(1);
     } else {
-        F_3B46(D_019B);
-        if (D_8BA0 == 0) {
-            F_3B46("Thou hast not a key!");
-        } else if (t != D_AD4E) {
-            F_3B46("Thou hast not");
-            F_3B46("the correct key!");
+        msgline(sempty);
+        if (hasjkey == 0) {
+            msgline("Thou hast not a key!");
+        } else if (t != lockkey) {
+            msgline("Thou hast not");
+            msgline("the correct key!");
         } else {
-            F_3B46("The door is open!");
-            D_8B9E = 1;
-            D_8BAE[D_AD42][D_AD3E][D_AD40 - 1] = 1;
-            F_B34F(1, D_AD3E, D_AD40 - 1);
+            msgline("The door is open!");
+            doorunl = 1;
+            tcdbin[townmap][townx][towny - 1] = 1;
+            towntile(1, townx, towny - 1);
         }
     }
 }
 
-/* 'U'nlock command: dungeon -> F_7B63(random), castle -> F_7C31, else "?" / " what?" */
-F_7CF2()
+/* 'U'nlock command: dungeon -> dungchst(random), castle -> unlkdoor, else "?" / " what?" */
+cmdunlk()
 {
-    F_3599("Unlock", D_2046);
-    if (D_204A == 3) {
-        F_7B63(F_4069(1, 75));
-    } else if (D_204A == 2) {
-        F_7C31();
-    } else if (D_204A == 0 || D_204A == 4) {
-        F_3B46(D_0235);
-        F_0476(1);
-    } else if (D_204A == 1) {
-        F_3B46(D_0CE3);
-        F_0476(1);
+    putstr("Unlock", coltext);
+    if (gmode == 3) {
+        dungchst(rndrange(1, 75));
+    } else if (gmode == 2) {
+        unlkdoor();
+    } else if (gmode == 0 || gmode == 4) {
+        msgline(squest);
+        playif(1);
+    } else if (gmode == 1) {
+        msgline(swhat);
+        playif(1);
     }
 }
 
 /* 'X'-it command: leave the vehicle (ship/aircraft) next to land */
-F_7D6B()
+cmdxit()
 {
     int t, i, j, f;
 
     f = 0;
-    if (D_204A != 0) {
-        F_3B46("X-it?");
-        F_0476(1);
-    } else if (D_2088 == 0) {
-        F_3B46("X-it what?");
-        F_0476(1);
+    if (gmode != 0) {
+        msgline("X-it?");
+        playif(1);
+    } else if (plveh == 0) {
+        msgline("X-it what?");
+        playif(1);
     } else {
-        t = F_C2AF(D_3AAC, D_3AAE, 1);
+        t = objat(worldx, worldy, 1);
         for (i = -2; i <= 2; i++)
             for (j = -2; j <= 2; j++)
-                if (F_A363(D_3AAC + i, D_3AAE + j))
+                if (terrain(worldx + i, worldy + j))
                     f = 1;
         if (t > 2 || f == 0) {
-            F_3B46(D_0172);
-            F_0476(1);
+            msgline(msgleave);
+            playif(1);
         } else {
-            F_B502(MT[0][0], D_8B31, D_3AAC, D_3AAE, 0);
-            D_2088 = 0;
+            addmon(MT[0][0], viewctr, worldx, worldy, 0);
+            plveh = 0;
             MT[0][1] = MT[0][0];
             MT[0][0] = 10;
-            F_3B46("X-it");
+            msgline("X-it");
         }
     }
 }
 
 /* 'Pass' command */
-F_7E5B()
+cmdpass()
 {
-    F_3B46("Pass");
+    msgline("Pass");
 }
 
 /* unknown command: "Huh?" */
-F_7E69()
+cmdhuh()
 {
-    F_3B46("Huh?");
-    F_0476(1);
+    msgline("Huh?");
+    playif(1);
 }
 
 /* spawn chance by experience (DGROUP 16CC) */
-int D_16CC[10] = { 0x23, 0x37, 0x4B, 0x5F, 0x73, 0x87, 0x9B, 0xAF, 0xC3, 0xCD };
+int spawnthr[10] = { 0x23, 0x37, 0x4B, 0x5F, 0x73, 0x87, 0x9B, 0xAF, 0xC3, 0xCD };
 
 /* per-turn food counter on the overworld: eat food when counter reaches vehicle limit */
-F_7E80()
+foodtick()
 {
-    if (D_204A == 0) {
-        if (D_8B8E >= D_36F8[D_2088]) {
-            D_8B8E = 0;
-            D_2080--;
-            F_44A2();
+    if (gmode == 0) {
+        if (foodcnt >= foodper[plveh]) {
+            foodcnt = 0;
+            plfood--;
+            showfood();
         }
-        D_8B8E++;
+        foodcnt++;
     }
 }
 
 /* is overworld x coordinate (after wrap) in range 9..158 */
-F_7EB3(a)
+xinrange(a)
 int a;
 {
     if (a > 83)
@@ -979,7 +979,7 @@ int a;
 }
 
 /* is overworld y coordinate (after wrap) in range 6..149 */
-F_7EE1(a)
+yinrange(a)
 int a;
 {
     if (a > 77)
@@ -990,16 +990,16 @@ int a;
 }
 
 /* maybe spawn a wandering monster near the player on the overworld */
-F_7F0F()
+spawnmon()
 {
     int m, r, t, x, y, n, k, lvl, id, hp, ok;
 
-    r = F_4069(1, 255);
-    if (r < D_16CC[D_207E / 1000]) {
+    r = rndrange(1, 255);
+    if (r < spawnthr[plexp / 1000]) {
         n = 0;
-        m = F_4069(1, 8) * 2;
-        lvl = F_4069(0, 149) / 10;
-        r = D_3698[lvl];
+        m = rndrange(1, 8) * 2;
+        lvl = rndrange(0, 149) / 10;
+        r = hpfact[lvl];
         if (m > r)
             m = r;
         if (lvl < 4)
@@ -1009,28 +1009,28 @@ F_7F0F()
         else
             t = 1;
         id = lvl * 2 + 19;
-        hp = F_40E9() + 1 + D_3698[lvl] * 10;
+        hp = getlevel() + 1 + hpfact[lvl] * 10;
         do {
-            x = F_4069(10, 15);
-            y = F_4069(5, 15);
-            if (F_4069(1, 16) & 1)
+            x = rndrange(10, 15);
+            y = rndrange(5, 15);
+            if (rndrange(1, 16) & 1)
                 x = -x;
-            if (F_4069(1, 16) & 1)
+            if (rndrange(1, 16) & 1)
                 y = -y;
-            x = F_C2EC(x + 9);
-            y = F_C31C(y + 4);
-            k = F_C2AF(x, y, 1);
-            ok = F_7EB3(x) && F_7EE1(y);
+            x = viewx(x + 9);
+            y = viewy(y + 4);
+            k = objat(x, y, 1);
+            ok = xinrange(x) && yinrange(y);
         } while (n < 5 && k != t && !ok);
         if (k == t && ok) {
-            F_B502(id, t, x, y, hp);
-            D_8B90++;
+            addmon(id, t, x, y, hp);
+            nmons++;
         }
     }
 }
 
 /* can monster m (type m) move onto the overworld square at (dx,dy) relative to screen centre */
-F_80A2(m, dx, dy)
+moncango(m, dx, dy)
 int m, dx, dy;
 {
     int a, b, t, k, x, y, res;
@@ -1038,7 +1038,7 @@ int m, dx, dy;
     a = 2;
     b = 1;
     res = 0;
-    if (F_4069(1, 100) > D_36E8[D_2088])
+    if (rndrange(1, 100) > movechan[plveh])
         return 0;
     t = MT[m][0];
     if (t >= 19 && t <= 25) {
@@ -1046,18 +1046,18 @@ int m, dx, dy;
     } else if (t == 31 || t == 35) {
         a = b = 2;
     }
-    x = F_C2EC(9 - dx);
-    y = F_C31C(4 - dy);
-    k = F_C2AF(x, y, 0);
+    x = viewx(9 - dx);
+    y = viewy(4 - dy);
+    k = objat(x, y, 0);
     if (a != b)
         res = k >= 4 && k <= 9;
-    if ((a == k || k == b) && F_7EB3(x) && F_7EE1(y) || res)
+    if ((a == k || k == b) && xinrange(x) && yinrange(y) || res)
         return 1;
     return 0;
 }
 
 /* distance test: returns reach (1 or 3) if (dx,dy) within it, else 0 */
-F_8194(m, dx, dy)
+monreach(m, dx, dy)
 int m, dx, dy;
 {
     int a, b, v;
@@ -1073,14 +1073,14 @@ int m, dx, dy;
 }
 
 /* monster m shoots / attacks along (dx,dy): animates the shot and may hit the player */
-F_81FC(m, dx, dy, n)
+monshoot(m, dx, dy, n)
 int m, dx, dy, n;
 {
     int dmg, hit, k, x, y, sx, sy, i;
 
     sy = sx = 0;
     i = 1;
-    F_355D(MT[m][0], 9 - dx, 4 - dy);
+    drawtile(MT[m][0], 9 - dx, 4 - dy);
     if (dx) {
         if (dx > 0)
             sx--;
@@ -1093,61 +1093,61 @@ int m, dx, dy, n;
         else
             sy++;
     }
-    F_3599(F_0742(MT[m][0]), D_2046);
-    F_3599(" attacks!", D_2046);
+    putstr(monname(MT[m][0]), coltext);
+    putstr(" attacks!", coltext);
     do {
         x = dx + sx * i;
         y = dy + sy * i;
-        F_355D(50, 9 - x, 4 - y);
+        drawtile(50, 9 - x, 4 - y);
         if (i == 1)
-            F_0476(3);
+            playif(3);
         else
-            F_3E5E(2);
-        k = F_C2AF(D_3AAC - x, D_3AAE - y, 0);
-        F_355D(k, 9 - x, 4 - y);
+            waittick(2);
+        k = objat(worldx - x, worldy - y, 0);
+        drawtile(k, 9 - x, 4 - y);
         i++;
     } while (i <= n && k != 3 && (x != 0 || y != 0));
-    hit = F_4069(1, 255) < 200 - D_3A94 / 2 - (D_2086 << 3);
+    hit = rndrange(1, 255) < 200 - plsta / 2 - (rdyarm << 3);
     if (x || y || !hit) {
-        F_355D(MT[0][0], 9, 4);
-        if (F_353A(F_0742(MT[m][0])) > 8)
-            F_3B46(D_019B);
+        drawtile(MT[0][0], 9, 4);
+        if (strlen2(monname(MT[m][0])) > 8)
+            msgline(sempty);
         else
-            F_357C(32, D_2046);
-        F_3B46(D_01E1);
+            putch(32, coltext);
+        msgline(smissed);
     } else {
-        F_355D(50, 9, 4);
-        dmg = F_4069(1, D_368C[(MT[m][0] - 19) / 2] * 2 + 1);
-        F_0476(2);
-        if (F_353A(F_0742(MT[m][0])) > 10) {
-            F_3B46(D_019B);
-            F_3599(D_01AC, D_2046);
+        drawtile(50, 9, 4);
+        dmg = rndrange(1, dmgfact[(MT[m][0] - 19) / 2] * 2 + 1);
+        playif(2);
+        if (strlen2(monname(MT[m][0])) > 10) {
+            msgline(sempty);
+            putstr(shit, coltext);
         } else {
-            F_3B46(" Hit!");
+            msgline(" Hit!");
         }
-        F_3C8B(dmg, 2, 32, D_2046, 1);
-        F_3B46(D_020C);
-        F_355D(MT[0][0], 9, 4);
-        D_206E[0] -= dmg;
-        F_4437();
+        putnum(dmg, 2, 32, coltext, 1);
+        msgline(sdamage);
+        drawtile(MT[0][0], 9, 4);
+        plstat[0] -= dmg;
+        showhp();
     }
 }
 
 /* move monster m to screen offset (dx,dy): update its terrain and position */
-F_8479(m, dx, dy)
+monplace(m, dx, dy)
 int m, dx, dy;
 {
     int a, b;
 
-    a = F_C2EC(9 - dx);
-    b = F_C31C(4 - dy);
-    MT[m][1] = F_A363(a, b);
+    a = viewx(9 - dx);
+    b = viewy(4 - dy);
+    MT[m][1] = terrain(a, b);
     MT[m][2] = a;
     MT[m][3] = b;
 }
 
 /* try to step monster m one square in y toward the player */
-F_84D3(m, dx, dy)
+monstepy(m, dx, dy)
 int m, dx, dy;
 {
     int s;
@@ -1159,15 +1159,15 @@ int m, dx, dy;
         s = -1;
     else
         s = 1;
-    if (s && F_80A2(m, dx, s + dy)) {
-        F_8479(m, dx, s + dy);
+    if (s && moncango(m, dx, s + dy)) {
+        monplace(m, dx, s + dy);
         return 1;
     }
     return 0;
 }
 
 /* try to step monster m one square in x toward the player */
-F_8536(m, dx, dy)
+monstepx(m, dx, dy)
 int m, dx, dy;
 {
     int s;
@@ -1178,68 +1178,68 @@ int m, dx, dy;
         s = -1;
     else
         s = 1;
-    if (s && F_80A2(m, dx + s, dy)) {
-        F_8479(m, dx + s, dy);
+    if (s && moncango(m, dx + s, dy)) {
+        monplace(m, dx + s, dy);
         return 1;
     }
     return 0;
 }
 
 /* move monster m toward the player, trying x or y first at random */
-F_8598(m, dx, dy)
+monchase(m, dx, dy)
 int m, dx, dy;
 {
     int r;
 
     r = 1;
-    if (F_91D4(1, 10) & 1) {
-        if (!F_84D3(m, dx, dy))
-            r = F_8536(m, dx, dy);
+    if (lcrand(1, 10) & 1) {
+        if (!monstepy(m, dx, dy))
+            r = monstepx(m, dx, dy);
     } else {
-        if (!F_8536(m, dx, dy))
-            r = F_84D3(m, dx, dy);
+        if (!monstepx(m, dx, dy))
+            r = monstepy(m, dx, dy);
     }
 }
 
 /* overworld monsters' turn: attackers in range fire, others move toward the player */
-F_8600()
+worldmon()
 {
     int q[10], t, dx, dy, n, i;
 
     n = 0;
-    for (i = 1; i <= D_8BA6; i++) {
+    for (i = 1; i <= lastmon; i++) {
         t = MT[i][0];
         if (t >= 19 && t <= 47) {
-            dx = D_3AAC - MT[i][2];
-            dy = D_3AAE - MT[i][3];
-            if (F_8194(t, dx, dy)) {
+            dx = worldx - MT[i][2];
+            dy = worldy - MT[i][3];
+            if (monreach(t, dx, dy)) {
                 q[n] = i;
                 n++;
             } else {
-                F_8598(i, dx, dy);
+                monchase(i, dx, dy);
             }
         }
     }
-    F_C3CA();
-    while (n-- && D_206E[0] > 0) {
+    drawwrld();
+    while (n-- && plstat[0] > 0) {
         i = q[n];
-        dx = D_3AAC - MT[i][2];
-        dy = D_3AAE - MT[i][3];
-        F_81FC(i, dx, dy, F_8194(MT[i][0], dx, dy));
+        dx = worldx - MT[i][2];
+        dy = worldy - MT[i][3];
+        monshoot(i, dx, dy, monreach(MT[i][0], dx, dy));
     }
 }
 
 /* remove monsters of overworld region a (kill list cleanup) */
-F_86E1(a)
+rmregion(a)
 int a;
 {
     int i;
 
-    for (i = 1; i <= D_8BA6; i++) {
+    for (i = 1; i <= lastmon; i++) {
         if (MT[i][0] >= 19) {
-            if (F_40FE(MT[i][2], MT[i][3]) == a) {
-                F_B58E(MT[i][2], MT[i][3]);
-                D_8B90--;
+            if (quadrant(MT[i][2], MT[i][3]) == a) {
+                delmon(MT[i][2], MT[i][3]);
+                nmons--;
                 i--;
             }
         }
@@ -1247,178 +1247,178 @@ int a;
 }
 
 /* dungeon monster at offset (dx,dy) attacks the player (hit/miss, special effects) */
-F_873D(dx, dy)
+dungmatk(dx, dy)
 int dx, dy;
 {
     int t, r, dmg, i, f;
 
     f = 1;
-    if (D_AD56[D_AD3E][D_AD40].a != 8) {
-        if (D_AD56[D_AD3E - dx][D_AD40 - dy].a != 3 ||
-            (D_AD56[D_AD3E][D_AD40].a != 3 && D_AD56[D_AD3E][D_AD40].a != 1 &&
-             D_AD56[D_AD3E][D_AD40].a != 2)) {
-            t = D_AD56[D_AD3E - dx][D_AD40 - dy].b;
-            F_3599("Attacked by ", D_2046);
-            F_3C31(t);
-            F_3B46(D_018D);
-            F_0476(3);
-            r = D_3A94 / 2 + (D_2086 << 3) + 56;
-            if (F_4069(1, 255) <= r) {
-                F_3B46(D_01E1);
+    if (dungmap[townx][towny].a != 8) {
+        if (dungmap[townx - dx][towny - dy].a != 3 ||
+            (dungmap[townx][towny].a != 3 && dungmap[townx][towny].a != 1 &&
+             dungmap[townx][towny].a != 2)) {
+            t = dungmap[townx - dx][towny - dy].b;
+            putstr("Attacked by ", coltext);
+            featname(t);
+            msgline(sbang);
+            playif(3);
+            r = plsta / 2 + (rdyarm << 3) + 56;
+            if (rndrange(1, 255) <= r) {
+                msgline(smissed);
                 f = 0;
             } else {
-                r = F_4069(1, 255);
-                dmg = D_AD50 + t * t;
+                r = rndrange(1, 255);
+                dmg = dunglvl + t * t;
                 if (dmg > 255)
-                    dmg = F_4069(t + 1, 255);
-                if (t == 9 && D_2086) {
-                    F_3B46("Armor destroyed!");
-                    D_20AC[D_2086]--;
-                    f = D_2086 = 0;
+                    dmg = rndrange(t + 1, 255);
+                if (t == 9 && rdyarm) {
+                    msgline("Armor destroyed!");
+                    ownarm[rdyarm]--;
+                    f = rdyarm = 0;
                 } else if (t == 16) {
-                    F_3B46("A gremlin stole some food!");
-                    D_2080 = D_2080 / 2;
-                    F_44A2();
+                    msgline("A gremlin stole some food!");
+                    plfood = plfood / 2;
+                    showfood();
                     f = 0;
                 } else if (t == 21 && r < 128) {
-                    F_3B46("Mental attack!");
-                    D_3A9A = D_3A9A / 2;
-                    D_3A9A += 5;
+                    msgline("Mental attack!");
+                    plint = plint / 2;
+                    plint += 5;
                     f = 0;
                 }
                 if (t == 2) {
                     for (i = 1; i <= 15; i++) {
-                        if (D_20B8[i] && i != D_2082) {
-                            F_3599("Thief stole a", D_2046);
-                            if (F_40A8(D_0D72[i][0]))
-                                F_3599("n ", D_2046);
+                        if (ownweap[i] && i != rdyweap) {
+                            putstr("Thief stole a", coltext);
+                            if (isvowel(wnamelng[i][0]))
+                                putstr("n ", coltext);
                             else
-                                F_357C(32, D_2046);
-                            if (F_353A(D_0D72[i]) > 11)
-                                F_3B46(D_019B);
-                            F_3B46(D_0D72[i]);
-                            D_20B8[i]--;
+                                putch(32, coltext);
+                            if (strlen2(wnamelng[i]) > 11)
+                                msgline(sempty);
+                            msgline(wnamelng[i]);
+                            ownweap[i]--;
                             i = 16;
                         }
                     }
                 }
             }
             if (f) {
-                F_0476(2);
-                F_3599(D_01AC, D_2046);
-                F_3C8B(dmg, 1, 32, D_2046, 1);
-                F_3B46(D_01D8);
-                D_206E[0] -= dmg;
-                F_4437();
+                playif(2);
+                putstr(shit, coltext);
+                putnum(dmg, 1, 32, coltext, 1);
+                msgline(sdamagex);
+                plstat[0] -= dmg;
+                showhp();
             }
         }
     }
 }
 
 /* dungeon: move monster at (x,y) one step by (dx,dy) if the square is free */
-F_8A04(x, y, dx, dy)
+dungmmov(x, y, dx, dy)
 int x, y, dx, dy;
 {
     int t;
 
-    t = D_AD56[x + dx][y + dy].a;
-    if (t != 1 && t != 2 && t != 8 && D_AD56[x + dx][y + dy].b == -1) {
-        D_AD56[x + dx][y + dy].b = D_AD56[x][y].b;
-        D_AD56[x][y].b = -1;
-        D_AD56[x + dx][y + dy].c += 1000;
+    t = dungmap[x + dx][y + dy].a;
+    if (t != 1 && t != 2 && t != 8 && dungmap[x + dx][y + dy].b == -1) {
+        dungmap[x + dx][y + dy].b = dungmap[x][y].b;
+        dungmap[x][y].b = -1;
+        dungmap[x + dx][y + dy].c += 1000;
         return 1;
     }
     return 0;
 }
 
 /* dungeon monsters' turn: adjacent ones attack, near ones move toward the player */
-F_8AC9()
+dungmons()
 {
     int i, j, dx, dy, r, d;
 
     r = 0;
     for (i = 1; i <= 9; i++) {
         for (j = 1; j <= 9; j++) {
-            if (D_AD56[i][j].b != -1 && D_AD56[i][j].c < 999) {
-                dx = D_AD3E - i;
-                dy = D_AD40 - j;
+            if (dungmap[i][j].b != -1 && dungmap[i][j].c < 999) {
+                dx = townx - i;
+                dy = towny - j;
                 d = (dx < 0 ? -dx : dx) + (dy < 0 ? -dy : dy);
                 if (d == 1) {
-                    F_873D(dx, dy);
+                    dungmatk(dx, dy);
                 } else if (d < 7) {
-                    dx = F_3C64(dx);
-                    dy = F_3C64(dy);
+                    dx = sign(dx);
+                    dy = sign(dy);
                     if (dx)
-                        r = F_8A04(i, j, dx, 0);
+                        r = dungmmov(i, j, dx, 0);
                     if (r == 0 && dy)
-                        r = F_8A04(i, j, 0, dy);
+                        r = dungmmov(i, j, 0, dy);
                 }
             }
-            if (D_206E[0] <= 0 || D_2080 <= 0)
+            if (plstat[0] <= 0 || plfood <= 0)
                 break;
         }
     }
     for (i = 1; i <= 9; i++)
         for (j = 1; j <= 9; j++)
-            if (D_AD56[i][j].c > 999)
-                D_AD56[i][j].c -= 1000;
+            if (dungmap[i][j].c > 999)
+                dungmap[i][j].c -= 1000;
 }
 
 /* teleport the player to a random nearby land square of the same region (time-machine style hop) */
-F_8C20()
+randhop()
 {
     int t, k, x, y;
 
-    t = F_40FE(D_3AAC, D_3AAE);
+    t = quadrant(worldx, worldy);
     do {
         do {
-            x = D_3AAC + F_4069(3, 23) - 13;
-            y = D_3AAE + F_4069(3, 23) - 13;
+            x = worldx + rndrange(3, 23) - 13;
+            y = worldy + rndrange(3, 23) - 13;
             if (x < 2 || x > 165)
-                x = D_3AAC;
+                x = worldx;
             if (y < 2 || y > 153)
-                y = D_3AAE;
-        } while (t != F_40FE(x, y));
-        k = F_C2AF(x, y, 1);
+                y = worldy;
+        } while (t != quadrant(x, y));
+        k = objat(x, y, 1);
     } while (k != 1 && k != 2);
-    D_3AAC = x;
-    D_3AAE = y;
+    worldx = x;
+    worldy = y;
     MT[0][0] = 10;
     MT[0][1] = k;
-    MT[0][2] = D_3AAC;
-    MT[0][3] = D_3AAE;
+    MT[0][2] = worldx;
+    MT[0][3] = worldy;
 }
 
 /* monsters' turn dispatch on game mode (0 world, 3 dungeon, 1/2 town/castle) */
-F_8CEB()
+montrn()
 {
-    if (D_204A == 0)
-        F_8600();
-    else if (D_204A == 3)
-        F_8AC9();
-    else if (D_204A == 1 || D_204A == 2)
-        F_2A73();
+    if (gmode == 0)
+        worldmon();
+    else if (gmode == 3)
+        dungmons();
+    else if (gmode == 1 || gmode == 2)
+        entturn();
 }
 
 /* "Insert Ultima I diskette / Hit space to continue..." prompt */
-F_125C()
+diskprmt()
 {
-    F_3EED();
-    F_352C(1, 23);
-    F_3599("Insert Ultima I diskette", D_2046);
-    F_352C(1, 24);
-    F_3599("Hit space to continue...", D_2046);
-    while (F_39C5(D_2046) != 32)
+    scrlmsg();
+    gotoxy(1, 23);
+    putstr("Insert Ultima I diskette", coltext);
+    gotoxy(1, 24);
+    putstr("Hit space to continue...", coltext);
+    while (waitkey(coltext) != 32)
         ;
-    F_352C(1, 23);
-    F_3599("                        ", D_2046);
-    F_352C(1, 24);
-    F_3599("                        ", D_2046);
-    F_352C(1, 23);
+    gotoxy(1, 23);
+    putstr("                        ", coltext);
+    gotoxy(1, 24);
+    putstr("                        ", coltext);
+    gotoxy(1, 23);
 }
 
 /* OUT.EXE main: load map.bin/tcd.bin/data, init state, command loop */
-F_1853(argc, argv)
+main(argc, argv)
 int argc;
 unsigned char **argv;
 {
@@ -1426,38 +1426,38 @@ unsigned char **argv;
     int cnt;
 
     F_1D0D(1);
-    D_2048 = F_3862(argv[1][0]) == 'C';
-    D_8B88 = argv[1];
-    D_8B8A = argv[2];
-    D_8B8C = argv[3];
-    F_3F58(0);
-    F_03E9(argv[2][0]);
-    F_0441();
-    F_3E2F("map.bin", D_3DAC, 13104);
-    F_3E2F("tcd.bin", (char *)D_8BAE, 6840);
-    F_3E2F(D_1DC8[D_082C + 23], 0xA666, 1632);
-    D_8BA6 = D_3B22;
-    D_8BA8 = D_3B24;
-    D_8B8E = 1;
-    D_204E = D_204A = D_8B9C = 0;
-    D_8B90 = F_B5E1();
-    D_8B92 = F_B617();
-    F_37FD(D_3AAA + F_3EC4() % 999);
-    if (D_206E[0] <= 0 || D_2080 <= 0)
-        F_C47C();
+    forcecga = upcase(argv[1][0]) == 'C';
+    argv1 = argv[1];
+    argv2 = argv[2];
+    argv3 = argv[3];
+    vidinit(0);
+    loadchar(argv[2][0]);
+    loadgfx();
+    readfile("map.bin", mapbin, 13104);
+    readfile("tcd.bin", (char *)tcdbin, 6840);
+    readfile(dirtab[vidmode + 23], 0xA666, 1632);
+    lastmon = savlast;
+    turns = savturns;
+    foodcnt = 1;
+    redraw = gmode = prevmode = 0;
+    nmons = cntmon();
+    nvehs = cntveh();
+    seedrnd(plseed + clockrnd() % 999);
+    if (plstat[0] <= 0 || plfood <= 0)
+        death();
     else
-        F_C3CA();
-    F_45A3();
+        drawwrld();
+    showstat();
     for (;;) {
-        if (D_206E[0] <= 0 || D_2080 <= 0)
-            F_C47C();
+        if (plstat[0] <= 0 || plfood <= 0)
+            death();
         cnt = 0;
-        F_387E(0, 24);
+        arrowr(0, 24);
         do {
-            c = F_4127();
+            c = keyup();
             cnt++;
-            if (D_204A == 0)
-                F_AF57(cnt);
+            if (gmode == 0)
+                drawview(cnt);
         } while (c == 0 && cnt < 1500);
         if (c == 0)
             c = ' ';
@@ -1466,100 +1466,100 @@ unsigned char **argv;
         case 4:
         case 2:
         case 1:
-            F_066F(c);
+            domove(c);
             break;
         case 'A':
-            F_10C2(-1);
+            cmdattk(-1);
             break;
         case '8':
-            F_10C2(3);
+            cmdattk(3);
             break;
         case '2':
-            F_10C2(4);
+            cmdattk(4);
             break;
         case '6':
-            F_10C2(2);
+            cmdattk(2);
             break;
         case '4':
-            F_10C2(1);
+            cmdattk(1);
             break;
         case 'B':
-            F_118D();
+            cmdboard();
             break;
         case 'C':
-            F_19FF();
+            cmdcast();
             break;
         case 'D':
-            F_204D();
+            cmddrop();
             break;
         case 'E':
-            F_52AB();
+            cmdenter();
             break;
         case 'F':
-            F_53DA();
+            cmdfire();
             break;
         case 'G':
-            F_5550();
+            cmdget();
             break;
         case 'H':
-            F_559A();
+            cmdhyper();
             break;
         case 'I':
-            F_564B();
+            cmdinfo();
             break;
         case 'K':
-            F_581A();
+            cmdklimb();
             break;
         case 'N':
-            F_58BD();
+            cmdnoise();
             break;
         case 'O':
-            F_59D7();
+            cmdopen();
             break;
         case 'Q':
-            F_5B54();
+            cmdquit();
             break;
         case 'R':
-            F_43C8();
+            readycmd();
             break;
         case 'S':
-            F_5DB1();
+            cmdsteal();
             break;
         case 'T':
-            F_7B17();
+            cmdtrans();
             break;
         case 'U':
-            F_7CF2();
+            cmdunlk();
             break;
         case 'V':
-            F_7B4C();
+            cmdview();
             break;
         case 'X':
-            F_7D6B();
+            cmdxit();
             break;
         case 'Z':
-            F_478E();
-            D_204E = 1;
-            F_387E(0, 24);
+            ztats();
+            redraw = 1;
+            arrowr(0, 24);
             break;
         case ' ':
-            F_7E5B();
+            cmdpass();
             break;
         case 27:
-            D_0182 = 1;
+            escflag = 1;
         default:
-            F_7E69();
+            cmdhuh();
         }
-        if (D_204A == 0) {
-            F_A554();
-            if (D_8B90 <= 10)
-                F_7F0F();
+        if (gmode == 0) {
+            animwat();
+            if (nmons <= 10)
+                spawnmon();
         }
-        D_8BA8++;
-        F_8CEB();
-        F_7E80();
-        if (D_204A == 3)
-            F_414A();
-        D_8B9C = D_204A;
+        turns++;
+        montrn();
+        foodtick();
+        if (gmode == 3)
+            drawdung();
+        prevmode = gmode;
     }
 }

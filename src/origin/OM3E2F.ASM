@@ -20,17 +20,17 @@ PROG	SEGMENT
 	EXTRN	FOPEN:NEAR
 	EXTRN	FREAD:NEAR
 	EXTRN	FWRITE:NEAR
-	EXTRN	F_125C:NEAR
+	EXTRN	diskprmt:NEAR
 PROG	ENDS
-	PUBLIC	F_3E2F,F_3E85,D_0AB6,D_0AB9
+	PUBLIC	readfile,writfile,strrb,strwb
 
 PROG	SEGMENT
-F_3E2F:
+readfile:
 	PUSH	BP                                 ; 3E2F 55
 	SUB	SP, 8                               ; 3E30 83 EC 08
 	MOV	BP, SP                              ; 3E33 8B EC
 L_3E35:
-	MOV	AX, OFFSET DGROUP:D_0AB6            ; 3E35 B8 B6 0A
+	MOV	AX, OFFSET DGROUP:strrb            ; 3E35 B8 B6 0A
 	PUSH	AX                                 ; 3E38 50
 	PUSH	WORD PTR [BP+0CH]                  ; 3E39 FF 76 0C
 	CALL	FOPEN                              ; 3E3C E8 F1 0D
@@ -56,19 +56,19 @@ L_3E35:
 L_3E71:
 	CMP	WORD PTR [BP+6], 0                  ; 3E71 83 7E 06 00
 	JE	L_3E7A                               ; 3E75 74 03
-	CALL	F_125C                             ; 3E77 E8 E2 D3
+	CALL	diskprmt                             ; 3E77 E8 E2 D3
 L_3E7A:
 	CMP	WORD PTR [BP+6], 0                  ; 3E7A 83 7E 06 00
 	JNE	L_3E35                              ; 3E7E 75 B5
 	ADD	SP, 8                               ; 3E80 83 C4 08
 	POP	BP                                  ; 3E83 5D
 	RET                                     ; 3E84 C3
-F_3E85:
+writfile:
 	PUSH	BP                                 ; 3E85 55
 	SUB	SP, 8                               ; 3E86 83 EC 08
 	MOV	BP, SP                              ; 3E89 8B EC
 L_3E8B:
-	MOV	AX, OFFSET DGROUP:D_0AB9            ; 3E8B B8 B9 0A
+	MOV	AX, OFFSET DGROUP:strwb            ; 3E8B B8 B9 0A
 	PUSH	AX                                 ; 3E8E 50
 	PUSH	WORD PTR [BP+0CH]                  ; 3E8F FF 76 0C
 	CALL	FOPEN                              ; 3E92 E8 9B 0D
@@ -94,7 +94,7 @@ L_3E8B:
 L_3EC7:
 	CMP	WORD PTR [BP+6], 0                  ; 3EC7 83 7E 06 00
 	JE	L_3ED0                               ; 3ECB 74 03
-	CALL	F_125C                             ; 3ECD E8 8C D3
+	CALL	diskprmt                             ; 3ECD E8 8C D3
 L_3ED0:
 	CMP	WORD PTR [BP+6], 0                  ; 3ED0 83 7E 06 00
 	JNE	L_3E8B                              ; 3ED4 75 B5
@@ -104,8 +104,8 @@ L_3ED0:
 PROG	ENDS
 
 DATA	SEGMENT
-D_0AB6	DB	72H,62H,0	; 0AB6
-D_0AB9	DB	77H,62H,0	; 0AB9
+strrb	DB	72H,62H,0	; 0AB6
+strwb	DB	77H,62H,0	; 0AB9
 DATA	ENDS
 
 	END

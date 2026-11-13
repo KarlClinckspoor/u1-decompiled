@@ -15,12 +15,12 @@ DGROUP	GROUP	DATA,UDATA
 PROG	SEGMENT
 	EXTRN	F_3D61:NEAR
 PROG	ENDS
-	PUBLIC	F_39FC,F_3A1D,D_07D8,D_07DA,D_07DC,D_07DE
+	PUBLIC	drawline,F_3A1D,D_07D8,D_07DA,D_07DC,D_07DE
 	PUBLIC	D_07E0,D_07E2,D_07E4,D_07E6,D_07E8,D_07EA
-	PUBLIC	D_07EC,D_07EE,D_07F0,D_07F2,D_07F4
+	PUBLIC	D_07EC,D_07EE,D_07F0,penx,peny
 
 PROG	SEGMENT
-F_39FC:
+drawline:
 	PUSH	BP                                 ; 39FC 55
 	MOV	BP, SP                              ; 39FD 8B EC
 	PUSH	SI                                 ; 39FF 56
@@ -46,8 +46,8 @@ F_3A1D:
 	MOV	WORD PTR D_07DE, DI                 ; 3A28 89 3E DE 07
 	MOV	WORD PTR D_07E0, DX                 ; 3A2C 89 16 E0 07
 	PUSH	DX                                 ; 3A30 52
-	MOV	WORD PTR D_07F2, SI                 ; 3A31 89 36 F2 07
-	MOV	WORD PTR D_07F4, DI                 ; 3A35 89 3E F4 07
+	MOV	WORD PTR penx, SI                 ; 3A31 89 36 F2 07
+	MOV	WORD PTR peny, DI                 ; 3A35 89 3E F4 07
 	MOV	SI, 1                               ; 3A39 BE 01 00
 	MOV	DI, 1                               ; 3A3C BF 01 00
 	MOV	DX, WORD PTR D_07DE                 ; 3A3F 8B 16 DE 07
@@ -132,8 +132,8 @@ D_07EA	DB	0,0	; 07EA
 D_07EC	DB	0,0	; 07EC
 D_07EE	DB	0,0	; 07EE
 D_07F0	DB	0,0	; 07F0
-D_07F2	DB	0,0	; 07F2
-D_07F4	DB	0,0	; 07F4
+penx	DB	0,0	; 07F2
+peny	DB	0,0	; 07F4
 DATA	ENDS
 
 	END

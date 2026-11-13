@@ -15,11 +15,11 @@ DGROUP	GROUP	DATA,UDATA
 PROG	SEGMENT
 	EXTRN	F_3D61:NEAR
 PROG	ENDS
-	PUBLIC	F_413C,F_41D5,F_4224,F_4234,D_09FE,D_0A26
+	PUBLIC	getkey,F_41D5,flushkey,F_4234,D_09FE,D_0A26
 	PUBLIC	D_0A28,D_0A2A,D_0A2E
 
 PROG	SEGMENT
-F_413C:
+getkey:
 	PUSH	BP                                 ; 413C 55
 	MOV	BP, SP                              ; 413D 8B EC
 	PUSH	SI                                 ; 413F 56
@@ -147,7 +147,7 @@ L_4207:
 	AND	AX, 3                               ; 421D 25 03 00
 	MOV	WORD PTR D_0A2A, AX                 ; 4220 A3 2A 0A
 	RET                                     ; 4223 C3
-F_4224:
+flushkey:
 	PUSH	BP                                 ; 4224 55
 	MOV	BP, SP                              ; 4225 8B EC
 	PUSH	SI                                 ; 4227 56

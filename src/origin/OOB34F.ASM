@@ -13,14 +13,14 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_082C:BYTE
-	EXTRN	D_0830:BYTE
-	EXTRN	D_084A:BYTE
+	EXTRN	vidmode:BYTE
+	EXTRN	vidmarg:BYTE
+	EXTRN	rowtab:BYTE
 DATA	ENDS
-	PUBLIC	F_B34F
+	PUBLIC	towntile
 
 PROG	SEGMENT
-F_B34F:
+towntile:
 	PUSH	BP                                 ; B34F 55
 	MOV	BP, SP                              ; B350 8B EC
 	PUSH	SI                                 ; B352 56
@@ -31,10 +31,10 @@ F_B34F:
 	MOV	BX, WORD PTR [BP+8]                 ; B359 8B 5E 08
 	MOV	CX, WORD PTR [BP+4]                 ; B35C 8B 4E 04
 	PUSH	BX                                 ; B35F 53
-	MOV	BX, WORD PTR D_0830                 ; B360 8B 1E D0 19
-	CMP	WORD PTR D_082C, 1                  ; B364 83 3E CC 19 01
+	MOV	BX, WORD PTR vidmarg                 ; B360 8B 1E D0 19
+	CMP	WORD PTR vidmode, 1                  ; B364 83 3E CC 19 01
 	JE	L_B375                               ; B369 74 0A
-	CMP	WORD PTR D_082C, 2                  ; B36B 83 3E CC 19 02
+	CMP	WORD PTR vidmode, 2                  ; B36B 83 3E CC 19 02
 	JNE	L_B378                              ; B370 75 06
 	DB	0E9H
 	DW	L_B430-$-2                  ; B372 E9 BB 00
@@ -61,7 +61,7 @@ L_B378:
 L_B39B:
 	PUSH	DI                                 ; B39B 57
 	SHL	DI, 1                               ; B39C D1 E7
-	MOV	DI, WORD PTR D_084A[DI]             ; B39E 8B BD EC 24
+	MOV	DI, WORD PTR rowtab[DI]             ; B39E 8B BD EC 24
 	ADD	DI, BX                              ; B3A2 03 FB
 	MOV	AX, WORD PTR [SI]                   ; B3A4 8B 04
 	MOV	WORD PTR ES:[DI], AX                ; B3A6 26 89 05
@@ -93,7 +93,7 @@ L_B3B8:
 	MOV	ES, AX                              ; B3D6 8E C0
 	MOV	DX, 3C5H                            ; B3D8 BA C5 03
 	SHL	DI, 1                               ; B3DB D1 E7
-	MOV	DI, WORD PTR D_084A[DI]             ; B3DD 8B BD EC 24
+	MOV	DI, WORD PTR rowtab[DI]             ; B3DD 8B BD EC 24
 	ADD	DI, BX                              ; B3E1 03 FB
 	MOV	AL, 1                               ; B3E3 B0 01
 	MOV	CX, 4                               ; B3E5 B9 04 00
@@ -144,56 +144,56 @@ L_B430:
 	MOV	ES, AX                              ; B452 8E C0
 	MOV	DX, DI                              ; B454 8B D7
 	SHL	DI, 1                               ; B456 D1 E7
-	MOV	DI, WORD PTR D_084A[DI]             ; B458 8B BD EC 24
+	MOV	DI, WORD PTR rowtab[DI]             ; B458 8B BD EC 24
 	ADD	DI, BX                              ; B45C 03 FB
 	MOVSW                                   ; B45E A5
 	MOVSW                                   ; B45F A5
 	INC	DX                                  ; B460 42
 	MOV	DI, DX                              ; B461 8B FA
 	SHL	DI, 1                               ; B463 D1 E7
-	MOV	DI, WORD PTR D_084A[DI]             ; B465 8B BD EC 24
+	MOV	DI, WORD PTR rowtab[DI]             ; B465 8B BD EC 24
 	ADD	DI, BX                              ; B469 03 FB
 	MOVSW                                   ; B46B A5
 	MOVSW                                   ; B46C A5
 	INC	DX                                  ; B46D 42
 	MOV	DI, DX                              ; B46E 8B FA
 	SHL	DI, 1                               ; B470 D1 E7
-	MOV	DI, WORD PTR D_084A[DI]             ; B472 8B BD EC 24
+	MOV	DI, WORD PTR rowtab[DI]             ; B472 8B BD EC 24
 	ADD	DI, BX                              ; B476 03 FB
 	MOVSW                                   ; B478 A5
 	MOVSW                                   ; B479 A5
 	INC	DX                                  ; B47A 42
 	MOV	DI, DX                              ; B47B 8B FA
 	SHL	DI, 1                               ; B47D D1 E7
-	MOV	DI, WORD PTR D_084A[DI]             ; B47F 8B BD EC 24
+	MOV	DI, WORD PTR rowtab[DI]             ; B47F 8B BD EC 24
 	ADD	DI, BX                              ; B483 03 FB
 	MOVSW                                   ; B485 A5
 	MOVSW                                   ; B486 A5
 	INC	DX                                  ; B487 42
 	MOV	DI, DX                              ; B488 8B FA
 	SHL	DI, 1                               ; B48A D1 E7
-	MOV	DI, WORD PTR D_084A[DI]             ; B48C 8B BD EC 24
+	MOV	DI, WORD PTR rowtab[DI]             ; B48C 8B BD EC 24
 	ADD	DI, BX                              ; B490 03 FB
 	MOVSW                                   ; B492 A5
 	MOVSW                                   ; B493 A5
 	INC	DX                                  ; B494 42
 	MOV	DI, DX                              ; B495 8B FA
 	SHL	DI, 1                               ; B497 D1 E7
-	MOV	DI, WORD PTR D_084A[DI]             ; B499 8B BD EC 24
+	MOV	DI, WORD PTR rowtab[DI]             ; B499 8B BD EC 24
 	ADD	DI, BX                              ; B49D 03 FB
 	MOVSW                                   ; B49F A5
 	MOVSW                                   ; B4A0 A5
 	INC	DX                                  ; B4A1 42
 	MOV	DI, DX                              ; B4A2 8B FA
 	SHL	DI, 1                               ; B4A4 D1 E7
-	MOV	DI, WORD PTR D_084A[DI]             ; B4A6 8B BD EC 24
+	MOV	DI, WORD PTR rowtab[DI]             ; B4A6 8B BD EC 24
 	ADD	DI, BX                              ; B4AA 03 FB
 	MOVSW                                   ; B4AC A5
 	MOVSW                                   ; B4AD A5
 	INC	DX                                  ; B4AE 42
 	MOV	DI, DX                              ; B4AF 8B FA
 	SHL	DI, 1                               ; B4B1 D1 E7
-	MOV	DI, WORD PTR D_084A[DI]             ; B4B3 8B BD EC 24
+	MOV	DI, WORD PTR rowtab[DI]             ; B4B3 8B BD EC 24
 	ADD	DI, BX                              ; B4B7 03 FB
 	MOVSW                                   ; B4B9 A5
 	MOVSW                                   ; B4BA A5

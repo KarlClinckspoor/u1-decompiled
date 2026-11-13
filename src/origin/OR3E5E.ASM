@@ -12,10 +12,10 @@ UDATA	ENDS
 DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
-	PUBLIC	F_3E5E,F_3E77,TIMERISR,D_0832,D_0834
+	PUBLIC	waittick,F_3E77,TIMERISR,tickcnt,tickmax
 
 PROG	SEGMENT
-F_3E5E:
+waittick:
 	PUSH	BP                                 ; 3E5E 55
 	MOV	BP, SP                              ; 3E5F 8B EC
 	PUSH	SI                                 ; 3E61 56
@@ -34,7 +34,7 @@ L_3E68:
 	POP	BP                                  ; 3E73 5D
 	RET	2                                   ; 3E74 C2 02 00
 F_3E77:
-	MOV	WORD PTR D_0832, AX                 ; 3E77 A3 32 08
+	MOV	WORD PTR tickcnt, AX                 ; 3E77 A3 32 08
 	PUSH	ES                                 ; 3E7A 06
 	MOV	AH, 35H                             ; 3E7B B4 35
 	MOV	AL, 1CH                             ; 3E7D B0 1C
@@ -44,7 +44,7 @@ F_3E77:
 	PUSH	BX                                 ; 3E84 53
 	PUSH	AX                                 ; 3E85 50
 	PUSH	DS                                 ; 3E86 1E
-	MOV	WORD PTR D_0834, 0                  ; 3E87 C7 06 34 08 00 00
+	MOV	WORD PTR tickmax, 0                  ; 3E87 C7 06 34 08 00 00
 	MOV	AX, PROG                            ; 3E8D B8 00 00
 	MOV	DS, AX                              ; 3E90 8E D8
 	MOV	DX, OFFSET TIMERISR                 ; 3E92 BA B2 3E
@@ -53,8 +53,8 @@ F_3E77:
 	INT	21H                                 ; 3E99 CD 21
 	POP	DS                                  ; 3E9B 1F
 L_3E9C:
-	MOV	AX, WORD PTR D_0832                 ; 3E9C A1 32 08
-	CMP	WORD PTR D_0834, AX                 ; 3E9F 39 06 34 08
+	MOV	AX, WORD PTR tickcnt                 ; 3E9C A1 32 08
+	CMP	WORD PTR tickmax, AX                 ; 3E9F 39 06 34 08
 	JB	L_3E9C                               ; 3EA3 72 F7
 	POP	AX                                  ; 3EA5 58
 	POP	DX                                  ; 3EA6 5A
@@ -72,7 +72,7 @@ TIMERISR:
 	PUSH	SI                                 ; 3EB5 56
 	MOV	AX, DGROUP                          ; 3EB6 B8 26 04
 	MOV	DS, AX                              ; 3EB9 8E D8
-	MOV	SI, OFFSET DGROUP:D_0834            ; 3EBB BE 34 08
+	MOV	SI, OFFSET DGROUP:tickmax            ; 3EBB BE 34 08
 	INC	WORD PTR [SI]                       ; 3EBE FF 04
 	POP	SI                                  ; 3EC0 5E
 	POP	AX                                  ; 3EC1 58
@@ -81,8 +81,8 @@ TIMERISR:
 PROG	ENDS
 
 DATA	SEGMENT
-D_0832	DB	0,0	; 0832
-D_0834	DB	0,0	; 0834
+tickcnt	DB	0,0	; 0832
+tickmax	DB	0,0	; 0834
 DATA	ENDS
 
 	END

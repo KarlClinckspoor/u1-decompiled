@@ -13,12 +13,12 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_082C:BYTE
+	EXTRN	vidmode:BYTE
 DATA	ENDS
-	PUBLIC	F_A554
+	PUBLIC	animwat
 
 PROG	SEGMENT
-F_A554:
+animwat:
 	PUSH	BP                                 ; A554 55
 	MOV	BP, SP                              ; A555 8B EC
 	PUSH	SI                                 ; A557 56
@@ -29,7 +29,7 @@ F_A554:
 	MOV	ES, AX                              ; A55D 8E C0
 	MOV	SI, 70DCH                           ; A55F BE DC 70
 	MOV	DI, 1970H                           ; A562 BF 70 19
-	CMP	WORD PTR D_082C, 0                  ; A565 83 3E CC 19 00
+	CMP	WORD PTR vidmode, 0                  ; A565 83 3E CC 19 00
 	JE	L_A58E                               ; A56A 74 22
 	ADD	SI, 78H                             ; A56C 83 C6 78
 	MOV	CX, 4                               ; A56F B9 04 00

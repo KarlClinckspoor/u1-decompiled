@@ -13,15 +13,15 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_084A:BYTE
+	EXTRN	rowtab:BYTE
 	EXTRN	D_09EC:BYTE
-	EXTRN	D_4A2C:BYTE
+	EXTRN	castlbuf:BYTE
 DATA	ENDS
-	PUBLIC	F_3C6C,F_3C87,F_3CA2,F_3CCD,F_3CE9,F_3D6A
-	PUBLIC	D_49BC,D_49CE,D_49D0,D_49D4,D_49D8,D_49E0
+	PUBLIC	palcastl,palnorm,blittand,blitcga,cvtplane,blitega
+	PUBLIC	castpal,D_49CE,D_49D0,D_49D4,D_49D8,D_49E0
 
 PROG	SEGMENT
-F_3C6C:
+palcastl:
 	PUSH	BP                                 ; 3C6C 55
 	MOV	BP, SP                              ; 3C6D 8B EC
 	PUSH	SI                                 ; 3C6F 56
@@ -30,7 +30,7 @@ F_3C6C:
 	PUSH	ES                                 ; 3C72 06
 	MOV	AX, DGROUP                          ; 3C73 B8 ED 03
 	MOV	ES, AX                              ; 3C76 8E C0
-	MOV	DX, OFFSET DGROUP:D_49BC            ; 3C78 BA BC 49
+	MOV	DX, OFFSET DGROUP:castpal            ; 3C78 BA BC 49
 	MOV	AH, 10H                             ; 3C7B B4 10
 	MOV	AL, 2                               ; 3C7D B0 02
 	INT	10H                                 ; 3C7F CD 10
@@ -40,7 +40,7 @@ F_3C6C:
 	POP	SI                                  ; 3C84 5E
 	POP	BP                                  ; 3C85 5D
 	RET                                     ; 3C86 C3
-F_3C87:
+palnorm:
 	PUSH	BP                                 ; 3C87 55
 	MOV	BP, SP                              ; 3C88 8B EC
 	PUSH	SI                                 ; 3C8A 56
@@ -59,7 +59,7 @@ F_3C87:
 	POP	SI                                  ; 3C9F 5E
 	POP	BP                                  ; 3CA0 5D
 	RET                                     ; 3CA1 C3
-F_3CA2:
+blittand:
 	PUSH	BP                                 ; 3CA2 55
 	MOV	BP, SP                              ; 3CA3 8B EC
 	PUSH	SI                                 ; 3CA5 56
@@ -69,11 +69,11 @@ F_3CA2:
 	MOV	AX, 0B800H                          ; 3CA9 B8 00 B8
 	MOV	ES, AX                              ; 3CAC 8E C0
 	XOR	BX, BX                              ; 3CAE 33 DB
-	MOV	SI, OFFSET DGROUP:D_4A2C            ; 3CB0 BE 2C 4A
+	MOV	SI, OFFSET DGROUP:castlbuf            ; 3CB0 BE 2C 4A
 L_3CB3:
 	MOV	DI, BX                              ; 3CB3 8B FB
 	SHL	DI, 1                               ; 3CB5 D1 E7
-	MOV	DI, WORD PTR D_084A[DI]             ; 3CB7 8B BD 02 48
+	MOV	DI, WORD PTR rowtab[DI]             ; 3CB7 8B BD 02 48
 	MOV	CX, 50H                             ; 3CBB B9 50 00
 	REP MOVSW                               ; 3CBE F3 A5
 	INC	BX                                  ; 3CC0 43
@@ -85,7 +85,7 @@ L_3CB3:
 	POP	SI                                  ; 3CCA 5E
 	POP	BP                                  ; 3CCB 5D
 	RET                                     ; 3CCC C3
-F_3CCD:
+blitcga:
 	PUSH	BP                                 ; 3CCD 55
 	MOV	BP, SP                              ; 3CCE 8B EC
 	PUSH	SI                                 ; 3CD0 56
@@ -94,7 +94,7 @@ F_3CCD:
 	PUSH	ES                                 ; 3CD3 06
 	MOV	AX, 0B800H                          ; 3CD4 B8 00 B8
 	MOV	ES, AX                              ; 3CD7 8E C0
-	MOV	SI, OFFSET DGROUP:D_4A2C            ; 3CD9 BE 2C 4A
+	MOV	SI, OFFSET DGROUP:castlbuf            ; 3CD9 BE 2C 4A
 	XOR	DI, DI                              ; 3CDC 33 FF
 	MOV	CX, 4000H                           ; 3CDE B9 00 40
 	REP MOVSB                               ; 3CE1 F3 A4
@@ -104,7 +104,7 @@ F_3CCD:
 	POP	SI                                  ; 3CE6 5E
 	POP	BP                                  ; 3CE7 5D
 	RET                                     ; 3CE8 C3
-F_3CE9:
+cvtplane:
 	PUSH	BP                                 ; 3CE9 55
 	MOV	BP, SP                              ; 3CEA 8B EC
 	PUSH	SI                                 ; 3CEC 56
@@ -119,7 +119,7 @@ F_3CE9:
 	MOV	WORD PTR D_49E0, AX                 ; 3CFF A3 E0 49
 	XOR	DI, DI                              ; 3D02 33 FF
 L_3D04:
-	MOV	SI, OFFSET DGROUP:D_4A2C            ; 3D04 BE 2C 4A
+	MOV	SI, OFFSET DGROUP:castlbuf            ; 3D04 BE 2C 4A
 	MOV	CX, 1F40H                           ; 3D07 B9 40 1F
 L_3D0A:
 	PUSH	CX                                 ; 3D0A 51
@@ -154,7 +154,7 @@ L_3D36:
 	INC	WORD PTR D_49CE                     ; 3D42 FF 06 CE 49
 	CMP	WORD PTR D_49CE, 4                  ; 3D46 83 3E CE 49 04
 	JNE	L_3D04                              ; 3D4B 75 B7
-	MOV	DI, OFFSET DGROUP:D_4A2C            ; 3D4D BF 2C 4A
+	MOV	DI, OFFSET DGROUP:castlbuf            ; 3D4D BF 2C 4A
 	XOR	SI, SI                              ; 3D50 33 F6
 	PUSH	DS                                 ; 3D52 1E
 	POP	ES                                  ; 3D53 07
@@ -172,7 +172,7 @@ L_3D36:
 	POP	SI                                  ; 3D67 5E
 	POP	BP                                  ; 3D68 5D
 	RET                                     ; 3D69 C3
-F_3D6A:
+blitega:
 	PUSH	BP                                 ; 3D6A 55
 	MOV	BP, SP                              ; 3D6B 8B EC
 	PUSH	SI                                 ; 3D6D 56
@@ -184,7 +184,7 @@ F_3D6A:
 	MOV	DX, 3C4H                            ; 3D76 BA C4 03
 	MOV	AH, 1                               ; 3D79 B4 01
 	MOV	CX, 4                               ; 3D7B B9 04 00
-	MOV	SI, OFFSET DGROUP:D_4A2C            ; 3D7E BE 2C 4A
+	MOV	SI, OFFSET DGROUP:castlbuf            ; 3D7E BE 2C 4A
 L_3D81:
 	XOR	DI, DI                              ; 3D81 33 FF
 	MOV	AL, 2                               ; 3D83 B0 02
@@ -220,7 +220,7 @@ L_3D81:
 PROG	ENDS
 
 DATA	SEGMENT
-D_49BC	DB	0,18H,7,3FH,3FH,22H,3AH,0EH,14H,7,3DH,3BH	; 49BC
+castpal	DB	0,18H,7,3FH,3FH,22H,3AH,0EH,14H,7,3DH,3BH	; 49BC
 	DB	1,39H,7,3FH,0,0	; 49C8
 D_49CE	DB	0,0	; 49CE
 D_49D0	DB	10H,20H,40H,80H	; 49D0

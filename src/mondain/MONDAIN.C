@@ -6,17 +6,17 @@
  */
 
 /* Origin support routines and their data */
-extern int D_082C;
-extern int D_0CD2[];
-extern char *D_0DF8[], *D_0F04[], *D_1DC8[];
-extern F_39FC(), F_3812(), F_352C(), F_35CA(), F_3599(), F_3F62(), F_3B46();
-extern F_3E5E(), F_355D(), F_4031(), F_3C8B(), F_4437(), F_3FF9();
-extern F_3E85(), F_44A2(), F_3EED(), F_357C(), F_3AE2(), F_3CF1(), F_3D41();
-extern F_3E2F(), F_3EC4(), F_3F58(), F_37FD(), F_387E(), F_4224(), F_43C8();
-extern F_45A3(), F_478E();
-extern int F_4069();
-extern char F_3862(), F_39C5();
-extern unsigned char F_413C();
+extern int vidmode;
+extern int wrange[];
+extern char *wnames[], *spellnam[], *dirtab[];
+extern drawline(), lineto(), gotoxy(), fillrect(), putstr(), playsnd(), msgline();
+extern waittick(), drawtile(), F_4031(), putnum(), showhp(), F_3FF9();
+extern writfile(), showfood(), scrlmsg(), putch(), presskey(), vwait(), pixel();
+extern readfile(), clockrnd(), vidinit(), seedrnd(), arrowr(), flushkey(), readycmd();
+extern showstat(), ztats();
+extern int rndrange();
+extern char upcase(), waitkey();
+extern unsigned char getkey();
 /* Lattice library */
 extern EXECL(), F_1D0D();
 
@@ -24,15 +24,15 @@ extern EXECL(), F_1D0D();
  * Initialised data (DGROUP 0124-0256)
  */
 int _stack = 3000;                      /* stack size */
-int D_0126 = 3, D_0128 = 4;             /* player position */
-int D_012A = 15, D_012C = 4;            /* Mondain position */
-int D_012E = 1000;                      /* Mondain hit points */
-int D_0130 = -1;                        /* frame of the spell effect */
-char *D_0156[3] = { "CgaMond.Bin", "EgaMond.Bin", "T1KMond.Bin" };
-char *D_0184[3] = { "CgaTiles.Bin", "EgaTiles.Bin", "T1KTiles.Bin" };
-int D_018A[3] = { 0x2c0, 0x580, 0x580 };
-int D_0190 = 0, D_0192 = 0;             /* bouncing gem */
-unsigned char D_0194[19][9] = {         /* the battle field */
+int plx = 3, ply = 4;             /* player position */
+int mondx = 15, mondy = 4;            /* Mondain position */
+int mondhp = 1000;                      /* Mondain hit points */
+int fxfrm = -1;                        /* frame of the spell effect */
+char *mondfile[3] = { "CgaMond.Bin", "EgaMond.Bin", "T1KMond.Bin" };
+char *tilefile[3] = { "CgaTiles.Bin", "EgaTiles.Bin", "T1KTiles.Bin" };
+int tilesize[3] = { 0x2c0, 0x580, 0x580 };
+int gemfrm = 0, gemdir = 0;             /* bouncing gem */
+unsigned char field[19][9] = {         /* the battle field */
     {0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 1, 0, 0, 0, 0},
@@ -53,99 +53,99 @@ unsigned char D_0194[19][9] = {         /* the battle field */
     {0, 5, 5, 5, 0, 5, 5, 5, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
-int D_0240 = 2, D_0242 = 0, D_0244 = 20;        /* Mondain's tile, frame, state */
-int D_0246 = 0, D_0248 = 0, D_024A = 0;         /* fight on, gem destroyed, victory */
+int mondtile = 2, mondfram = 0, mondmode = 20;        /* Mondain's tile, frame, state */
+int fighton = 0, gemgone = 0, wongame = 0;         /* fight on, gem destroyed, victory */
 
 /*
  * Uninitialised data (DGROUP 2040-2E10 + 1A90)
  */
-int D_0DA6, D_0DA8;                     /* colours */
-int D_2044, D_2046, D_2048, D_204A, D_204C;
-int D_204E, U_2050, U_2052;
-int D_2054, D_2056;
-char D_2058[16];
-int D_2068, D_206A, D_206C;
-int D_206E, D_2070, D_2072, D_2074, U_2076, D_2078, D_207A, D_207C, D_207E;
-int D_2080, D_2082, D_2084, D_2086, D_2088;
-int D_208A, U_208C, U_208E;
-int D_2090, U_2092[9];
-char D_20A4[8];
-char D_20AC[12];
-char D_20B8[32];
-int D_20D8[11];
-char D_20EE[16];
-char D_20FE[0x28e];
-char D_238C[0x78d];
+int colline, colfill;                     /* colours */
+int colhigh, coltext, forcecga, gmode, D_204C;
+int redraw, U_2050, U_2052;
+int magx, magy;
+char plname[16];
+int plrace, plclass, plsex;
+int plstat, plstr, plagi, plsta, plcha, plwis, plint, plcoin, plexp;
+int plfood, rdyweap, rdyspel, rdyarm, plveh;
+int plseed, worldx, worldy;
+int plnoise, plquest[9];
+char gemred[8];
+char ownarm[12];
+char ownweap[32];
+int ownspel[11];
+char ownveh[16];
+char plkills[0x28e];
+char tilegfx[0x78d];
 char D_2B19[0x82];
 char D_2B9B[0x45];
 char D_2BE0[0x22c];
-char *D_2E0C, *D_2E0E;
-unsigned char D_2E10[0x1a90];
+char *argv1, *argv2;
+unsigned char bmpbuf[0x1a90];
 
 /* wait about a while, or until a key is pressed */
-F_03E9() { long n; for (n = 0; !F_413C(0) && ++n < 0x124F8; ) ; }
+idlewait() { long n; for (n = 0; !getkey(0) && ++n < 0x124F8; ) ; }
 
 /* draw the frame of the big window in colour c and home the text cursor */
-F_0423(c) int c; { F_39FC(0x19, 0x12, 0x129, 0x12, c); F_3812(0x129, 0x8c, c); F_3812(0x19, 0x8c, c); F_3812(0x19, 0x12, c); F_352C(4, 3); }
+bigframe(c) int c; { drawline(0x19, 0x12, 0x129, 0x12, c); lineto(0x129, 0x8c, c); lineto(0x19, 0x8c, c); lineto(0x19, 0x12, c); gotoxy(4, 3); }
 
 /* clear the big window and frame it */
-F_047D(c) int c; { F_35CA(0x16, 0xf, 0x12c, 0x8f, 0); F_0423(c); }
+clrbig(c) int c; { fillrect(0x16, 0xf, 0x12c, 0x8f, 0); bigframe(c); }
 
 /* print string s at text position (a, b) */
-F_04A2(a, b, s) int a, b, s; { F_352C(a, b); F_3599(s, D_2046); }
+printat(a, b, s) int a, b, s; { gotoxy(a, b); putstr(s, coltext); }
 
 /* draw the frame of the smaller window in colour c */
-F_04BE(c)
+smframe(c)
 int c;
 {
-    F_39FC(0x22, 0x1a, 0x11c, 0x1a, c);
-    F_3812(0x11c, 0x7c, c);
-    F_3812(0x22, 0x7c, c);
-    F_3812(0x22, 0x1a, c);
-    F_352C(5, 4);
+    drawline(0x22, 0x1a, 0x11c, 0x1a, c);
+    lineto(0x11c, 0x7c, c);
+    lineto(0x22, 0x7c, c);
+    lineto(0x22, 0x1a, c);
+    gotoxy(5, 4);
 }
 
 /* clear the smaller window and frame it */
-F_0518(c)
+clrsmall(c)
 int c;
 {
-    F_35CA(0x1f, 0x17, 0x11f, 0x7f, 0);
-    F_04BE(c);
+    fillrect(0x1f, 0x17, 0x11f, 0x7f, 0);
+    smframe(c);
 }
 
 /* play sound n if sound is on */
-F_053D(n)
+playif(n)
 int n;
 {
-    if (D_2090)
-        F_3F62(n);
+    if (plnoise)
+        playsnd(n);
 }
 
 /* "Pass" */
-F_0551()
+cmdpass()
 {
-    F_3B46("Pass");
+    msgline("Pass");
 }
 
 /* "Huh?" and a beep */
-F_055F()
+cmdhuh()
 {
-    F_3B46("Huh?");
-    F_053D(1);
+    msgline("Huh?");
+    playif(1);
 }
 
 /* toggle the sound */
-F_0576()
+cmdnoise()
 {
-    F_3599("Noise ", D_2046);
-    if (D_2090 = !D_2090)
-        F_3B46("on");
+    putstr("Noise ", coltext);
+    if (plnoise = !plnoise)
+        msgline("on");
     else
-        F_3B46("off");
+        msgline("off");
 }
 
 /* sign of x */
-F_05B1(x)
+sign(x)
 int x;
 {
     if (x < 0)
@@ -156,311 +156,311 @@ int x;
 }
 
 /* wait for a key, animating meanwhile */
-unsigned char F_05DB()
+unsigned char waitanim()
 {
     char c, k;
 
     do {
-        c = F_413C(D_2046);
-        F_1477();
+        c = getkey(coltext);
+        animate();
         if (c)
-            F_3E5E(1);
+            waittick(1);
         else
-            F_3E5E(3);
+            waittick(3);
     } while (c == 0);
     return c;
 }
 
-/* random check against the player's agility (or D_206A == 1) */
-F_0618()
+/* random check against the player's agility (or plclass == 1) */
+agilchk()
 {
-    return F_4069(1, 0xf9) < D_207A + 0xa0 || D_206A == 1;
+    return rndrange(1, 0xf9) < plint + 0xa0 || plclass == 1;
 }
 
 #define abs(x) ((x) < 0 ? -(x) : (x))
 
 /* player within 7 steps of Mondain */
-F_064A()
+nearmond()
 {
-    return abs(D_0126 - D_012A) + abs(D_0128 - D_012C) < 7;
+    return abs(plx - mondx) + abs(ply - mondy) < 7;
 }
 
 /* move the player one step in direction dir */
-F_0696(dir)
+moveplr(dir)
 unsigned char dir;
 {
     int t, x, y;
 
-    x = D_0126 + F_1415(dir);
-    y = D_0128 + F_1447(dir);
+    x = plx + stepx(dir);
+    y = ply + stepy(dir);
     if (x < 0 || x >= 19 || y < 0 || y >= 9)
         t = 2;
-    else if (x == D_012A && y == D_012C)
+    else if (x == mondx && y == mondy)
         t = 2;
     else
-        t = D_0194[x][y];
+        t = field[x][y];
     if (t == 0) {
-        F_3B46(D_1DC8[dir]);
-        F_355D(0, D_0126, D_0128);
-        D_0194[D_0126][D_0128] = 0;
-        D_0126 += F_1415(dir);
-        D_0128 += F_1447(dir);
-        D_0194[D_0126][D_0128] = 0x14;
-        F_355D(0x14, D_0126, D_0128);
-        F_053D(4);
+        msgline(dirtab[dir]);
+        drawtile(0, plx, ply);
+        field[plx][ply] = 0;
+        plx += stepx(dir);
+        ply += stepy(dir);
+        field[plx][ply] = 0x14;
+        drawtile(0x14, plx, ply);
+        playif(4);
     } else if (t == 1) {
-        F_3B46("Blocked!");
-        F_053D(0);
+        msgline("Blocked!");
+        playif(0);
     } else {
-        F_053D(0);
+        playif(0);
         F_4031();
-        F_3599("Burned! ", D_2046);
-        t = D_206E / 10;
+        putstr("Burned! ", coltext);
+        t = plstat / 10;
         if (t == 0)
             t++;
-        F_3C8B(t, 1, 0x20, D_2046, 1);
-        F_3B46(" damage!");
-        F_053D(2);
-        D_206E -= t;
-        F_4437();
+        putnum(t, 1, 0x20, coltext, 1);
+        msgline(" damage!");
+        playif(2);
+        plstat -= t;
+        showhp();
         F_3FF9();
     }
-    if (F_0FC7() && D_0190 == 0)
-        D_0246 = D_0190 = 1;
+    if (gemnear() && gemfrm == 0)
+        fighton = gemfrm = 1;
 }
 
 /* fire a shot in direction dir: range, damage and hit chance given */
-F_0831(dir, snd, range, damage, chance)
+fireshot(dir, snd, range, damage, chance)
 int dir, snd, range, damage, chance;
 {
     int t, dx, dy, x, y, i;
 
     dy = dx = 0;
     i = 1;
-    F_053D(snd);
-    dx = F_1415(dir);
-    dy = F_1447(dir);
+    playif(snd);
+    dx = stepx(dir);
+    dy = stepy(dir);
     do {
-        x = dx * i + D_0126;
-        y = i * dy + D_0128;
-        if ((t = D_0194[x][y]) == 0)
-            if (x == D_012A && y == D_012C)
+        x = dx * i + plx;
+        y = i * dy + ply;
+        if ((t = field[x][y]) == 0)
+            if (x == mondx && y == mondy)
                 t = 2;
         i++;
     } while (i <= range && t != 2 && x > 0 && y > 0 && x < 19 && y < 9);
     if (t != 2)
-        F_3B46("Missed!");
-    else if (F_4069(1, 100) <= chance) {
-        D_012E -= damage;
-        F_3599("Hit Mondain! ", D_2046);
-        F_3C8B(damage, 1, 0x20, D_2046, 1);
-        F_3B46(" damage!");
-        F_053D(2);
+        msgline("Missed!");
+    else if (rndrange(1, 100) <= chance) {
+        mondhp -= damage;
+        putstr("Hit Mondain! ", coltext);
+        putnum(damage, 1, 0x20, coltext, 1);
+        msgline(" damage!");
+        playif(2);
     } else
-        F_3B46("Missed!");
+        msgline("Missed!");
 }
 
 /* attack in direction dir with weapon w (7: ranged) or spell */
-F_0944(dir, w)
+attackdr(dir, w)
 int dir, w;
 {
     int damage, chance, range;
 
     if (w == 7) {
-        range = D_0CD2[D_2082];
-        chance = D_2072 + 50;
-        damage = F_4069(2, D_2070 + D_2082 * 3);
+        range = wrange[rdyweap];
+        chance = plagi + 50;
+        damage = rndrange(2, plstr + rdyweap * 3);
     } else {
         range = 3;
         chance = 0x50;
-        damage = F_4069(1, D_2088 * 10) + 30;
+        damage = rndrange(1, plveh * 10) + 30;
     }
-    F_0831(dir, w, range, damage, chance);
+    fireshot(dir, w, range, damage, chance);
 }
 
 /* aim: read a direction (or use dir), say it, and attack with weapon w */
-F_09C0(dir, w)
+aimattk(dir, w)
 int dir, w;
 {
     int d;
 
     if (dir == -1)
-        d = F_05DB();
+        d = waitanim();
     else
         d = dir;
     if (d > 4)
-        F_3B46("nothing");
+        msgline("nothing");
     else {
-        F_3B46(D_1DC8[d]);
-        F_0944(d, w);
+        msgline(dirtab[d]);
+        attackdr(d, w);
     }
 }
 
 /* Attack: choose weapon, ask for a direction */
-F_0A0D(dir)
+cmdattk(dir)
 int dir;
 {
-    D_0246 = 1;
-    F_3599("Attack with ", D_2046);
-    F_3599(D_0DF8[D_2082], D_2046);
-    if (D_0CD2[D_2082] == 0) {
-        F_3B46("?");
-        F_053D(1);
+    fighton = 1;
+    putstr("Attack with ", coltext);
+    putstr(wnames[rdyweap], coltext);
+    if (wrange[rdyweap] == 0) {
+        msgline("?");
+        playif(1);
     } else {
-        F_3599(": ", D_2046);
-        F_09C0(dir, 7);
+        putstr(": ", coltext);
+        aimattk(dir, 7);
     }
 }
 
-/* damage of the spell: random up to D_207A, scaled by the spell */
-F_0A7A()
+/* damage of the spell: random up to plint, scaled by the spell */
+spldamg()
 {
     int t;
 
-    t = F_4069(2, D_207A);
-    if (D_2082 == 9)
+    t = rndrange(2, plint);
+    if (rdyweap == 9)
         t <<= 1;
-    else if (D_2082 == 8) {
+    else if (rdyweap == 8) {
         t *= 3;
         t /= 2;
-    } else if (D_2082 == 10 || D_2082 == 11)
+    } else if (rdyweap == 10 || rdyweap == 11)
         t *= 3;
     return t;
 }
 
 /* spell with no effect (D_0618 test) */
-F_0AD9()
+splnone()
 {
-    F_3B46("");
-    if (F_0618) {
-        F_3B46("Hmmm...no effect!");
-        F_053D(6);
+    msgline("");
+    if (agilchk) {
+        msgline("Hmmm...no effect!");
+        playif(6);
         return 1;
     }
     return 0;
 }
 
 /* spell: ask a direction, put a block (5) in the empty square there */
-F_0B07()
+splblock()
 {
     unsigned char c;
     int x, y;
 
-    F_3599(": ", D_2046);
-    c = F_05DB();
+    putstr(": ", coltext);
+    c = waitanim();
     if (c > 4) {
-        F_3B46("nothing");
-        F_053D(6);
+        msgline("nothing");
+        playif(6);
         return 1;
     }
-    F_3B46(D_1DC8[c]);
-    if (!F_0618())
+    msgline(dirtab[c]);
+    if (!agilchk())
         return 0;
-    x = D_0126 + F_1415(c);
-    y = D_0128 + F_1447(c);
-    if (D_0194[x][y] == 0 && x != D_012A && y != D_012C) {
-        D_0194[x][y] = 5;
-        F_355D(5, x, y);
-        F_053D(5);
-        F_3B46("Done.");
+    x = plx + stepx(c);
+    y = ply + stepy(c);
+    if (field[x][y] == 0 && x != mondx && y != mondy) {
+        field[x][y] = 5;
+        drawtile(5, x, y);
+        playif(5);
+        msgline("Done.");
         return 1;
     }
     return 0;
 }
 
 /* spell: ask a direction, remove a block (5) from the square there */
-F_0BE4()
+splunblk()
 {
     unsigned char c;
     int x, y;
 
-    F_3599(": ", D_2046);
-    c = F_05DB();
+    putstr(": ", coltext);
+    c = waitanim();
     if (c > 4) {
-        F_3B46("nothing");
-        F_053D(6);
+        msgline("nothing");
+        playif(6);
         return 1;
     }
-    F_3B46(D_1DC8[c]);
-    if (!F_0618())
+    msgline(dirtab[c]);
+    if (!agilchk())
         return 0;
-    x = D_0126 + F_1415(c);
-    y = D_0128 + F_1447(c);
-    if (D_0194[x][y] == 5) {
-        D_0194[x][y] = 0;
-        F_355D(0, x, y);
-        F_053D(5);
-        F_3B46("Done.");
+    x = plx + stepx(c);
+    y = ply + stepy(c);
+    if (field[x][y] == 5) {
+        field[x][y] = 0;
+        drawtile(0, x, y);
+        playif(5);
+        msgline("Done.");
         return 1;
     }
     return 0;
 }
 
 /* spell: strengthen Mondain (doubles his hit points below 15000) */
-F_0CAC()
+splboost()
 {
-    F_3B46("");
-    if (F_0618() && F_064A()) {
-        F_3B46("\"INTERFICIO-NUNC!\"");
-        F_3B46("The spell doth seem");
-        F_3B46("to make him stronger!");
-        if (D_012E < 15000)
-            D_012E <<= 1;
-        F_053D(5);
+    msgline("");
+    if (agilchk() && nearmond()) {
+        msgline("\"INTERFICIO-NUNC!\"");
+        msgline("The spell doth seem");
+        msgline("to make him stronger!");
+        if (mondhp < 15000)
+            mondhp <<= 1;
+        playif(5);
         return 1;
     }
     return 0;
 }
 
 /* spell: ask a direction and fire a bolt of spell damage */
-F_0D08()
+splbolt()
 {
     unsigned char c;
     int t;
 
-    F_3599(": ", D_2046);
-    c = F_05DB();
+    putstr(": ", coltext);
+    c = waitanim();
     if (c > 4) {
-        F_3B46("nothing");
-        F_053D(6);
+        msgline("nothing");
+        playif(6);
         return 0;
     }
-    F_3B46(D_1DC8[c]);
-    if (F_0618() && F_064A()) {
-        t = F_0A7A();
-        F_0831(c, 5, 5, t, 500);
+    msgline(dirtab[c]);
+    if (agilchk() && nearmond()) {
+        t = spldamg();
+        fireshot(c, 5, 5, t, 500);
         return 1;
     }
     return 0;
 }
 
 /* spell: teleport the player to a random empty square */
-F_0D88()
+splblink()
 {
     int x, y, r;
 
     r = 0;
-    F_3B46("");
-    if (F_0618()) {
+    msgline("");
+    if (agilchk()) {
         do {
-            x = F_4069(1, 255) % 19;
-            y = F_4069(1, 255) % 9;
-        } while (D_0194[x][y] != 0);
-        F_355D(0, D_0126, D_0128);
-        F_355D(0x14, x, y);
-        D_0194[x][y] = 0x14;
-        D_0194[D_0126][D_0128] = 0;
-        D_0126 = x;
-        D_0128 = y;
+            x = rndrange(1, 255) % 19;
+            y = rndrange(1, 255) % 9;
+        } while (field[x][y] != 0);
+        drawtile(0, plx, ply);
+        drawtile(0x14, x, y);
+        field[x][y] = 0x14;
+        field[plx][ply] = 0;
+        plx = x;
+        ply = y;
         r = 1;
-        F_053D(5);
-        F_3B46("Done.");
+        playif(5);
+        msgline("Done.");
     }
     return r;
 }
 
 /* cast spell number w */
-F_0E56(w)
+castspl(w)
 int w;
 {
     int t;
@@ -468,226 +468,226 @@ int w;
     t = 0;
     switch (w) {
     case 0:
-        t = F_0AD9();
+        t = splnone();
         break;
     case 8:
-        t = F_0B07();
+        t = splblock();
         break;
     case 9:
-        t = F_0BE4();
+        t = splunblk();
         break;
     case 10:
-        t = F_0CAC();
+        t = splboost();
         break;
     case 7:
-        t = F_0D88();
+        t = splblink();
         break;
     default:
-        t = F_0D08();
+        t = splbolt();
     }
     if (t == 0) {
-        F_053D(6);
-        F_3B46("Failed!");
+        playif(6);
+        msgline("Failed!");
     }
 }
 
-/* Cast: use up a charge of spell D_2084 and cast it if it is a usable one */
-F_0ED3()
+/* Cast: use up a charge of spell rdyspel and cast it if it is a usable one */
+cmdcast()
 {
-    F_3599("Cast ", D_2046);
-    F_3599(D_0F04[D_2084], D_2046);
-    if (D_20D8[D_2084] == 0) {
-        F_3B46("");
-        F_3B46("You've used up that spell!");
-        F_053D(6);
+    putstr("Cast ", coltext);
+    putstr(spellnam[rdyspel], coltext);
+    if (ownspel[rdyspel] == 0) {
+        msgline("");
+        msgline("You've used up that spell!");
+        playif(6);
     } else {
-        if (D_2084)
-            D_20D8[D_2084]--;
-        if (D_2084 != 3 && D_2084 != 7 && D_2084 != 8 && D_2084 != 9 && D_2084 != 10) {
-            F_3B46("");
-            F_3B46("Failed!");
-            F_053D(6);
+        if (rdyspel)
+            ownspel[rdyspel]--;
+        if (rdyspel != 3 && rdyspel != 7 && rdyspel != 8 && rdyspel != 9 && rdyspel != 10) {
+            msgline("");
+            msgline("Failed!");
+            playif(6);
         } else
-            F_0E56(D_2084);
+            castspl(rdyspel);
     }
 }
 
 /* is the square (player + (dx, dy)) inside the field and of kind 6 (the gem) */
-F_0F7B(dx, dy)
+isgem(dx, dy)
 int dx, dy;
 {
     int x, y;
 
-    x = D_0126 + dx;
-    y = D_0128 + dy;
-    if (x > 0 && x < 19 && y > 0 && y < 9 && D_0194[x][y] == 6)
+    x = plx + dx;
+    y = ply + dy;
+    if (x > 0 && x < 19 && y > 0 && y < 9 && field[x][y] == 6)
         return 1;
     return 0;
 }
 
 /* is the gem on any of the eight squares around the player */
-F_0FC7()
+gemnear()
 {
-    return F_0F7B(1, 1) || F_0F7B(1, 0) || F_0F7B(0, 1) || F_0F7B(-1, -1)
-        || F_0F7B(-1, 0) || F_0F7B(0, -1) || F_0F7B(1, -1) || F_0F7B(-1, 1);
+    return isgem(1, 1) || isgem(1, 0) || isgem(0, 1) || isgem(-1, -1)
+        || isgem(-1, 0) || isgem(0, -1) || isgem(1, -1) || isgem(-1, 1);
 }
 
 /* Get (Gem): take the gem next to the player and destroy it (hurts the player) */
-F_1057()
+cmdget()
 {
     int t, i;
 
-    F_3599("Get (Gem)", D_2046);
-    if (D_0248 != 0 || !F_0FC7()) {
-        F_3B46("..'tis nothing here!");
-        F_053D(1);
+    putstr("Get (Gem)", coltext);
+    if (gemgone != 0 || !gemnear()) {
+        msgline("..'tis nothing here!");
+        playif(1);
     } else {
-        D_0248 = D_204E = D_0246 = 1;
-        D_0194[14][4] = 0;
-        D_0190 = 0;
-        t = D_206E * 3;
+        gemgone = redraw = fighton = 1;
+        field[14][4] = 0;
+        gemfrm = 0;
+        t = plstat * 3;
         t /= 4;
-        F_3599("... ", D_2046);
-        F_3C8B(t, 1, 0x20, D_2046, 1);
-        F_3B46(" damage!");
+        putstr("... ", coltext);
+        putnum(t, 1, 0x20, coltext, 1);
+        msgline(" damage!");
         for (i = 0; i < 5; i++)
-            F_053D(2);
-        F_3B46("The Gem is DESTROYED!");
-        D_206E -= t;
-        F_4437();
-        if (D_0244 == 30)
-            D_024A = 1;
+            playif(2);
+        msgline("The Gem is DESTROYED!");
+        plstat -= t;
+        showhp();
+        if (mondmode == 30)
+            wongame = 1;
     }
 }
 
 /* Inform and Search: report on the gem */
-F_1124()
+cmdinfo()
 {
-    F_3599("Inform and Search", D_2046);
-    if (D_0248) {
-        F_3B46("");
-        F_3B46("Mondain's magical aura doth");
-        F_3B46("seem substantially diminished");
-        F_3B46("in the absence of the gem.");
+    putstr("Inform and Search", coltext);
+    if (gemgone) {
+        msgline("");
+        msgline("Mondain's magical aura doth");
+        msgline("seem substantially diminished");
+        msgline("in the absence of the gem.");
     } else {
-        F_3B46("...it looks");
-        F_3B46("as if he is creating the evil");
-        F_3B46("gem!");
+        msgline("...it looks");
+        msgline("as if he is creating the evil");
+        msgline("gem!");
     }
 }
 
 /* print message s and beep */
-F_117E(s)
+refuse(s)
 char *s;
 {
-    F_3B46(s);
-    F_053D(1);
+    msgline(s);
+    playif(1);
 }
 
 /* "Board?" */
-F_1194() { F_117E("Board?"); }
+cmdboard() { refuse("Board?"); }
 /* "Drop?" */
-F_11A2() { F_117E("Drop?"); }
+cmddrop() { refuse("Drop?"); }
 /* "Enter?" */
-F_11B0() { F_117E("Enter?"); }
+cmdenter() { refuse("Enter?"); }
 /* "Fire?" */
-F_11BE() { F_117E("Fire?"); }
+cmdfire() { refuse("Fire?"); }
 /* "Hyperjump?" */
-F_11CC() { F_117E("Hyperjump?"); }
+cmdhyper() { refuse("Hyperjump?"); }
 /* "Klimb?" */
-F_11DA() { F_117E("Klimb?"); }
+cmdklimb() { refuse("Klimb?"); }
 /* "Open?" */
-F_11E8() { F_117E("Open?"); }
+cmdopen() { refuse("Open?"); }
 /* "Quit...is not allowed!" */
-F_11F6() { F_117E("Quit...is not allowed!"); }
+cmdquit() { refuse("Quit...is not allowed!"); }
 
 /* Steal: refused */
-F_1204()
+cmdsteal()
 {
-    F_3B46("Steal...he's watching,");
-    F_117E("That would be foolish!");
+    msgline("Steal...he's watching,");
+    refuse("That would be foolish!");
 }
 
 /* Transact: refused */
-F_121B()
+cmdtrans()
 {
-    F_3B46("Transact...Mondain will");
-    F_117E("not negotiate!");
+    msgline("Transact...Mondain will");
+    refuse("not negotiate!");
 }
 
 /* "Unlock?" */
-F_1232() { F_117E("Unlock?"); }
+cmdunlk() { refuse("Unlock?"); }
 /* "View?" */
-F_1240() { F_117E("View?"); }
+cmdview() { refuse("View?"); }
 /* "Xit?" */
-F_124E() { F_117E("Xit?"); }
+cmdxit() { refuse("Xit?"); }
 
 /* prompt for the Ultima I diskette and wait for a space */
-F_125C()
+diskprmt()
 {
-    F_3EED();
-    F_352C(1, 0x17);
-    F_3599("Insert Ultima I diskette", D_2046);
-    F_352C(1, 0x18);
-    F_3599("Hit space to continue...", D_2046);
-    while (F_39C5(D_2046) != 0x20)
+    scrlmsg();
+    gotoxy(1, 0x17);
+    putstr("Insert Ultima I diskette", coltext);
+    gotoxy(1, 0x18);
+    putstr("Hit space to continue...", coltext);
+    while (waitkey(coltext) != 0x20)
         ;
-    F_352C(1, 0x17);
-    F_3599("                        ", D_2046);
-    F_352C(1, 0x18);
-    F_3599("                        ", D_2046);
-    F_352C(1, 0x17);
+    gotoxy(1, 0x17);
+    putstr("                        ", coltext);
+    gotoxy(1, 0x18);
+    putstr("                        ", coltext);
+    gotoxy(1, 0x17);
 }
 
 /* "THOU ART DEAD!": defeat message, save inuse.u1, back to OUT.EXE */
-F_12EC()
+defeat()
 {
     int r;
 
-    F_3B46("THOU ART DEAD!");
-    F_0518(D_0DA8);
-    F_352C(5, 6);
-    F_3599("   Thou hast been defeated by", D_2046);
-    F_352C(5, 7);
-    F_3599("      Mondain the Wizard!", D_2046);
-    F_352C(5, 12);
-    F_3599("    THE UNIVERSE IS DOOMED!", D_2046);
-    F_3E5E(50);
-    F_3E85("inuse.u1", (int)D_2058, 0x334);
+    msgline("THOU ART DEAD!");
+    clrsmall(colfill);
+    gotoxy(5, 6);
+    putstr("   Thou hast been defeated by", coltext);
+    gotoxy(5, 7);
+    putstr("      Mondain the Wizard!", coltext);
+    gotoxy(5, 12);
+    putstr("    THE UNIVERSE IS DOOMED!", coltext);
+    waittick(50);
+    writfile("inuse.u1", (int)plname, 0x334);
     for (;;) {
-        r = EXECL("out.exe", "out.exe", D_2E0C, D_2E0E, "M", 0);
-        F_125C();
+        r = EXECL("out.exe", "out.exe", argv1, argv2, "M", 0);
+        diskprmt();
     }
 }
 
 /* the player dies: hit points and food to 0, then defeat */
-F_138D()
+killplr()
 {
-    D_206E = 0;
-    D_2080 = 0;
-    F_4437();
-    F_44A2();
-    F_12EC();
+    plstat = 0;
+    plfood = 0;
+    showhp();
+    showfood();
+    defeat();
 }
 
 /* draw the whole 19x9 battle map and the player */
-F_13A3()
+drawfld()
 {
     int i, j;
 
-    D_204E = 0;
+    redraw = 0;
     for (i = 0; i < 19; i++)
         for (j = 0; j < 9; j++)
-            F_355D(D_0194[i][j], i, j);
-    F_355D(D_0240 + D_0242, D_012A, D_012C);
-    if (D_0190) {
-        D_0190 = 1;
-        D_0192 = 1;
+            drawtile(field[i][j], i, j);
+    drawtile(mondtile + mondfram, mondx, mondy);
+    if (gemfrm) {
+        gemfrm = 1;
+        gemdir = 1;
     }
 }
 
 /* x step for a direction code */
-F_1415(d)
+stepx(d)
 unsigned char d;
 {
     if (d == 3 || d == 4)
@@ -698,7 +698,7 @@ unsigned char d;
 }
 
 /* y step for a direction code */
-F_1447(d)
+stepy(d)
 unsigned char d;
 {
     if (d == 2 || d == 1)
@@ -709,236 +709,236 @@ unsigned char d;
 }
 
 /* animate: spell effect, the bouncing tile, the player's tile */
-F_1477()
+animate()
 {
-    if (D_0130 >= 0) {
-        if (D_0130 == 6) {
-            D_0130 = -1;
-            F_355D(0, D_2054, D_2056);
-            D_0194[D_2054][D_2056] = 0;
+    if (fxfrm >= 0) {
+        if (fxfrm == 6) {
+            fxfrm = -1;
+            drawtile(0, magx, magy);
+            field[magx][magy] = 0;
         } else {
-            F_355D(D_0130 + 14, D_2054, D_2056);
-            D_0130++;
+            drawtile(fxfrm + 14, magx, magy);
+            fxfrm++;
         }
     }
-    if (D_0190) {
-        D_0190 += D_0192;
-        if (D_0190 == 1)
-            D_0192 = 1;
-        else if (D_0190 > 4)
-            D_0192 = -1;
-        F_355D(D_0190 + 6 - 1, 14, 4);
+    if (gemfrm) {
+        gemfrm += gemdir;
+        if (gemfrm == 1)
+            gemdir = 1;
+        else if (gemfrm > 4)
+            gemdir = -1;
+        drawtile(gemfrm + 6 - 1, 14, 4);
     }
-    if (D_0240 == 2)
-        D_0242 = F_4069(1, 200) < 100;
-    else if (D_0240 == 11) {
-        if (D_0242 == 2)
-            D_0242 = 0;
+    if (mondtile == 2)
+        mondfram = rndrange(1, 200) < 100;
+    else if (mondtile == 11) {
+        if (mondfram == 2)
+            mondfram = 0;
         else
-            D_0242++;
+            mondfram++;
     }
-    F_355D(D_0240 + D_0242, D_012A, D_012C);
+    drawtile(mondtile + mondfram, mondx, mondy);
 }
 
 /* random sound/colour effect */
-F_1565()
+fxrand()
 {
     int r;
 
-    r = F_4069(1, 255);
-    F_05B1(r - 128);
+    r = rndrange(1, 255);
+    sign(r - 128);
 }
 
 /* move the player by (dx, dy) if the target square is free; returns 1 if moved */
-F_1589(dx, dy)
+movetry(dx, dy)
 int dx, dy;
 {
     int x, y, moved;
 
     moved = 0;
-    x = D_012A + dx;
-    y = D_012C + dy;
-    if (x >= 0 && y >= 0 && x < 19 && y < 9 && D_0194[x][y] == 0) {
-        D_0194[D_012A][D_012C] = 0;
-        F_355D(0, D_012A, D_012C);
-        D_012A = x;
-        D_012C = y;
-        F_355D(D_0240 + D_0242, D_012A, D_012C);
+    x = mondx + dx;
+    y = mondy + dy;
+    if (x >= 0 && y >= 0 && x < 19 && y < 9 && field[x][y] == 0) {
+        field[mondx][mondy] = 0;
+        drawtile(0, mondx, mondy);
+        mondx = x;
+        mondy = y;
+        drawtile(mondtile + mondfram, mondx, mondy);
         moved = 1;
     }
     return moved;
 }
 
 /* the player takes n points of damage */
-F_161E(n)
+hurtplr(n)
 int n;
 {
-    F_3599("Hit! ", D_2046);
-    F_3C8B(n, 1, 0x20, D_2046, 1);
-    F_3B46(" damage!");
-    D_206E -= n;
-    F_053D(2);
-    F_4437();
+    putstr("Hit! ", coltext);
+    putnum(n, 1, 0x20, coltext, 1);
+    msgline(" damage!");
+    plstat -= n;
+    playif(2);
+    showhp();
 }
 
 /* Mondain attacks in melee */
-F_1664()
+mondmele()
 {
-    F_3B46("Attacked by Mondain!");
-    F_053D(3);
-    if (F_4069(1, 255) > (0xb9 - D_2074 / 2 + (D_2086 << 3)) * 2)
-        F_3B46("Missed!");
+    msgline("Attacked by Mondain!");
+    playif(3);
+    if (rndrange(1, 255) > (0xb9 - plsta / 2 + (rdyarm << 3)) * 2)
+        msgline("Missed!");
     else
-        F_161E(D_206E / 32 + F_4069(1, 20));
+        hurtplr(plstat / 32 + rndrange(1, 20));
 }
 
 /* Mondain casts a spell: magic missile, mind blaster or psionic shock */
-F_16E0()
+mondcast()
 {
     int kind, thr, hit, i;
 
-    kind = F_4069(1, 0xee) % 3;
-    F_3599("Mondain casts ", D_2046);
+    kind = rndrange(1, 0xee) % 3;
+    putstr("Mondain casts ", coltext);
     switch (kind) {
     case 0:
-        F_3B46("magic missile!");
-        F_053D(5);
-        thr = (0xc3 - (D_2078 + D_207A / 2)) * 2;
-        if (hit = F_4069(1, 255) < thr)
-            F_161E(F_4069(1, 100));
+        msgline("magic missile!");
+        playif(5);
+        thr = (0xc3 - (plwis + plint / 2)) * 2;
+        if (hit = rndrange(1, 255) < thr)
+            hurtplr(rndrange(1, 100));
         break;
     case 1:
-        F_3B46("mind blaster!");
-        F_053D(5);
-        if (hit = F_4069(1, 200) > 140) {
-            F_3B46("Hit!  Stats are reduced!");
+        msgline("mind blaster!");
+        playif(5);
+        if (hit = rndrange(1, 200) > 140) {
+            msgline("Hit!  Stats are reduced!");
             for (i = 1; i <= 6; i++) {
-                if ((&D_206E)[i] > 16)
-                    (&D_206E)[i] -= (&D_206E)[i] / 8;
-                else if ((&D_206E)[i] >= 2)
-                    (&D_206E)[i] -= 2;
+                if ((&plstat)[i] > 16)
+                    (&plstat)[i] -= (&plstat)[i] / 8;
+                else if ((&plstat)[i] >= 2)
+                    (&plstat)[i] -= 2;
             }
         }
         break;
     case 2:
-        F_3B46("psionic shock!");
+        msgline("psionic shock!");
         F_4031();
-        F_053D(5);
+        playif(5);
         F_3FF9();
-        if (hit = F_4069(1, 200) > 140) {
-            i = D_206E / 32;
+        if (hit = rndrange(1, 200) > 140) {
+            i = plstat / 32;
             if (i > 255)
                 i -= 254;
-            F_161E(i);
+            hurtplr(i);
         }
         break;
     }
     if (!hit)
-        F_3B46("Missed!");
+        msgline("Missed!");
 }
 
 /* the monsters act: Mondain chants, melee, casts, or the minions move */
-F_186F()
+mondturn()
 {
     int dx, dy, dist, moved = 0;
 
-    if (!D_0246 && F_4069(1, 200) < 17)
-        F_3B46("You hear a strange chanting!");
-    else if (D_0246) {
-        if (D_0240 == 4)
-            D_012E += 25;
+    if (!fighton && rndrange(1, 200) < 17)
+        msgline("You hear a strange chanting!");
+    else if (fighton) {
+        if (mondtile == 4)
+            mondhp += 25;
         else {
-            dx = D_012A - D_0126;
-            dy = D_012C - D_0128;
+            dx = mondx - plx;
+            dy = mondy - ply;
             dist = (dx < 0 ? -dx : dx) + (dy < 0 ? -dy : dy);
-            if (dist == 1 && D_0244 == 20)
-                F_1664();
-            else if (dist < 7 && F_4069(1, 255) < 128 && D_0244 == 20)
-                F_16E0();
+            if (dist == 1 && mondmode == 20)
+                mondmele();
+            else if (dist < 7 && rndrange(1, 255) < 128 && mondmode == 20)
+                mondcast();
             else {
-                if (D_0244 == 40) {
+                if (mondmode == 40) {
                     if (dx == 0)
-                        dx = F_1565();
+                        dx = fxrand();
                     if (dy == 0)
-                        dy = F_1565();
+                        dy = fxrand();
                 }
-                if (F_4069(1, 255) & 1) {
-                    moved = F_1589(0, F_05B1(dy));
+                if (rndrange(1, 255) & 1) {
+                    moved = movetry(0, sign(dy));
                     if (!moved)
-                        moved = F_1589(F_05B1(dx), 0);
+                        moved = movetry(sign(dx), 0);
                 } else {
-                    moved = F_1589(F_05B1(dx), 0);
+                    moved = movetry(sign(dx), 0);
                     if (!moved)
-                        moved = F_1589(0, F_05B1(dy));
+                        moved = movetry(0, sign(dy));
                 }
-                if (!moved && D_0244 == 40)
-                    D_012E += 5;
+                if (!moved && mondmode == 40)
+                    mondhp += 5;
             }
         }
     }
 }
 
 /* Mondain's state: spawn a magic square, change form by his hit points, or die */
-F_19C8()
+mondstat()
 {
     int n = 0;
 
-    if (D_0246 && D_0130 == -1 && F_4069(1, 200) < 36) {
+    if (fighton && fxfrm == -1 && rndrange(1, 200) < 36) {
         do {
-            D_2054 = (F_4069(1, 255) + F_4069(1, 255)) % 19;
-            D_2056 = (F_4069(1, 255) + F_4069(1, 255)) % 9;
-        } while (D_0194[D_2054][D_2056] != 0 && ++n < 100);
-        if (n < 100 && D_2054 != D_012A && D_2054 != D_0126 &&
-            D_2056 != D_012C && D_2056 != D_0128) {
-            D_0130 = 0;
-            D_0194[D_2054][D_2056] = 14;
+            magx = (rndrange(1, 255) + rndrange(1, 255)) % 19;
+            magy = (rndrange(1, 255) + rndrange(1, 255)) % 9;
+        } while (field[magx][magy] != 0 && ++n < 100);
+        if (n < 100 && magx != mondx && magx != plx &&
+            magy != mondy && magy != ply) {
+            fxfrm = 0;
+            field[magx][magy] = 14;
         }
     }
-    if (D_012E > 500) {
-        D_0240 = 2;
-        D_0244 = 20;
-    } else if (D_012E <= 500 && D_012E > 0 && D_0240 != 11) {
-        D_0240 = 11;
-        D_0244 = 40;
-        D_0242 = 0;
-    } else if (D_012E <= 0 && D_0244 != 30) {
-        F_3599("Mondain is dead!", D_2046);
-        if (D_0248 == 0)
-            F_3B46("...or is he?");
+    if (mondhp > 500) {
+        mondtile = 2;
+        mondmode = 20;
+    } else if (mondhp <= 500 && mondhp > 0 && mondtile != 11) {
+        mondtile = 11;
+        mondmode = 40;
+        mondfram = 0;
+    } else if (mondhp <= 0 && mondmode != 30) {
+        putstr("Mondain is dead!", coltext);
+        if (gemgone == 0)
+            msgline("...or is he?");
         else {
-            F_3B46("");
-            D_024A = 1;
+            msgline("");
+            wongame = 1;
         }
-        D_0240 = 4;
-        D_0244 = 30;
-        D_0242 = 0;
+        mondtile = 4;
+        mondmode = 30;
+        mondfram = 0;
     }
 }
 
 /* read a key (waits with the animation, 0 if none) and return it upper-cased */
-char F_1B46()
+char pollkey()
 {
     unsigned char k;
 
-    k = F_3862(F_413C(D_2046));
-    F_3E5E(1);
+    k = upcase(getkey(coltext));
+    waittick(1);
     if (k == 0) {
-        F_3E5E(1);
-        if (D_0190 == 0)
-            F_3E5E(1);
+        waittick(1);
+        if (gemfrm == 0)
+            waittick(1);
         else
-            F_3CF1(4);
+            vwait(4);
     }
     return k;
 }
 
 /* story screen 1: entering the craft, the gems, the colour legend */
-F_1B9B()
+story1()
 {
     int c[4];
     int i;
 
-    if (D_082C) {
+    if (vidmode) {
         c[0] = 12;
         c[1] = 10;
         c[2] = 9;
@@ -948,73 +948,73 @@ F_1B9B()
         c[1] = c[2] = 1;
         c[3] = 3;
     }
-    F_047D(D_0DA8);
-    F_04A2(5, 3, "Entering the craft, thou dost");
-    F_04A2(5, 4, "remark upon four holes marked:");
-    F_04A2(12, 6, "R    G    B    W");
+    clrbig(colfill);
+    printat(5, 3, "Entering the craft, thou dost");
+    printat(5, 4, "remark upon four holes marked:");
+    printat(12, 6, "R    G    B    W");
     for (i = 0; i < 4; i++) {
-        F_352C(i * 5 + 12, 7);
-        F_357C(4, c[i]);
+        gotoxy(i * 5 + 12, 7);
+        putch(4, c[i]);
     }
-    F_04A2(4, 9, "The proper gems fit in each hole.");
-    F_04A2(5, 11, "Further examination leads thee");
-    F_04A2(11, 12, "to two discoveries:");
-    F_04A2(4, 14, "There is a button marked LAUNCH,");
-    F_04A2(6, 15, "and thou art locked in, with");
-    F_04A2(6, 16, "nothing to do but press it!");
+    printat(4, 9, "The proper gems fit in each hole.");
+    printat(5, 11, "Further examination leads thee");
+    printat(11, 12, "to two discoveries:");
+    printat(4, 14, "There is a button marked LAUNCH,");
+    printat(6, 15, "and thou art locked in, with");
+    printat(6, 16, "nothing to do but press it!");
 }
 
 /* story screen 2: the launch button */
-F_1CAF()
+story2()
 {
-    F_047D(D_0DA8);
-    F_04A2(4, 4, "As soon as thou hast pressed the");
-    F_04A2(4, 5, "large black button, lights begin");
-    F_04A2(4, 6, "  to dance across the control");
-    F_04A2(16, 7, "screens.");
-    F_04A2(4, 9, " Generators shake the very floor");
-    F_04A2(12, 10, "beneath thy feet.");
-    F_04A2(4, 12, "The small craft begins to tremble");
-    F_04A2(8, 13, "and rattle as thy journey");
-    F_04A2(9, 14, "through time begins...");
+    clrbig(colfill);
+    printat(4, 4, "As soon as thou hast pressed the");
+    printat(4, 5, "large black button, lights begin");
+    printat(4, 6, "  to dance across the control");
+    printat(16, 7, "screens.");
+    printat(4, 9, " Generators shake the very floor");
+    printat(12, 10, "beneath thy feet.");
+    printat(4, 12, "The small craft begins to tremble");
+    printat(8, 13, "and rattle as thy journey");
+    printat(9, 14, "through time begins...");
 }
 
 /* story screen 3: pulled from the craft */
-F_1D53()
+story3()
 {
-    F_047D(D_0DA8);
-    F_04A2(4, 8, "After but a few moments thou dost");
-    F_04A2(4, 9, "feel a strong magic pulling thee");
-    F_04A2(12, 10, "from thy craft...");
+    clrbig(colfill);
+    printat(4, 8, "After but a few moments thou dost");
+    printat(4, 9, "feel a strong magic pulling thee");
+    printat(12, 10, "from thy craft...");
 }
 
 /* story screen 4: face to face with Mondain */
-F_1D94()
+story4()
 {
-    F_047D(D_0DA8);
-    F_04A2(11, 6, "...A moment later,");
-    F_04A2(9, 7, "thou art face to face");
-    F_04A2(4, 8, " with the evil Mondain himself!");
-    F_04A2(9, 13, "Good luck, this is it!");
+    clrbig(colfill);
+    printat(11, 6, "...A moment later,");
+    printat(9, 7, "thou art face to face");
+    printat(4, 8, " with the evil Mondain himself!");
+    printat(9, 13, "Good luck, this is it!");
 }
 
 /* the four story screens, each followed by a pause */
-F_1DE6()
+storyrun()
 {
-    F_1B9B();
-    F_3AE2();
-    F_1CAF();
-    F_3AE2();
-    F_1D53();
-    F_3AE2();
-    F_1D94();
-    F_3AE2();
+    story1();
+    presskey();
+    story2();
+    presskey();
+    story3();
+    presskey();
+    story4();
+    presskey();
 }
 
 unsigned char D_08BB[8] = { 0x80, 0x40, 0x20, 0x10, 8, 4, 2, 1 };
 
 /* load file `name` (n bytes) and draw it as a 1-bit 320-wide image */
-F_1E03(n, name)
+showbmp(n, name)
 int n;
 char *name;
 {
@@ -1023,16 +1023,16 @@ char *name;
 
     j = i = y = x = 0;
     col = 15;
-    F_3E2F(name, D_2E10, n);
-    if (D_082C == 0)
+    readfile(name, bmpbuf, n);
+    if (vidmode == 0)
         col = 3;
     for (i = 0; i < n; i++) {
-        b = D_2E10[i];
+        b = bmpbuf[i];
         for (j = 0; j < 8; j++) {
             if (b & D_08BB[j])
-                F_3D41(x, y, col);
+                pixel(x, y, col);
             else
-                F_3D41(x, y, 0);
+                pixel(x, y, 0);
             x++;
             if (x > 319) {
                 x = 0;
@@ -1043,37 +1043,37 @@ char *name;
 }
 
 /* victory: show the player, wait for a key */
-F_1EA8()
+victory()
 {
     int i;
 
-    F_355D(4, D_012A, D_012C);
-    F_3D41(50, 7, D_0DA6);
-    D_2090 = 1;
-    F_0518(D_0DA8);
-    F_04A2(11, 8, "THOU ART VICTORIOUS!");
+    drawtile(4, mondx, mondy);
+    pixel(50, 7, colline);
+    plnoise = 1;
+    clrsmall(colfill);
+    printat(11, 8, "THOU ART VICTORIOUS!");
     for (i = 0; i < 3; i++)
-        F_053D(5);
-    F_3E5E(10);
-    F_4224();
-    while (!F_413C(0) && i++ < 10000)
+        playif(5);
+    waittick(10);
+    flushkey();
+    while (!getkey(0) && i++ < 10000)
         ;
 }
 
 /* end of the game: victory screen, nif.bin picture, restart message */
-F_1F31()
+endgame()
 {
-    F_1EA8();
-    F_35CA(0, 0, 319, 199, 0);
-    F_1E03(0x1a40, "nif.bin");
-    F_3E5E(75);
-    F_352C(4, 24);
-    F_3599("Press CONTROL-ALT-DEL to Restart", D_2046);
-    F_3E5E(0);
+    victory();
+    fillrect(0, 0, 319, 199, 0);
+    showbmp(0x1a40, "nif.bin");
+    waittick(75);
+    gotoxy(4, 24);
+    putstr("Press CONTROL-ALT-DEL to Restart", coltext);
+    waittick(0);
 }
 
 /* main: load data files, story screens, then the key-driven battle loop */
-F_1853(argc, argv)
+main(argc, argv)
 int argc;
 unsigned char **argv;
 {
@@ -1082,29 +1082,29 @@ unsigned char **argv;
 
     sz = 64;
     F_1D0D(1);
-    D_2048 = F_3862(argv[1][0]) == 'C';
-    D_2E0C = argv[1];
-    D_2E0E = argv[2];
-    F_3F58(0);
-    if (D_082C)
+    forcecga = upcase(argv[1][0]) == 'C';
+    argv1 = argv[1];
+    argv2 = argv[2];
+    vidinit(0);
+    if (vidmode)
         sz = 128;
     for (i = 0; i < 128; i++)
-        D_238C[i] = 0;
-    F_3E2F("inuse.u1", (int)D_2058, 0x334);
-    F_3E2F(D_0184[D_082C], D_238C + sz * 10, D_018A[D_082C]);
-    F_3E2F(D_0156[D_082C], D_238C + sz, 0xa80 - sz);
-    D_204A = 5;
-    F_45A3();
-    F_37FD(D_208A + F_3EC4());
-    F_1DE6();
-    F_13A3();
+        tilegfx[i] = 0;
+    readfile("inuse.u1", (int)plname, 0x334);
+    readfile(tilefile[vidmode], tilegfx + sz * 10, tilesize[vidmode]);
+    readfile(mondfile[vidmode], tilegfx + sz, 0xa80 - sz);
+    gmode = 5;
+    showstat();
+    seedrnd(plseed + clockrnd());
+    storyrun();
+    drawfld();
     for (;;) {
         i = 0;
-        F_387E(0, 24);
+        arrowr(0, 24);
         do {
-            key = F_1B46();
+            key = pollkey();
             i++;
-            F_1477();
+            animate();
         } while (key == 0 && i < 1500);
         if (key == 0)
             key = ' ';
@@ -1113,101 +1113,101 @@ unsigned char **argv;
         case 4:
         case 2:
         case 1:
-            F_0696(key);
+            moveplr(key);
             break;
         case 'A':
-            F_0A0D(-1);
+            cmdattk(-1);
             break;
         case '8':
-            F_0A0D(3);
+            cmdattk(3);
             break;
         case '2':
-            F_0A0D(4);
+            cmdattk(4);
             break;
         case '6':
-            F_0A0D(2);
+            cmdattk(2);
             break;
         case '4':
-            F_0A0D(1);
+            cmdattk(1);
             break;
         case 'B':
-            F_1194();
+            cmdboard();
             break;
         case 'C':
-            F_0ED3();
+            cmdcast();
             break;
         case 'D':
-            F_11A2();
+            cmddrop();
             break;
         case 'E':
-            F_11B0();
+            cmdenter();
             break;
         case 'F':
-            F_11BE();
+            cmdfire();
             break;
         case 'G':
-            F_1057();
+            cmdget();
             break;
         case 'H':
-            F_11CC();
-            D_0190 = 1;
+            cmdhyper();
+            gemfrm = 1;
             break;
         case 'I':
-            F_1124();
+            cmdinfo();
             break;
         case 'K':
-            F_11DA();
+            cmdklimb();
             break;
         case 'N':
-            F_0576();
+            cmdnoise();
             break;
         case 'O':
-            F_11E8();
+            cmdopen();
             break;
         case 'Q':
-            F_11F6();
+            cmdquit();
             break;
         case 'R':
-            F_43C8();
+            readycmd();
             break;
         case 'S':
-            F_1204();
+            cmdsteal();
             break;
         case 'T':
-            F_121B();
+            cmdtrans();
             break;
         case 'U':
-            F_1232();
+            cmdunlk();
             break;
         case 'V':
-            F_1240();
+            cmdview();
             break;
         case 'X':
-            F_124E();
+            cmdxit();
             break;
         case 'Z':
-            F_478E();
-            D_204E = 1;
-            F_387E(0, 24);
+            ztats();
+            redraw = 1;
+            arrowr(0, 24);
             break;
         case ' ':
-            F_0551();
+            cmdpass();
             break;
         case 27:
             D_204C = 1;
         default:
-            F_055F();
+            cmdhuh();
         }
-        if (D_204E)
-            F_13A3();
-        F_19C8();
-        if (D_024A) {
-            F_1F31();
+        if (redraw)
+            drawfld();
+        mondstat();
+        if (wongame) {
+            endgame();
             D_204C = 1;
         }
-        F_186F();
-        if (D_206E > 0 && D_2080 > 0)
+        mondturn();
+        if (plstat > 0 && plfood > 0)
             continue;
-        F_138D();
+        killplr();
     }
 }

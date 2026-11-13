@@ -13,56 +13,56 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_0DA6:BYTE
-	EXTRN	D_0DA8:BYTE
-	EXTRN	D_2044:BYTE
-	EXTRN	D_2046:BYTE
-	EXTRN	D_204A:BYTE
-	EXTRN	D_2058:BYTE
-	EXTRN	D_2068:BYTE
-	EXTRN	D_206A:BYTE
-	EXTRN	D_206C:BYTE
-	EXTRN	D_206E:BYTE
-	EXTRN	D_207C:BYTE
-	EXTRN	D_207E:BYTE
-	EXTRN	D_2080:BYTE
-	EXTRN	D_2082:BYTE
-	EXTRN	D_2084:BYTE
-	EXTRN	D_2086:BYTE
-	EXTRN	D_2088:BYTE
-	EXTRN	D_20A4:BYTE
-	EXTRN	D_20AC:BYTE
-	EXTRN	D_20B8:BYTE
-	EXTRN	D_20D8:BYTE
-	EXTRN	D_20EE:BYTE
-	EXTRN	D_20FE:BYTE
+	EXTRN	colline:BYTE
+	EXTRN	colfill:BYTE
+	EXTRN	colhigh:BYTE
+	EXTRN	coltext:BYTE
+	EXTRN	gmode:BYTE
+	EXTRN	plname:BYTE
+	EXTRN	plrace:BYTE
+	EXTRN	plclass:BYTE
+	EXTRN	plsex:BYTE
+	EXTRN	plstat:BYTE
+	EXTRN	plcoin:BYTE
+	EXTRN	plexp:BYTE
+	EXTRN	plfood:BYTE
+	EXTRN	rdyweap:BYTE
+	EXTRN	rdyspel:BYTE
+	EXTRN	rdyarm:BYTE
+	EXTRN	plveh:BYTE
+	EXTRN	gemred:BYTE
+	EXTRN	ownarm:BYTE
+	EXTRN	ownweap:BYTE
+	EXTRN	ownspel:BYTE
+	EXTRN	ownveh:BYTE
+	EXTRN	plkills:BYTE
 DATA	ENDS
 PROG	SEGMENT
-	EXTRN	F_352C:NEAR
-	EXTRN	F_353A:NEAR
-	EXTRN	F_357C:NEAR
-	EXTRN	F_3599:NEAR
-	EXTRN	F_35CA:NEAR
-	EXTRN	F_387E:NEAR
-	EXTRN	F_3920:NEAR
-	EXTRN	F_39FC:NEAR
-	EXTRN	F_3AE2:NEAR
-	EXTRN	F_3B46:NEAR
-	EXTRN	F_3BF6:NEAR
-	EXTRN	F_3C46:NEAR
-	EXTRN	F_3C8B:NEAR
-	EXTRN	F_40E9:NEAR
+	EXTRN	gotoxy:NEAR
+	EXTRN	strlen2:NEAR
+	EXTRN	putch:NEAR
+	EXTRN	putstr:NEAR
+	EXTRN	fillrect:NEAR
+	EXTRN	arrowr:NEAR
+	EXTRN	arrowl:NEAR
+	EXTRN	drawline:NEAR
+	EXTRN	presskey:NEAR
+	EXTRN	msgline:NEAR
+	EXTRN	botbar:NEAR
+	EXTRN	topbar:NEAR
+	EXTRN	putnum:NEAR
+	EXTRN	getlevel:NEAR
 PROG	ENDS
-	PUBLIC	F_4437,F_44A2,F_450D,F_4558,F_45A3,F_461C
-	PUBLIC	F_4645,F_468F,F_46CA,F_46E5,F_478E,D_0CBA
-	PUBLIC	D_0CC0,D_0CC6,D_0CCC,D_0CD2,D_0D72,D_0DF8
-	PUBLIC	D_0E30,D_0E54,D_0E9E,D_0F04,D_0F5C,D_0FA2
-	PUBLIC	D_0FD8,D_13ED,D_1D0C,D_1DC8,D_1F56,D_1F5D
-	PUBLIC	D_1F63,D_1F6F,D_1F78,D_1F81,D_1F88,D_1F91
-	PUBLIC	D_1F9F,D_1FAD,D_1FBB
+	PUBLIC	showhp,showfood,showexp,showcoin,showstat,putdots
+	PUBLIC	morepage,ztatpos,ztatnum,ztatattr,ztats,lblhits
+	PUBLIC	lblfood,lblexp,lblcoin,wrange,wnamelng,wnames
+	PUBLIC	racenam,classnam,attrnam,spellnam,armornam,vehnam
+	PUBLIC	strtab,D_13ED,D_1D0C,dirtab,strmore,strztats
+	PUBLIC	strinv,strplay,strlevel,strmale,strfem,strcopp
+	PUBLIC	strsilv,strgold,strenemy
 
 PROG	SEGMENT
-F_4437:
+showhp:
 	PUSH	BP                                 ; 4437 55
 	SUB	SP, 4                               ; 4438 83 EC 04
 	MOV	BP, SP                              ; 443B 8B EC
@@ -70,23 +70,23 @@ F_4437:
 	PUSH	AX                                 ; 4440 50
 	MOV	AX, 24H                             ; 4441 B8 24 00
 	PUSH	AX                                 ; 4444 50
-	CALL	F_352C                             ; 4445 E8 3D EC
+	CALL	gotoxy                             ; 4445 E8 3D EC
 	MOV	SP, BP                              ; 4448 8B E5
-	MOV	AX, WORD PTR D_206E                 ; 444A A1 6E 20
+	MOV	AX, WORD PTR plstat                 ; 444A A1 6E 20
 	CMP	AX, 64H                             ; 444D 3D 64 00
 	JGE	L_4465                              ; 4450 7D 13
-	MOV	BX, WORD PTR D_2044                 ; 4452 8B 1E 44 20
+	MOV	BX, WORD PTR colhigh                 ; 4452 8B 1E 44 20
 	TEST	AX, AX                             ; 4456 85 C0
 	MOV	WORD PTR [BP+2], BX                 ; 4458 89 5E 02
 	JNS	L_4479                              ; 445B 79 1C
-	MOV	WORD PTR D_206E, 0                  ; 445D C7 06 6E 20 00 00
+	MOV	WORD PTR plstat, 0                  ; 445D C7 06 6E 20 00 00
 	JMP	SHORT L_4479                        ; 4463 EB 14
 L_4465:
-	MOV	AX, WORD PTR D_2046                 ; 4465 A1 46 20
-	CMP	WORD PTR D_206E, 270FH              ; 4468 81 3E 6E 20 0F 27
+	MOV	AX, WORD PTR coltext                 ; 4465 A1 46 20
+	CMP	WORD PTR plstat, 270FH              ; 4468 81 3E 6E 20 0F 27
 	MOV	WORD PTR [BP+2], AX                 ; 446E 89 46 02
 	JLE	L_4479                              ; 4471 7E 06
-	MOV	WORD PTR D_206E, 270FH              ; 4473 C7 06 6E 20 0F 27
+	MOV	WORD PTR plstat, 270FH              ; 4473 C7 06 6E 20 0F 27
 L_4479:
 	XOR	AX, AX                              ; 4479 33 C0
 	PUSH	AX                                 ; 447B 50
@@ -95,19 +95,19 @@ L_4479:
 	PUSH	AX                                 ; 4482 50
 	MOV	AX, 4                               ; 4483 B8 04 00
 	PUSH	AX                                 ; 4486 50
-	PUSH	WORD PTR D_206E                    ; 4487 FF 36 6E 20
-	CALL	F_3C8B                             ; 448B E8 81 F4
+	PUSH	WORD PTR plstat                    ; 4487 FF 36 6E 20
+	CALL	putnum                             ; 448B E8 81 F4
 	MOV	SP, BP                              ; 448E 8B E5
 	MOV	AX, 18H                             ; 4490 B8 18 00
 	PUSH	AX                                 ; 4493 50
 	MOV	AX, 1                               ; 4494 B8 01 00
 	PUSH	AX                                 ; 4497 50
-	CALL	F_352C                             ; 4498 E8 EA EB
+	CALL	gotoxy                             ; 4498 E8 EA EB
 	MOV	SP, BP                              ; 449B 8B E5
 	ADD	SP, 4                               ; 449D 83 C4 04
 	POP	BP                                  ; 44A0 5D
 	RET                                     ; 44A1 C3
-F_44A2:
+showfood:
 	PUSH	BP                                 ; 44A2 55
 	SUB	SP, 4                               ; 44A3 83 EC 04
 	MOV	BP, SP                              ; 44A6 8B EC
@@ -115,23 +115,23 @@ F_44A2:
 	PUSH	AX                                 ; 44AB 50
 	MOV	AX, 24H                             ; 44AC B8 24 00
 	PUSH	AX                                 ; 44AF 50
-	CALL	F_352C                             ; 44B0 E8 D2 EB
+	CALL	gotoxy                             ; 44B0 E8 D2 EB
 	MOV	SP, BP                              ; 44B3 8B E5
-	MOV	AX, WORD PTR D_2080                 ; 44B5 A1 80 20
+	MOV	AX, WORD PTR plfood                 ; 44B5 A1 80 20
 	CMP	AX, 64H                             ; 44B8 3D 64 00
 	JGE	L_44D0                              ; 44BB 7D 13
-	MOV	BX, WORD PTR D_2044                 ; 44BD 8B 1E 44 20
+	MOV	BX, WORD PTR colhigh                 ; 44BD 8B 1E 44 20
 	TEST	AX, AX                             ; 44C1 85 C0
 	MOV	WORD PTR [BP+2], BX                 ; 44C3 89 5E 02
 	JNS	L_44E4                              ; 44C6 79 1C
-	MOV	WORD PTR D_2080, 0                  ; 44C8 C7 06 80 20 00 00
+	MOV	WORD PTR plfood, 0                  ; 44C8 C7 06 80 20 00 00
 	JMP	SHORT L_44E4                        ; 44CE EB 14
 L_44D0:
-	MOV	AX, WORD PTR D_2046                 ; 44D0 A1 46 20
-	CMP	WORD PTR D_2080, 270FH              ; 44D3 81 3E 80 20 0F 27
+	MOV	AX, WORD PTR coltext                 ; 44D0 A1 46 20
+	CMP	WORD PTR plfood, 270FH              ; 44D3 81 3E 80 20 0F 27
 	MOV	WORD PTR [BP+2], AX                 ; 44D9 89 46 02
 	JLE	L_44E4                              ; 44DC 7E 06
-	MOV	WORD PTR D_2080, 270FH              ; 44DE C7 06 80 20 0F 27
+	MOV	WORD PTR plfood, 270FH              ; 44DE C7 06 80 20 0F 27
 L_44E4:
 	XOR	AX, AX                              ; 44E4 33 C0
 	PUSH	AX                                 ; 44E6 50
@@ -140,19 +140,19 @@ L_44E4:
 	PUSH	AX                                 ; 44ED 50
 	MOV	AX, 4                               ; 44EE B8 04 00
 	PUSH	AX                                 ; 44F1 50
-	PUSH	WORD PTR D_2080                    ; 44F2 FF 36 80 20
-	CALL	F_3C8B                             ; 44F6 E8 16 F4
+	PUSH	WORD PTR plfood                    ; 44F2 FF 36 80 20
+	CALL	putnum                             ; 44F6 E8 16 F4
 	MOV	SP, BP                              ; 44F9 8B E5
 	MOV	AX, 18H                             ; 44FB B8 18 00
 	PUSH	AX                                 ; 44FE 50
 	MOV	AX, 1                               ; 44FF B8 01 00
 	PUSH	AX                                 ; 4502 50
-	CALL	F_352C                             ; 4503 E8 7F EB
+	CALL	gotoxy                             ; 4503 E8 7F EB
 	MOV	SP, BP                              ; 4506 8B E5
 	ADD	SP, 4                               ; 4508 83 C4 04
 	POP	BP                                  ; 450B 5D
 	RET                                     ; 450C C3
-F_450D:
+showexp:
 	PUSH	BP                                 ; 450D 55
 	SUB	SP, 2                               ; 450E 83 EC 02
 	MOV	BP, SP                              ; 4511 8B EC
@@ -160,32 +160,32 @@ F_450D:
 	PUSH	AX                                 ; 4516 50
 	MOV	AX, 24H                             ; 4517 B8 24 00
 	PUSH	AX                                 ; 451A 50
-	CALL	F_352C                             ; 451B E8 67 EB
+	CALL	gotoxy                             ; 451B E8 67 EB
 	MOV	SP, BP                              ; 451E 8B E5
-	CMP	WORD PTR D_207E, 270FH              ; 4520 81 3E 7E 20 0F 27
+	CMP	WORD PTR plexp, 270FH              ; 4520 81 3E 7E 20 0F 27
 	JLE	L_452E                              ; 4526 7E 06
-	MOV	WORD PTR D_207E, 270FH              ; 4528 C7 06 7E 20 0F 27
+	MOV	WORD PTR plexp, 270FH              ; 4528 C7 06 7E 20 0F 27
 L_452E:
 	XOR	AX, AX                              ; 452E 33 C0
 	PUSH	AX                                 ; 4530 50
-	PUSH	WORD PTR D_2046                    ; 4531 FF 36 46 20
+	PUSH	WORD PTR coltext                    ; 4531 FF 36 46 20
 	MOV	AX, 20H                             ; 4535 B8 20 00
 	PUSH	AX                                 ; 4538 50
 	MOV	AX, 4                               ; 4539 B8 04 00
 	PUSH	AX                                 ; 453C 50
-	PUSH	WORD PTR D_207E                    ; 453D FF 36 7E 20
-	CALL	F_3C8B                             ; 4541 E8 CB F3
+	PUSH	WORD PTR plexp                    ; 453D FF 36 7E 20
+	CALL	putnum                             ; 4541 E8 CB F3
 	MOV	SP, BP                              ; 4544 8B E5
 	MOV	AX, 18H                             ; 4546 B8 18 00
 	PUSH	AX                                 ; 4549 50
 	MOV	AX, 1                               ; 454A B8 01 00
 	PUSH	AX                                 ; 454D 50
-	CALL	F_352C                             ; 454E E8 34 EB
+	CALL	gotoxy                             ; 454E E8 34 EB
 	MOV	SP, BP                              ; 4551 8B E5
 	ADD	SP, 2                               ; 4553 83 C4 02
 	POP	BP                                  ; 4556 5D
 	RET                                     ; 4557 C3
-F_4558:
+showcoin:
 	PUSH	BP                                 ; 4558 55
 	SUB	SP, 2                               ; 4559 83 EC 02
 	MOV	BP, SP                              ; 455C 8B EC
@@ -193,85 +193,85 @@ F_4558:
 	PUSH	AX                                 ; 4561 50
 	MOV	AX, 24H                             ; 4562 B8 24 00
 	PUSH	AX                                 ; 4565 50
-	CALL	F_352C                             ; 4566 E8 1C EB
+	CALL	gotoxy                             ; 4566 E8 1C EB
 	MOV	SP, BP                              ; 4569 8B E5
-	CMP	WORD PTR D_207C, 270FH              ; 456B 81 3E 7C 20 0F 27
+	CMP	WORD PTR plcoin, 270FH              ; 456B 81 3E 7C 20 0F 27
 	JLE	L_4579                              ; 4571 7E 06
-	MOV	WORD PTR D_207C, 270FH              ; 4573 C7 06 7C 20 0F 27
+	MOV	WORD PTR plcoin, 270FH              ; 4573 C7 06 7C 20 0F 27
 L_4579:
 	XOR	AX, AX                              ; 4579 33 C0
 	PUSH	AX                                 ; 457B 50
-	PUSH	WORD PTR D_2046                    ; 457C FF 36 46 20
+	PUSH	WORD PTR coltext                    ; 457C FF 36 46 20
 	MOV	AX, 20H                             ; 4580 B8 20 00
 	PUSH	AX                                 ; 4583 50
 	MOV	AX, 4                               ; 4584 B8 04 00
 	PUSH	AX                                 ; 4587 50
-	PUSH	WORD PTR D_207C                    ; 4588 FF 36 7C 20
-	CALL	F_3C8B                             ; 458C E8 80 F3
+	PUSH	WORD PTR plcoin                    ; 4588 FF 36 7C 20
+	CALL	putnum                             ; 458C E8 80 F3
 	MOV	SP, BP                              ; 458F 8B E5
 	MOV	AX, 18H                             ; 4591 B8 18 00
 	PUSH	AX                                 ; 4594 50
 	MOV	AX, 1                               ; 4595 B8 01 00
 	PUSH	AX                                 ; 4598 50
-	CALL	F_352C                             ; 4599 E8 E9 EA
+	CALL	gotoxy                             ; 4599 E8 E9 EA
 	MOV	SP, BP                              ; 459C 8B E5
 	ADD	SP, 2                               ; 459E 83 C4 02
 	POP	BP                                  ; 45A1 5D
 	RET                                     ; 45A2 C3
-F_45A3:
+showstat:
 	PUSH	BP                                 ; 45A3 55
 	MOV	BP, SP                              ; 45A4 8B EC
 	MOV	AX, 15H                             ; 45A6 B8 15 00
 	PUSH	AX                                 ; 45A9 50
 	MOV	AX, 1FH                             ; 45AA B8 1F 00
 	PUSH	AX                                 ; 45AD 50
-	CALL	F_352C                             ; 45AE E8 D4 EA
+	CALL	gotoxy                             ; 45AE E8 D4 EA
 	MOV	SP, BP                              ; 45B1 8B E5
-	PUSH	WORD PTR D_2046                    ; 45B3 FF 36 46 20
-	MOV	AX, OFFSET DGROUP:D_0CBA            ; 45B7 B8 BA 0C
+	PUSH	WORD PTR coltext                    ; 45B3 FF 36 46 20
+	MOV	AX, OFFSET DGROUP:lblhits            ; 45B7 B8 BA 0C
 	PUSH	AX                                 ; 45BA 50
-	CALL	F_3599                             ; 45BB E8 34 EB
+	CALL	putstr                             ; 45BB E8 34 EB
 	MOV	SP, BP                              ; 45BE 8B E5
 	MOV	AX, 16H                             ; 45C0 B8 16 00
 	PUSH	AX                                 ; 45C3 50
 	MOV	AX, 1FH                             ; 45C4 B8 1F 00
 	PUSH	AX                                 ; 45C7 50
-	CALL	F_352C                             ; 45C8 E8 BA EA
+	CALL	gotoxy                             ; 45C8 E8 BA EA
 	MOV	SP, BP                              ; 45CB 8B E5
-	PUSH	WORD PTR D_2046                    ; 45CD FF 36 46 20
-	MOV	AX, OFFSET DGROUP:D_0CC0            ; 45D1 B8 C0 0C
+	PUSH	WORD PTR coltext                    ; 45CD FF 36 46 20
+	MOV	AX, OFFSET DGROUP:lblfood            ; 45D1 B8 C0 0C
 	PUSH	AX                                 ; 45D4 50
-	CALL	F_3599                             ; 45D5 E8 1A EB
+	CALL	putstr                             ; 45D5 E8 1A EB
 	MOV	SP, BP                              ; 45D8 8B E5
 	MOV	AX, 17H                             ; 45DA B8 17 00
 	PUSH	AX                                 ; 45DD 50
 	MOV	AX, 1FH                             ; 45DE B8 1F 00
 	PUSH	AX                                 ; 45E1 50
-	CALL	F_352C                             ; 45E2 E8 A0 EA
+	CALL	gotoxy                             ; 45E2 E8 A0 EA
 	MOV	SP, BP                              ; 45E5 8B E5
-	PUSH	WORD PTR D_2046                    ; 45E7 FF 36 46 20
-	MOV	AX, OFFSET DGROUP:D_0CC6            ; 45EB B8 C6 0C
+	PUSH	WORD PTR coltext                    ; 45E7 FF 36 46 20
+	MOV	AX, OFFSET DGROUP:lblexp            ; 45EB B8 C6 0C
 	PUSH	AX                                 ; 45EE 50
-	CALL	F_3599                             ; 45EF E8 00 EB
+	CALL	putstr                             ; 45EF E8 00 EB
 	MOV	SP, BP                              ; 45F2 8B E5
 	MOV	AX, 18H                             ; 45F4 B8 18 00
 	PUSH	AX                                 ; 45F7 50
 	MOV	AX, 1FH                             ; 45F8 B8 1F 00
 	PUSH	AX                                 ; 45FB 50
-	CALL	F_352C                             ; 45FC E8 86 EA
+	CALL	gotoxy                             ; 45FC E8 86 EA
 	MOV	SP, BP                              ; 45FF 8B E5
-	PUSH	WORD PTR D_2046                    ; 4601 FF 36 46 20
-	MOV	AX, OFFSET DGROUP:D_0CCC            ; 4605 B8 CC 0C
+	PUSH	WORD PTR coltext                    ; 4601 FF 36 46 20
+	MOV	AX, OFFSET DGROUP:lblcoin            ; 4605 B8 CC 0C
 	PUSH	AX                                 ; 4608 50
-	CALL	F_3599                             ; 4609 E8 E6 EA
+	CALL	putstr                             ; 4609 E8 E6 EA
 	MOV	SP, BP                              ; 460C 8B E5
-	CALL	F_4437                             ; 460E E8 26 FE
-	CALL	F_44A2                             ; 4611 E8 8E FE
-	CALL	F_450D                             ; 4614 E8 F6 FE
-	CALL	F_4558                             ; 4617 E8 3E FF
+	CALL	showhp                             ; 460E E8 26 FE
+	CALL	showfood                             ; 4611 E8 8E FE
+	CALL	showexp                             ; 4614 E8 F6 FE
+	CALL	showcoin                             ; 4617 E8 3E FF
 	POP	BP                                  ; 461A 5D
 	RET                                     ; 461B C3
-F_461C:
+putdots:
 	PUSH	BP                                 ; 461C 55
 	SUB	SP, 4                               ; 461D 83 EC 04
 	MOV	BP, SP                              ; 4620 8B EC
@@ -283,7 +283,7 @@ L_4627:
 	PUSH	WORD PTR [BP+0AH]                  ; 462F FF 76 0A
 	MOV	AX, 2EH                             ; 4632 B8 2E 00
 	PUSH	AX                                 ; 4635 50
-	CALL	F_357C                             ; 4636 E8 9C EA
+	CALL	putch                             ; 4636 E8 9C EA
 	MOV	SP, BP                              ; 4639 8B E5
 	INC	WORD PTR [BP+2]                     ; 463B FF 46 02
 	JMP	SHORT L_4627                        ; 463E EB E7
@@ -291,28 +291,28 @@ L_4640:
 	ADD	SP, 4                               ; 4640 83 C4 04
 	POP	BP                                  ; 4643 5D
 	RET                                     ; 4644 C3
-F_4645:
+morepage:
 	PUSH	BP                                 ; 4645 55
 	MOV	BP, SP                              ; 4646 8B EC
 	MOV	AX, 13H                             ; 4648 B8 13 00
 	PUSH	AX                                 ; 464B 50
 	MOV	AX, 10H                             ; 464C B8 10 00
 	PUSH	AX                                 ; 464F 50
-	CALL	F_387E                             ; 4650 E8 A0 ED
+	CALL	arrowr                             ; 4650 E8 A0 ED
 	MOV	SP, BP                              ; 4653 8B E5
-	PUSH	WORD PTR D_2046                    ; 4655 FF 36 46 20
-	MOV	AX, OFFSET DGROUP:D_1F56            ; 4659 B8 56 1F
+	PUSH	WORD PTR coltext                    ; 4655 FF 36 46 20
+	MOV	AX, OFFSET DGROUP:strmore            ; 4659 B8 56 1F
 	PUSH	AX                                 ; 465C 50
-	CALL	F_3599                             ; 465D E8 92 EA
+	CALL	putstr                             ; 465D E8 92 EA
 	MOV	SP, BP                              ; 4660 8B E5
 	MOV	AX, 13H                             ; 4662 B8 13 00
 	PUSH	AX                                 ; 4665 50
 	MOV	AX, 17H                             ; 4666 B8 17 00
 	PUSH	AX                                 ; 4669 50
-	CALL	F_3920                             ; 466A E8 28 EE
+	CALL	arrowl                             ; 466A E8 28 EE
 	MOV	SP, BP                              ; 466D 8B E5
-	CALL	F_3AE2                             ; 466F E8 70 F4
-	CALL	F_3BF6                             ; 4672 E8 81 F5
+	CALL	presskey                             ; 466F E8 70 F4
+	CALL	botbar                             ; 4672 E8 81 F5
 	XOR	AX, AX                              ; 4675 33 C0
 	PUSH	AX                                 ; 4677 50
 	MOV	AX, 97H                             ; 4678 B8 97 00
@@ -323,11 +323,11 @@ F_4645:
 	PUSH	AX                                 ; 4683 50
 	MOV	AX, 8                               ; 4684 B8 08 00
 	PUSH	AX                                 ; 4687 50
-	CALL	F_35CA                             ; 4688 E8 98 EA
+	CALL	fillrect                             ; 4688 E8 98 EA
 	MOV	SP, BP                              ; 468B 8B E5
 	POP	BP                                  ; 468D 5D
 	RET                                     ; 468E C3
-F_468F:
+ztatpos:
 	PUSH	BP                                 ; 468F 55
 	SUB	SP, 4                               ; 4690 83 EC 04
 	MOV	BP, SP                              ; 4693 8B EC
@@ -353,12 +353,12 @@ L_46A4:
 	ADD	DX, 5                               ; 46B9 83 C2 05
 	PUSH	DX                                 ; 46BC 52
 	PUSH	WORD PTR [BP]                      ; 46BD FF 76 00
-	CALL	F_352C                             ; 46C0 E8 C2 E9
+	CALL	gotoxy                             ; 46C0 E8 C2 E9
 	MOV	SP, BP                              ; 46C3 8B E5
 	ADD	SP, 4                               ; 46C5 83 C4 04
 	POP	BP                                  ; 46C8 5D
 	RET                                     ; 46C9 C3
-F_46CA:
+ztatnum:
 	PUSH	BP                                 ; 46CA 55
 	MOV	BP, SP                              ; 46CB 8B EC
 	XOR	AX, AX                              ; 46CD 33 C0
@@ -369,11 +369,11 @@ F_46CA:
 	MOV	AX, 4                               ; 46D7 B8 04 00
 	PUSH	AX                                 ; 46DA 50
 	PUSH	WORD PTR [BP+4]                    ; 46DB FF 76 04
-	CALL	F_3C8B                             ; 46DE E8 2E F2
+	CALL	putnum                             ; 46DE E8 2E F2
 	MOV	SP, BP                              ; 46E1 8B E5
 	POP	BP                                  ; 46E3 5D
 	RET                                     ; 46E4 C3
-F_46E5:
+ztatattr:
 	PUSH	BP                                 ; 46E5 55
 	SUB	SP, 6                               ; 46E6 83 EC 06
 	MOV	BP, SP                              ; 46E9 8B EC
@@ -394,21 +394,21 @@ L_46FE:
 	JE	L_4780                               ; 4708 74 76
 	CMP	WORD PTR [BP+14H], 19H              ; 470A 83 7E 14 19
 	JLE	L_4718                              ; 470E 7E 08
-	CALL	F_4645                             ; 4710 E8 32 FF
+	CALL	morepage                             ; 4710 E8 32 FF
 	MOV	WORD PTR [BP+14H], 0                ; 4713 C7 46 14 00 00
 L_4718:
 	PUSH	WORD PTR [BP+14H]                  ; 4718 FF 76 14
-	CALL	F_468F                             ; 471B E8 71 FF
+	CALL	ztatpos                             ; 471B E8 71 FF
 	MOV	SP, BP                              ; 471E 8B E5
 	INC	WORD PTR [BP+14H]                   ; 4720 FF 46 14
 	MOV	AX, WORD PTR [BP+2]                 ; 4723 8B 46 02
 	CMP	AX, WORD PTR [BP+12H]               ; 4726 3B 46 12
 	JE	L_4733                               ; 4729 74 08
-	MOV	AX, WORD PTR D_2046                 ; 472B A1 46 20
+	MOV	AX, WORD PTR coltext                 ; 472B A1 46 20
 	MOV	WORD PTR [BP+4], AX                 ; 472E 89 46 04
 	JMP	SHORT L_4739                        ; 4731 EB 06
 L_4733:
-	MOV	AX, WORD PTR D_2044                 ; 4733 A1 44 20
+	MOV	AX, WORD PTR colhigh                 ; 4733 A1 44 20
 	MOV	WORD PTR [BP+4], AX                 ; 4736 89 46 04
 L_4739:
 	MOV	AX, WORD PTR [BP+2]                 ; 4739 8B 46 02
@@ -417,20 +417,20 @@ L_4739:
 	ADD	SI, AX                              ; 4741 03 F0
 	PUSH	WORD PTR [BP+4]                    ; 4743 FF 76 04
 	PUSH	WORD PTR [SI]                      ; 4746 FF 34
-	CALL	F_3599                             ; 4748 E8 A7 E9
+	CALL	putstr                             ; 4748 E8 A7 E9
 	MOV	SP, BP                              ; 474B 8B E5
 	MOV	AX, WORD PTR [BP+2]                 ; 474D 8B 46 02
 	SHL	AX, 1                               ; 4750 D1 E0
 	MOV	SI, WORD PTR [BP+0CH]               ; 4752 8B 76 0C
 	ADD	SI, AX                              ; 4755 03 F0
 	PUSH	WORD PTR [SI]                      ; 4757 FF 34
-	CALL	F_353A                             ; 4759 E8 DE ED
+	CALL	strlen2                             ; 4759 E8 DE ED
 	MOV	SP, BP                              ; 475C 8B E5
 	MOV	BX, 0DH                             ; 475E BB 0D 00
 	SUB	BX, AX                              ; 4761 2B D8
 	PUSH	WORD PTR [BP+4]                    ; 4763 FF 76 04
 	PUSH	BX                                 ; 4766 53
-	CALL	F_461C                             ; 4767 E8 B2 FE
+	CALL	putdots                             ; 4767 E8 B2 FE
 	MOV	SP, BP                              ; 476A 8B E5
 	MOV	AX, WORD PTR [BP+2]                 ; 476C 8B 46 02
 	SHL	AX, 1                               ; 476F D1 E0
@@ -438,7 +438,7 @@ L_4739:
 	ADD	SI, AX                              ; 4774 03 F0
 	PUSH	WORD PTR [BP+4]                    ; 4776 FF 76 04
 	PUSH	WORD PTR [SI]                      ; 4779 FF 34
-	CALL	F_46CA                             ; 477B E8 4C FF
+	CALL	ztatnum                             ; 477B E8 4C FF
 	MOV	SP, BP                              ; 477E 8B E5
 L_4780:
 	INC	WORD PTR [BP+2]                     ; 4780 FF 46 02
@@ -449,18 +449,18 @@ L_4786:
 	ADD	SP, 6                               ; 4789 83 C4 06
 	POP	BP                                  ; 478C 5D
 	RET                                     ; 478D C3
-F_478E:
+ztats:
 	PUSH	BP                                 ; 478E 55
 	SUB	SP, 4                               ; 478F 83 EC 04
 	MOV	BP, SP                              ; 4792 8B EC
-	CMP	WORD PTR D_204A, 3                  ; 4794 83 3E 4A 20 03
+	CMP	WORD PTR gmode, 3                  ; 4794 83 3E 4A 20 03
 	JNE	L_479E                              ; 4799 75 03
-	CALL	F_3C46                             ; 479B E8 A8 F4
+	CALL	topbar                             ; 479B E8 A8 F4
 L_479E:
-	CALL	F_3BF6                             ; 479E E8 55 F4
-	MOV	AX, OFFSET DGROUP:D_1F5D            ; 47A1 B8 5D 1F
+	CALL	botbar                             ; 479E E8 55 F4
+	MOV	AX, OFFSET DGROUP:strztats            ; 47A1 B8 5D 1F
 	PUSH	AX                                 ; 47A4 50
-	CALL	F_3B46                             ; 47A5 E8 9E F3
+	CALL	msgline                             ; 47A5 E8 9E F3
 	MOV	SP, BP                              ; 47A8 8B E5
 	XOR	AX, AX                              ; 47AA 33 C0
 	PUSH	AX                                 ; 47AC 50
@@ -471,95 +471,95 @@ L_479E:
 	MOV	AX, 8                               ; 47B5 B8 08 00
 	PUSH	AX                                 ; 47B8 50
 	PUSH	AX                                 ; 47B9 50
-	CALL	F_35CA                             ; 47BA E8 66 E9
+	CALL	fillrect                             ; 47BA E8 66 E9
 	MOV	SP, BP                              ; 47BD 8B E5
 	XOR	AX, AX                              ; 47BF 33 C0
 	PUSH	AX                                 ; 47C1 50
 	MOV	AX, 0DH                             ; 47C2 B8 0D 00
 	PUSH	AX                                 ; 47C5 50
-	CALL	F_387E                             ; 47C6 E8 2A EC
+	CALL	arrowr                             ; 47C6 E8 2A EC
 	MOV	SP, BP                              ; 47C9 8B E5
-	PUSH	WORD PTR D_2046                    ; 47CB FF 36 46 20
-	MOV	AX, OFFSET DGROUP:D_1F63            ; 47CF B8 63 1F
+	PUSH	WORD PTR coltext                    ; 47CB FF 36 46 20
+	MOV	AX, OFFSET DGROUP:strinv            ; 47CF B8 63 1F
 	PUSH	AX                                 ; 47D2 50
-	CALL	F_3599                             ; 47D3 E8 1C E9
+	CALL	putstr                             ; 47D3 E8 1C E9
 	MOV	SP, BP                              ; 47D6 8B E5
 	XOR	AX, AX                              ; 47D8 33 C0
 	PUSH	AX                                 ; 47DA 50
 	MOV	AX, 19H                             ; 47DB B8 19 00
 	PUSH	AX                                 ; 47DE 50
-	CALL	F_3920                             ; 47DF E8 B3 EC
+	CALL	arrowl                             ; 47DF E8 B3 EC
 	MOV	SP, BP                              ; 47E2 8B E5
 	MOV	AX, 2                               ; 47E4 B8 02 00
 	PUSH	AX                                 ; 47E7 50
 	PUSH	AX                                 ; 47E8 50
-	CALL	F_352C                             ; 47E9 E8 99 E8
+	CALL	gotoxy                             ; 47E9 E8 99 E8
 	MOV	SP, BP                              ; 47EC 8B E5
-	PUSH	WORD PTR D_0DA6                    ; 47EE FF 36 40 20
-	MOV	AX, OFFSET DGROUP:D_1F6F            ; 47F2 B8 6F 1F
+	PUSH	WORD PTR colline                    ; 47EE FF 36 40 20
+	MOV	AX, OFFSET DGROUP:strplay            ; 47F2 B8 6F 1F
 	PUSH	AX                                 ; 47F5 50
-	CALL	F_3599                             ; 47F6 E8 F9 E8
+	CALL	putstr                             ; 47F6 E8 F9 E8
 	MOV	SP, BP                              ; 47F9 8B E5
-	PUSH	WORD PTR D_0DA6                    ; 47FB FF 36 40 20
-	MOV	AX, OFFSET DGROUP:D_2058            ; 47FF B8 58 20
+	PUSH	WORD PTR colline                    ; 47FB FF 36 40 20
+	MOV	AX, OFFSET DGROUP:plname            ; 47FF B8 58 20
 	PUSH	AX                                 ; 4802 50
-	CALL	F_3599                             ; 4803 E8 EC E8
+	CALL	putstr                             ; 4803 E8 EC E8
 	MOV	SP, BP                              ; 4806 8B E5
 	MOV	AX, 3                               ; 4808 B8 03 00
 	PUSH	AX                                 ; 480B 50
 	MOV	AX, 2                               ; 480C B8 02 00
 	PUSH	AX                                 ; 480F 50
-	CALL	F_352C                             ; 4810 E8 72 E8
+	CALL	gotoxy                             ; 4810 E8 72 E8
 	MOV	SP, BP                              ; 4813 8B E5
-	PUSH	WORD PTR D_0DA6                    ; 4815 FF 36 40 20
-	MOV	AX, OFFSET DGROUP:D_1F78            ; 4819 B8 78 1F
+	PUSH	WORD PTR colline                    ; 4815 FF 36 40 20
+	MOV	AX, OFFSET DGROUP:strlevel            ; 4819 B8 78 1F
 	PUSH	AX                                 ; 481C 50
-	CALL	F_3599                             ; 481D E8 D2 E8
+	CALL	putstr                             ; 481D E8 D2 E8
 	MOV	SP, BP                              ; 4820 8B E5
-	CALL	F_40E9                             ; 4822 E8 C4 F8
+	CALL	getlevel                             ; 4822 E8 C4 F8
 	MOV	BX, 1                               ; 4825 BB 01 00
 	PUSH	BX                                 ; 4828 53
-	PUSH	WORD PTR D_0DA6                    ; 4829 FF 36 40 20
+	PUSH	WORD PTR colline                    ; 4829 FF 36 40 20
 	MOV	BX, 20H                             ; 482D BB 20 00
 	PUSH	BX                                 ; 4830 53
 	MOV	BX, 1                               ; 4831 BB 01 00
 	PUSH	BX                                 ; 4834 53
 	PUSH	AX                                 ; 4835 50
-	CALL	F_3C8B                             ; 4836 E8 D6 F0
+	CALL	putnum                             ; 4836 E8 D6 F0
 	MOV	SP, BP                              ; 4839 8B E5
-	CMP	WORD PTR D_206C, 0                  ; 483B 83 3E 6C 20 00
+	CMP	WORD PTR plsex, 0                  ; 483B 83 3E 6C 20 00
 	JNE	L_4851                              ; 4840 75 0F
-	PUSH	WORD PTR D_0DA6                    ; 4842 FF 36 40 20
-	MOV	AX, OFFSET DGROUP:D_1F81            ; 4846 B8 81 1F
+	PUSH	WORD PTR colline                    ; 4842 FF 36 40 20
+	MOV	AX, OFFSET DGROUP:strmale            ; 4846 B8 81 1F
 	PUSH	AX                                 ; 4849 50
-	CALL	F_3599                             ; 484A E8 A5 E8
+	CALL	putstr                             ; 484A E8 A5 E8
 	MOV	SP, BP                              ; 484D 8B E5
 	JMP	SHORT L_485E                        ; 484F EB 0D
 L_4851:
-	PUSH	WORD PTR D_0DA6                    ; 4851 FF 36 40 20
-	MOV	AX, OFFSET DGROUP:D_1F88            ; 4855 B8 88 1F
+	PUSH	WORD PTR colline                    ; 4851 FF 36 40 20
+	MOV	AX, OFFSET DGROUP:strfem            ; 4855 B8 88 1F
 	PUSH	AX                                 ; 4858 50
-	CALL	F_3599                             ; 4859 E8 96 E8
+	CALL	putstr                             ; 4859 E8 96 E8
 	MOV	SP, BP                              ; 485C 8B E5
 L_485E:
-	MOV	AX, WORD PTR D_2068                 ; 485E A1 68 20
+	MOV	AX, WORD PTR plrace                 ; 485E A1 68 20
 	SHL	AX, 1                               ; 4861 D1 E0
 	MOV	SI, AX                              ; 4863 8B F0
-	PUSH	WORD PTR D_0DA6                    ; 4865 FF 36 40 20
-	PUSH	WORD PTR D_0E30[SI]                ; 4869 FF B4 30 0E
-	CALL	F_3599                             ; 486D E8 82 E8
+	PUSH	WORD PTR colline                    ; 4865 FF 36 40 20
+	PUSH	WORD PTR racenam[SI]                ; 4869 FF B4 30 0E
+	CALL	putstr                             ; 486D E8 82 E8
 	MOV	SP, BP                              ; 4870 8B E5
-	PUSH	WORD PTR D_0DA6                    ; 4872 FF 36 40 20
+	PUSH	WORD PTR colline                    ; 4872 FF 36 40 20
 	MOV	AX, 20H                             ; 4876 B8 20 00
 	PUSH	AX                                 ; 4879 50
-	CALL	F_357C                             ; 487A E8 58 E8
+	CALL	putch                             ; 487A E8 58 E8
 	MOV	SP, BP                              ; 487D 8B E5
-	MOV	AX, WORD PTR D_206A                 ; 487F A1 6A 20
+	MOV	AX, WORD PTR plclass                 ; 487F A1 6A 20
 	SHL	AX, 1                               ; 4882 D1 E0
 	MOV	SI, AX                              ; 4884 8B F0
-	PUSH	WORD PTR D_0DA6                    ; 4886 FF 36 40 20
-	PUSH	WORD PTR D_0E54[SI]                ; 488A FF B4 54 0E
-	CALL	F_3599                             ; 488E E8 61 E8
+	PUSH	WORD PTR colline                    ; 4886 FF 36 40 20
+	PUSH	WORD PTR classnam[SI]                ; 488A FF B4 54 0E
+	CALL	putstr                             ; 488E E8 61 E8
 	MOV	SP, BP                              ; 4891 8B E5
 	XOR	AX, AX                              ; 4893 33 C0
 	PUSH	AX                                 ; 4895 50
@@ -569,52 +569,52 @@ L_485E:
 	PUSH	AX                                 ; 489D 50
 	XOR	AX, AX                              ; 489E 33 C0
 	PUSH	AX                                 ; 48A0 50
-	MOV	AX, OFFSET DGROUP:D_0E9E            ; 48A1 B8 9E 0E
+	MOV	AX, OFFSET DGROUP:attrnam            ; 48A1 B8 9E 0E
 	PUSH	AX                                 ; 48A4 50
-	MOV	AX, OFFSET DGROUP:D_206E            ; 48A5 B8 6E 20
+	MOV	AX, OFFSET DGROUP:plstat            ; 48A5 B8 6E 20
 	PUSH	AX                                 ; 48A8 50
-	CALL	F_46E5                             ; 48A9 E8 39 FE
+	CALL	ztatattr                             ; 48A9 E8 39 FE
 	MOV	SP, BP                              ; 48AC 8B E5
 	MOV	WORD PTR [BP+2], AX                 ; 48AE 89 46 02
-	MOV	AX, WORD PTR D_207C                 ; 48B1 A1 7C 20
+	MOV	AX, WORD PTR plcoin                 ; 48B1 A1 7C 20
 	MOV	BX, 0AH                             ; 48B4 BB 0A 00
 	CWD                                     ; 48B7 99
 	IDIV	BX                                 ; 48B8 F7 FB
 	TEST	DX, DX                             ; 48BA 85 D2
 	JE	L_48E9                               ; 48BC 74 2B
 	PUSH	WORD PTR [BP+2]                    ; 48BE FF 76 02
-	CALL	F_468F                             ; 48C1 E8 CB FD
+	CALL	ztatpos                             ; 48C1 E8 CB FD
 	MOV	SP, BP                              ; 48C4 8B E5
-	PUSH	WORD PTR D_2046                    ; 48C6 FF 36 46 20
-	MOV	AX, OFFSET DGROUP:D_1F91            ; 48CA B8 91 1F
+	PUSH	WORD PTR coltext                    ; 48C6 FF 36 46 20
+	MOV	AX, OFFSET DGROUP:strcopp            ; 48CA B8 91 1F
 	PUSH	AX                                 ; 48CD 50
-	CALL	F_3599                             ; 48CE E8 21 E8
+	CALL	putstr                             ; 48CE E8 21 E8
 	MOV	SP, BP                              ; 48D1 8B E5
-	MOV	AX, WORD PTR D_207C                 ; 48D3 A1 7C 20
+	MOV	AX, WORD PTR plcoin                 ; 48D3 A1 7C 20
 	MOV	BX, 0AH                             ; 48D6 BB 0A 00
 	CWD                                     ; 48D9 99
 	IDIV	BX                                 ; 48DA F7 FB
-	PUSH	WORD PTR D_2046                    ; 48DC FF 36 46 20
+	PUSH	WORD PTR coltext                    ; 48DC FF 36 46 20
 	PUSH	DX                                 ; 48E0 52
-	CALL	F_46CA                             ; 48E1 E8 E6 FD
+	CALL	ztatnum                             ; 48E1 E8 E6 FD
 	MOV	SP, BP                              ; 48E4 8B E5
 	INC	WORD PTR [BP+2]                     ; 48E6 FF 46 02
 L_48E9:
-	MOV	AX, WORD PTR D_207C                 ; 48E9 A1 7C 20
+	MOV	AX, WORD PTR plcoin                 ; 48E9 A1 7C 20
 	MOV	BX, 64H                             ; 48EC BB 64 00
 	CWD                                     ; 48EF 99
 	IDIV	BX                                 ; 48F0 F7 FB
 	CMP	DX, 9                               ; 48F2 83 FA 09
 	JLE	L_492E                              ; 48F5 7E 37
 	PUSH	WORD PTR [BP+2]                    ; 48F7 FF 76 02
-	CALL	F_468F                             ; 48FA E8 92 FD
+	CALL	ztatpos                             ; 48FA E8 92 FD
 	MOV	SP, BP                              ; 48FD 8B E5
-	PUSH	WORD PTR D_2046                    ; 48FF FF 36 46 20
-	MOV	AX, OFFSET DGROUP:D_1F9F            ; 4903 B8 9F 1F
+	PUSH	WORD PTR coltext                    ; 48FF FF 36 46 20
+	MOV	AX, OFFSET DGROUP:strsilv            ; 4903 B8 9F 1F
 	PUSH	AX                                 ; 4906 50
-	CALL	F_3599                             ; 4907 E8 E8 E7
+	CALL	putstr                             ; 4907 E8 E8 E7
 	MOV	SP, BP                              ; 490A 8B E5
-	MOV	AX, WORD PTR D_207C                 ; 490C A1 7C 20
+	MOV	AX, WORD PTR plcoin                 ; 490C A1 7C 20
 	MOV	BX, 64H                             ; 490F BB 64 00
 	CWD                                     ; 4912 99
 	IDIV	BX                                 ; 4913 F7 FB
@@ -623,98 +623,98 @@ L_48E9:
 	MOV	BX, 0AH                             ; 491B BB 0A 00
 	CWD                                     ; 491E 99
 	IDIV	BX                                 ; 491F F7 FB
-	PUSH	WORD PTR D_2046                    ; 4921 FF 36 46 20
+	PUSH	WORD PTR coltext                    ; 4921 FF 36 46 20
 	PUSH	AX                                 ; 4925 50
-	CALL	F_46CA                             ; 4926 E8 A1 FD
+	CALL	ztatnum                             ; 4926 E8 A1 FD
 	MOV	SP, BP                              ; 4929 8B E5
 	INC	WORD PTR [BP+2]                     ; 492B FF 46 02
 L_492E:
-	CMP	WORD PTR D_207C, 63H                ; 492E 83 3E 7C 20 63
+	CMP	WORD PTR plcoin, 63H                ; 492E 83 3E 7C 20 63
 	JLE	L_4960                              ; 4933 7E 2B
 	PUSH	WORD PTR [BP+2]                    ; 4935 FF 76 02
-	CALL	F_468F                             ; 4938 E8 54 FD
+	CALL	ztatpos                             ; 4938 E8 54 FD
 	MOV	SP, BP                              ; 493B 8B E5
-	PUSH	WORD PTR D_2046                    ; 493D FF 36 46 20
-	MOV	AX, OFFSET DGROUP:D_1FAD            ; 4941 B8 AD 1F
+	PUSH	WORD PTR coltext                    ; 493D FF 36 46 20
+	MOV	AX, OFFSET DGROUP:strgold            ; 4941 B8 AD 1F
 	PUSH	AX                                 ; 4944 50
-	CALL	F_3599                             ; 4945 E8 AA E7
+	CALL	putstr                             ; 4945 E8 AA E7
 	MOV	SP, BP                              ; 4948 8B E5
-	MOV	AX, WORD PTR D_207C                 ; 494A A1 7C 20
+	MOV	AX, WORD PTR plcoin                 ; 494A A1 7C 20
 	MOV	BX, 64H                             ; 494D BB 64 00
 	CWD                                     ; 4950 99
 	IDIV	BX                                 ; 4951 F7 FB
-	PUSH	WORD PTR D_2046                    ; 4953 FF 36 46 20
+	PUSH	WORD PTR coltext                    ; 4953 FF 36 46 20
 	PUSH	AX                                 ; 4957 50
-	CALL	F_46CA                             ; 4958 E8 6F FD
+	CALL	ztatnum                             ; 4958 E8 6F FD
 	MOV	SP, BP                              ; 495B 8B E5
 	INC	WORD PTR [BP+2]                     ; 495D FF 46 02
 L_4960:
-	CMP	WORD PTR D_20FE, 0                  ; 4960 83 3E FE 20 00
+	CMP	WORD PTR plkills, 0                  ; 4960 83 3E FE 20 00
 	JE	L_498C                               ; 4965 74 25
 	PUSH	WORD PTR [BP+2]                    ; 4967 FF 76 02
-	CALL	F_468F                             ; 496A E8 22 FD
+	CALL	ztatpos                             ; 496A E8 22 FD
 	MOV	SP, BP                              ; 496D 8B E5
-	PUSH	WORD PTR D_2046                    ; 496F FF 36 46 20
-	MOV	AX, OFFSET DGROUP:D_1FBB            ; 4973 B8 BB 1F
+	PUSH	WORD PTR coltext                    ; 496F FF 36 46 20
+	MOV	AX, OFFSET DGROUP:strenemy            ; 4973 B8 BB 1F
 	PUSH	AX                                 ; 4976 50
-	CALL	F_3599                             ; 4977 E8 78 E7
+	CALL	putstr                             ; 4977 E8 78 E7
 	MOV	SP, BP                              ; 497A 8B E5
-	PUSH	WORD PTR D_2046                    ; 497C FF 36 46 20
-	PUSH	WORD PTR D_20FE                    ; 4980 FF 36 FE 20
-	CALL	F_46CA                             ; 4984 E8 43 FD
+	PUSH	WORD PTR coltext                    ; 497C FF 36 46 20
+	PUSH	WORD PTR plkills                    ; 4980 FF 36 FE 20
+	CALL	ztatnum                             ; 4984 E8 43 FD
 	MOV	SP, BP                              ; 4987 8B E5
 	INC	WORD PTR [BP+2]                     ; 4989 FF 46 02
 L_498C:
 	PUSH	WORD PTR [BP+2]                    ; 498C FF 76 02
-	PUSH	WORD PTR D_2086                    ; 498F FF 36 86 20
+	PUSH	WORD PTR rdyarm                    ; 498F FF 36 86 20
 	MOV	AX, 5                               ; 4993 B8 05 00
 	PUSH	AX                                 ; 4996 50
 	MOV	AX, 1                               ; 4997 B8 01 00
 	PUSH	AX                                 ; 499A 50
-	MOV	AX, OFFSET DGROUP:D_0F5C            ; 499B B8 5C 0F
+	MOV	AX, OFFSET DGROUP:armornam            ; 499B B8 5C 0F
 	PUSH	AX                                 ; 499E 50
-	MOV	AX, OFFSET DGROUP:D_20AC            ; 499F B8 AC 20
+	MOV	AX, OFFSET DGROUP:ownarm            ; 499F B8 AC 20
 	PUSH	AX                                 ; 49A2 50
-	CALL	F_46E5                             ; 49A3 E8 3F FD
+	CALL	ztatattr                             ; 49A3 E8 3F FD
 	MOV	SP, BP                              ; 49A6 8B E5
 	PUSH	AX                                 ; 49A8 50
-	PUSH	WORD PTR D_2082                    ; 49A9 FF 36 82 20
+	PUSH	WORD PTR rdyweap                    ; 49A9 FF 36 82 20
 	MOV	BX, 0FH                             ; 49AD BB 0F 00
 	PUSH	BX                                 ; 49B0 53
 	MOV	BX, 1                               ; 49B1 BB 01 00
 	PUSH	BX                                 ; 49B4 53
-	MOV	BX, OFFSET DGROUP:D_0D72            ; 49B5 BB 72 0D
+	MOV	BX, OFFSET DGROUP:wnamelng            ; 49B5 BB 72 0D
 	PUSH	BX                                 ; 49B8 53
-	MOV	BX, OFFSET DGROUP:D_20B8            ; 49B9 BB B8 20
+	MOV	BX, OFFSET DGROUP:ownweap            ; 49B9 BB B8 20
 	PUSH	BX                                 ; 49BC 53
 	MOV	WORD PTR [BP+2], AX                 ; 49BD 89 46 02
-	CALL	F_46E5                             ; 49C0 E8 22 FD
+	CALL	ztatattr                             ; 49C0 E8 22 FD
 	MOV	SP, BP                              ; 49C3 8B E5
 	PUSH	AX                                 ; 49C5 50
-	PUSH	WORD PTR D_2084                    ; 49C6 FF 36 84 20
+	PUSH	WORD PTR rdyspel                    ; 49C6 FF 36 84 20
 	MOV	BX, 0AH                             ; 49CA BB 0A 00
 	PUSH	BX                                 ; 49CD 53
 	MOV	BX, 1                               ; 49CE BB 01 00
 	PUSH	BX                                 ; 49D1 53
-	MOV	BX, OFFSET DGROUP:D_0F04            ; 49D2 BB 04 0F
+	MOV	BX, OFFSET DGROUP:spellnam            ; 49D2 BB 04 0F
 	PUSH	BX                                 ; 49D5 53
-	MOV	BX, OFFSET DGROUP:D_20D8            ; 49D6 BB D8 20
+	MOV	BX, OFFSET DGROUP:ownspel            ; 49D6 BB D8 20
 	PUSH	BX                                 ; 49D9 53
 	MOV	WORD PTR [BP+2], AX                 ; 49DA 89 46 02
-	CALL	F_46E5                             ; 49DD E8 05 FD
+	CALL	ztatattr                             ; 49DD E8 05 FD
 	MOV	SP, BP                              ; 49E0 8B E5
 	PUSH	AX                                 ; 49E2 50
-	PUSH	WORD PTR D_2088                    ; 49E3 FF 36 88 20
+	PUSH	WORD PTR plveh                    ; 49E3 FF 36 88 20
 	MOV	BX, 7                               ; 49E7 BB 07 00
 	PUSH	BX                                 ; 49EA 53
 	MOV	BX, 1                               ; 49EB BB 01 00
 	PUSH	BX                                 ; 49EE 53
-	MOV	BX, OFFSET DGROUP:D_0FA2            ; 49EF BB A2 0F
+	MOV	BX, OFFSET DGROUP:vehnam            ; 49EF BB A2 0F
 	PUSH	BX                                 ; 49F2 53
-	MOV	BX, OFFSET DGROUP:D_20EE            ; 49F3 BB EE 20
+	MOV	BX, OFFSET DGROUP:ownveh            ; 49F3 BB EE 20
 	PUSH	BX                                 ; 49F6 53
 	MOV	WORD PTR [BP+2], AX                 ; 49F7 89 46 02
-	CALL	F_46E5                             ; 49FA E8 E8 FC
+	CALL	ztatattr                             ; 49FA E8 E8 FC
 	MOV	SP, BP                              ; 49FD 8B E5
 	PUSH	AX                                 ; 49FF 50
 	MOV	BX, 0FFFFH                          ; 4A00 BB FF FF
@@ -723,16 +723,16 @@ L_498C:
 	PUSH	BX                                 ; 4A07 53
 	XOR	BX, BX                              ; 4A08 33 DB
 	PUSH	BX                                 ; 4A0A 53
-	MOV	BX, OFFSET DGROUP:D_0FD8            ; 4A0B BB D8 0F
+	MOV	BX, OFFSET DGROUP:strtab            ; 4A0B BB D8 0F
 	PUSH	BX                                 ; 4A0E 53
-	MOV	BX, OFFSET DGROUP:D_20A4            ; 4A0F BB A4 20
+	MOV	BX, OFFSET DGROUP:gemred            ; 4A0F BB A4 20
 	PUSH	BX                                 ; 4A12 53
 	MOV	WORD PTR [BP+2], AX                 ; 4A13 89 46 02
-	CALL	F_46E5                             ; 4A16 E8 CC FC
+	CALL	ztatattr                             ; 4A16 E8 CC FC
 	MOV	SP, BP                              ; 4A19 8B E5
 	MOV	WORD PTR [BP+2], AX                 ; 4A1B 89 46 02
-	CALL	F_3AE2                             ; 4A1E E8 C1 F0
-	PUSH	WORD PTR D_0DA8                    ; 4A21 FF 36 42 20
+	CALL	presskey                             ; 4A1E E8 C1 F0
+	PUSH	WORD PTR colfill                    ; 4A21 FF 36 42 20
 	MOV	AX, 6                               ; 4A25 B8 06 00
 	PUSH	AX                                 ; 4A28 50
 	MOV	AX, 0DCH                            ; 4A29 B8 DC 00
@@ -741,9 +741,9 @@ L_498C:
 	PUSH	AX                                 ; 4A2F 50
 	MOV	AX, 64H                             ; 4A30 B8 64 00
 	PUSH	AX                                 ; 4A33 50
-	CALL	F_35CA                             ; 4A34 E8 EC E6
+	CALL	fillrect                             ; 4A34 E8 EC E6
 	MOV	SP, BP                              ; 4A37 8B E5
-	PUSH	WORD PTR D_0DA6                    ; 4A39 FF 36 40 20
+	PUSH	WORD PTR colline                    ; 4A39 FF 36 40 20
 	MOV	AX, 7                               ; 4A3D B8 07 00
 	PUSH	AX                                 ; 4A40 50
 	MOV	AX, 0DCH                            ; 4A41 B8 DC 00
@@ -752,7 +752,7 @@ L_498C:
 	PUSH	AX                                 ; 4A48 50
 	MOV	AX, 64H                             ; 4A49 B8 64 00
 	PUSH	AX                                 ; 4A4C 50
-	CALL	F_39FC                             ; 4A4D E8 E4 ED
+	CALL	drawline                             ; 4A4D E8 E4 ED
 	MOV	SP, BP                              ; 4A50 8B E5
 	ADD	SP, 4                               ; 4A52 83 C4 04
 	POP	BP                                  ; 4A55 5D
@@ -760,11 +760,11 @@ L_498C:
 PROG	ENDS
 
 DATA	SEGMENT
-D_0CBA	DB	48H,69H,74H,73H,3AH,0	; 0CBA
-D_0CC0	DB	46H,6FH,6FH,64H,3AH,0	; 0CC0
-D_0CC6	DB	45H,78H,70H,2EH,3AH,0	; 0CC6
-D_0CCC	DB	43H,6FH,69H,6EH,3AH,0	; 0CCC
-D_0CD2	DB	1,0,1,0,1,0,1,0,0,0,1,0	; 0CD2
+lblhits	DB	48H,69H,74H,73H,3AH,0	; 0CBA
+lblfood	DB	46H,6FH,6FH,64H,3AH,0	; 0CC0
+lblexp	DB	45H,78H,70H,2EH,3AH,0	; 0CC6
+lblcoin	DB	43H,6FH,69H,6EH,3AH,0	; 0CCC
+wrange	DB	1,0,1,0,1,0,1,0,0,0,1,0	; 0CD2
 	DB	1,0,3,0,0,0,0,0,0,0,1,0	; 0CDE
 	DB	3,0,1,0,3,0,3,0,48H,61H,6EH,64H	; 0CEA
 	DB	73H,0,44H,61H,67H,67H,65H,72H,0,4DH,61H,63H	; 0CF6
@@ -778,22 +778,22 @@ D_0CD2	DB	1,0,1,0,1,0,1,0,0,0,1,0	; 0CD2
 	DB	0,4CH,69H,67H,68H,74H,20H,53H,77H,6FH,72H,64H	; 0D56
 	DB	0,50H,68H,61H,7AH,6FH,72H,0,42H,6CH,61H,73H	; 0D62
 	DB	74H,65H,72H,0	; 0D6E
-D_0D72	DW	D_0CD2+32			; 0D72
-	DW	D_0CD2+38			; 0D74
-	DW	D_0CD2+45			; 0D76
-	DW	D_0CD2+50			; 0D78
-	DW	D_0CD2+54			; 0D7A
-	DW	D_0CD2+68			; 0D7C
-	DW	D_0CD2+74			; 0D7E
-	DW	D_0CD2+86			; 0D80
-	DW	D_0CD2+99			; 0D82
-	DW	D_0CD2+106			; 0D84
-	DW	D_0CD2+111			; 0D86
-	DW	D_0CD2+117			; 0D88
-	DW	D_0CD2+126			; 0D8A
-	DW	D_0CD2+133			; 0D8C
-	DW	D_0CD2+145			; 0D8E
-	DW	D_0CD2+152			; 0D90
+wnamelng	DW	wrange+32			; 0D72
+	DW	wrange+38			; 0D74
+	DW	wrange+45			; 0D76
+	DW	wrange+50			; 0D78
+	DW	wrange+54			; 0D7A
+	DW	wrange+68			; 0D7C
+	DW	wrange+74			; 0D7E
+	DW	wrange+86			; 0D80
+	DW	wrange+99			; 0D82
+	DW	wrange+106			; 0D84
+	DW	wrange+111			; 0D86
+	DW	wrange+117			; 0D88
+	DW	wrange+126			; 0D8A
+	DW	wrange+133			; 0D8C
+	DW	wrange+145			; 0D8E
+	DW	wrange+152			; 0D90
 	DB	68H,61H,6EH,64H,73H,0,64H,61H,67H,67H,65H,72H	; 0D92
 	DB	0,6DH,61H,63H,65H,0,61H,78H,65H,0,72H,6FH	; 0D9E
 	DB	70H,65H,0,73H,77H,6FH,72H,64H,0,67H,20H,73H	; 0DAA
@@ -803,48 +803,48 @@ D_0D72	DW	D_0CD2+32			; 0D72
 	DB	70H,69H,73H,74H,6FH,6CH,0,4CH,20H,73H,77H,6FH	; 0DDA
 	DB	72H,64H,0,70H,68H,61H,7AH,6FH,72H,0,62H,6CH	; 0DE6
 	DB	61H,73H,74H,65H,72H,0	; 0DF2
-D_0DF8	DW	D_0D72+32			; 0DF8
-	DW	D_0D72+38			; 0DFA
-	DW	D_0D72+45			; 0DFC
-	DW	D_0D72+50			; 0DFE
-	DW	D_0D72+54			; 0E00
-	DW	D_0D72+59			; 0E02
-	DW	D_0D72+65			; 0E04
-	DW	D_0D72+73			; 0E06
-	DW	D_0D72+77			; 0E08
-	DW	D_0D72+84			; 0E0A
-	DW	D_0D72+89			; 0E0C
-	DW	D_0D72+95			; 0E0E
-	DW	D_0D72+104			; 0E10
-	DW	D_0D72+111			; 0E12
-	DW	D_0D72+119			; 0E14
-	DW	D_0D72+126			; 0E16
+wnames	DW	wnamelng+32			; 0DF8
+	DW	wnamelng+38			; 0DFA
+	DW	wnamelng+45			; 0DFC
+	DW	wnamelng+50			; 0DFE
+	DW	wnamelng+54			; 0E00
+	DW	wnamelng+59			; 0E02
+	DW	wnamelng+65			; 0E04
+	DW	wnamelng+73			; 0E06
+	DW	wnamelng+77			; 0E08
+	DW	wnamelng+84			; 0E0A
+	DW	wnamelng+89			; 0E0C
+	DW	wnamelng+95			; 0E0E
+	DW	wnamelng+104			; 0E10
+	DW	wnamelng+111			; 0E12
+	DW	wnamelng+119			; 0E14
+	DW	wnamelng+126			; 0E16
 	DB	48H,75H,6DH,61H,6EH,0,45H,6CH,66H,0,44H,77H	; 0E18
 	DB	61H,72H,66H,0,42H,6FH,62H,62H,69H,74H,0,0	; 0E24
-D_0E30	DW	D_0DF8+32			; 0E30
-	DW	D_0DF8+38			; 0E32
-	DW	D_0DF8+42			; 0E34
-	DW	D_0DF8+48			; 0E36
+racenam	DW	wnames+32			; 0E30
+	DW	wnames+38			; 0E32
+	DW	wnames+42			; 0E34
+	DW	wnames+48			; 0E36
 	DB	46H,69H,67H,68H,74H,65H,72H,0,43H,6CH,65H,72H	; 0E38
 	DB	69H,63H,0,57H,69H,7AH,61H,72H,64H,0,54H,68H	; 0E44
 	DB	69H,65H,66H,0	; 0E50
-D_0E54	DW	D_0E30+8			; 0E54
-	DW	D_0E30+16			; 0E56
-	DW	D_0E30+23			; 0E58
-	DW	D_0E30+30			; 0E5A
+classnam	DW	racenam+8			; 0E54
+	DW	racenam+16			; 0E56
+	DW	racenam+23			; 0E58
+	DW	racenam+30			; 0E5A
 	DB	48H,69H,74H,20H,50H,6FH,69H,6EH,74H,73H,0,53H	; 0E5C
 	DB	74H,72H,65H,6EH,67H,74H,68H,0,41H,67H,69H,6CH	; 0E68
 	DB	69H,74H,79H,0,53H,74H,61H,6DH,69H,6EH,61H,0	; 0E74
 	DB	43H,68H,61H,72H,69H,73H,6DH,61H,0,57H,69H,73H	; 0E80
 	DB	64H,6FH,6DH,0,49H,6EH,74H,65H,6CH,6CH,69H,67H	; 0E8C
 	DB	65H,6EH,63H,65H,0,0	; 0E98
-D_0E9E	DW	D_0E54+8			; 0E9E
-	DW	D_0E54+19			; 0EA0
-	DW	D_0E54+28			; 0EA2
-	DW	D_0E54+36			; 0EA4
-	DW	D_0E54+44			; 0EA6
-	DW	D_0E54+53			; 0EA8
-	DW	D_0E54+60			; 0EAA
+attrnam	DW	classnam+8			; 0E9E
+	DW	classnam+19			; 0EA0
+	DW	classnam+28			; 0EA2
+	DW	classnam+36			; 0EA4
+	DW	classnam+44			; 0EA6
+	DW	classnam+53			; 0EA8
+	DW	classnam+60			; 0EAA
 	DB	50H,72H,61H,79H,65H,72H,0,4FH,70H,65H,6EH,0	; 0EAC
 	DB	55H,6EH,6CH,6FH,63H,6BH,0,4DH,61H,67H,69H,63H	; 0EB8
 	DB	20H,4DH,69H,73H,73H,69H,6CH,65H,0,53H,74H,65H	; 0EC4
@@ -853,58 +853,58 @@ D_0E9E	DW	D_0E54+8			; 0E9E
 	DB	0,42H,6CH,69H,6EH,6BH,0,43H,72H,65H,61H,74H	; 0EE8
 	DB	65H,0,44H,65H,73H,74H,72H,6FH,79H,0,4BH,69H	; 0EF4
 	DB	6CH,6CH,0,0	; 0F00
-D_0F04	DW	D_0E9E+14			; 0F04
-	DW	D_0E9E+21			; 0F06
-	DW	D_0E9E+26			; 0F08
-	DW	D_0E9E+33			; 0F0A
-	DW	D_0E9E+47			; 0F0C
-	DW	D_0E9E+53			; 0F0E
-	DW	D_0E9E+65			; 0F10
-	DW	D_0E9E+75			; 0F12
-	DW	D_0E9E+81			; 0F14
-	DW	D_0E9E+88			; 0F16
-	DW	D_0E9E+96			; 0F18
+spellnam	DW	attrnam+14			; 0F04
+	DW	attrnam+21			; 0F06
+	DW	attrnam+26			; 0F08
+	DW	attrnam+33			; 0F0A
+	DW	attrnam+47			; 0F0C
+	DW	attrnam+53			; 0F0E
+	DW	attrnam+65			; 0F10
+	DW	attrnam+75			; 0F12
+	DW	attrnam+81			; 0F14
+	DW	attrnam+88			; 0F16
+	DW	attrnam+96			; 0F18
 	DB	53H,6BH,69H,6EH,0,4CH,65H,61H,74H,68H,65H,72H	; 0F1A
 	DB	20H,61H,72H,6DH,6FH,72H,0,43H,68H,61H,69H,6EH	; 0F26
 	DB	20H,6DH,61H,69H,6CH,0,50H,6CH,61H,74H,65H,20H	; 0F32
 	DB	6DH,61H,69H,6CH,0,56H,61H,63H,75H,75H,6DH,20H	; 0F3E
 	DB	73H,75H,69H,74H,0,52H,65H,66H,6CH,65H,63H,74H	; 0F4A
 	DB	20H,73H,75H,69H,74H,0	; 0F56
-D_0F5C	DW	D_0F04+22			; 0F5C
-	DW	D_0F04+27			; 0F5E
-	DW	D_0F04+41			; 0F60
-	DW	D_0F04+52			; 0F62
-	DW	D_0F04+63			; 0F64
-	DW	D_0F04+75			; 0F66
+armornam	DW	spellnam+22			; 0F5C
+	DW	spellnam+27			; 0F5E
+	DW	spellnam+41			; 0F60
+	DW	spellnam+52			; 0F62
+	DW	spellnam+63			; 0F64
+	DW	spellnam+75			; 0F66
 	DB	46H,6FH,6FH,74H,0,48H,6FH,72H,73H,65H,0,43H	; 0F68
 	DB	61H,72H,74H,0,52H,61H,66H,74H,0,46H,72H,69H	; 0F74
 	DB	67H,61H,74H,65H,0,41H,69H,72H,63H,61H,72H,0	; 0F80
 	DB	53H,68H,75H,74H,74H,6CH,65H,0,54H,69H,6DH,65H	; 0F8C
 	DB	20H,4DH,61H,63H,68H,69H,6EH,65H,0,0	; 0F98
-D_0FA2	DW	D_0F5C+12			; 0FA2
-	DW	D_0F5C+17			; 0FA4
-	DW	D_0F5C+23			; 0FA6
-	DW	D_0F5C+28			; 0FA8
-	DW	D_0F5C+33			; 0FAA
-	DW	D_0F5C+41			; 0FAC
-	DW	D_0F5C+48			; 0FAE
-	DW	D_0F5C+56			; 0FB0
+vehnam	DW	armornam+12			; 0FA2
+	DW	armornam+17			; 0FA4
+	DW	armornam+23			; 0FA6
+	DW	armornam+28			; 0FA8
+	DW	armornam+33			; 0FAA
+	DW	armornam+41			; 0FAC
+	DW	armornam+48			; 0FAE
+	DW	armornam+56			; 0FB0
 	DB	52H,65H,64H,20H,47H,65H,6DH,0,47H,72H,65H,65H	; 0FB2
 	DB	6EH,20H,47H,65H,6DH,0,42H,6CH,75H,65H,20H,47H	; 0FBE
 	DB	65H,6DH,0,57H,68H,69H,74H,65H,20H,47H,65H,6DH	; 0FCA
 	DB	0,0	; 0FD6
-D_0FD8	DW	D_0FA2+16			; 0FD8
-	DW	D_0FA2+24			; 0FDA
-	DW	D_0FA2+34			; 0FDC
-	DW	D_0FA2+43			; 0FDE
+strtab	DW	vehnam+16			; 0FD8
+	DW	vehnam+24			; 0FDA
+	DW	vehnam+34			; 0FDC
+	DW	vehnam+43			; 0FDE
 	DB	70H,6CH,61H,79H,65H,72H,31H,2EH,75H,31H,0,70H	; 0FE0
 	DB	6CH,61H,79H,65H,72H,32H,2EH,75H,31H,0,70H,6CH	; 0FEC
 	DB	61H,79H,65H,72H,33H,2EH,75H,31H,0,70H,6CH,61H	; 0FF8
 	DB	79H,65H,72H,34H,2EH,75H,31H,0	; 1004
-	DW	D_0FD8+8			; 100C
-	DW	D_0FD8+19			; 100E
-	DW	D_0FD8+30			; 1010
-	DW	D_0FD8+41			; 1012
+	DW	strtab+8			; 100C
+	DW	strtab+19			; 100E
+	DW	strtab+30			; 1010
+	DW	strtab+41			; 1012
 	DB	4EH,65H,73H,73H,20H,63H,72H,65H,61H,74H,75H,72H	; 1014
 	DB	65H,0,47H,69H,61H,6EH,74H,20H,73H,71H,75H,69H	; 1020
 	DB	64H,0,44H,72H,61H,67H,6FH,6EH,20H,74H,75H,72H	; 102C
@@ -918,21 +918,21 @@ D_0FD8	DW	D_0FA2+16			; 0FD8
 	DB	72H,0,45H,76H,69H,6CH,20H,72H,61H,6EH,67H,65H	; 108C
 	DB	72H,0,57H,61H,6EH,64H,65H,72H,69H,6EH,67H,20H	; 1098
 	DB	77H,61H,72H,6CH,6FH,63H,6BH,0	; 10A4
-	DW	D_0FD8+60			; 10AC
-	DW	D_0FD8+74			; 10AE
-	DW	D_0FD8+86			; 10B0
-	DW	D_0FD8+100			; 10B2
-	DW	D_0FD8+112			; 10B4
-	DW	D_0FD8+117			; 10B6
-	DW	D_0FD8+122			; 10B8
-	DW	D_0FD8+136			; 10BA
-	DW	D_0FD8+148			; 10BC
-	DW	D_0E30+30			; 10BE
-	DW	D_0FD8+159			; 10C0
-	DW	D_0FD8+163			; 10C2
-	DW	D_0FD8+170			; 10C4
-	DW	D_0FD8+182			; 10C6
-	DW	D_0FD8+194			; 10C8
+	DW	strtab+60			; 10AC
+	DW	strtab+74			; 10AE
+	DW	strtab+86			; 10B0
+	DW	strtab+100			; 10B2
+	DW	strtab+112			; 10B4
+	DW	strtab+117			; 10B6
+	DW	strtab+122			; 10B8
+	DW	strtab+136			; 10BA
+	DW	strtab+148			; 10BC
+	DW	racenam+30			; 10BE
+	DW	strtab+159			; 10C0
+	DW	strtab+163			; 10C2
+	DW	strtab+170			; 10C4
+	DW	strtab+182			; 10C6
+	DW	strtab+194			; 10C8
 	DB	22H,50H,4FH,54H,45H,4EH,54H,49H,53H,2DH,4CH,41H	; 10CA
 	DB	55H,44H,49H,53H,21H,22H,0,22H,41H,50H,45H,52H	; 10D6
 	DB	54H,55H,53H,21H,22H,0,22H,50H,45H,43H,55H,4EH	; 10E2
@@ -944,17 +944,17 @@ D_0FD8	DW	D_0FA2+16			; 0FD8
 	DB	53H,54H,52H,55H,58H,49H,21H,22H,0,22H,44H,45H	; 112A
 	DB	4CH,49H,4FH,21H,22H,0,22H,49H,4EH,54H,45H,52H	; 1136
 	DB	46H,49H,43H,49H,4FH,21H,22H,0	; 1142
-	DW	D_0FD8+242			; 114A
-	DW	D_0FD8+261			; 114C
-	DW	D_0FD8+272			; 114E
-	DW	D_0FD8+283			; 1150
-	DW	D_0FD8+292			; 1152
-	DW	D_0FD8+300			; 1154
-	DW	D_0FD8+311			; 1156
-	DW	D_0FD8+322			; 1158
-	DW	D_0FD8+337			; 115A
-	DW	D_0FD8+347			; 115C
-	DW	D_0FD8+356			; 115E
+	DW	strtab+242			; 114A
+	DW	strtab+261			; 114C
+	DW	strtab+272			; 114E
+	DW	strtab+283			; 1150
+	DW	strtab+292			; 1152
+	DW	strtab+300			; 1154
+	DW	strtab+311			; 1156
+	DW	strtab+322			; 1158
+	DW	strtab+337			; 115A
+	DW	strtab+347			; 115C
+	DW	strtab+356			; 115E
 	DB	3FH,0,42H,72H,69H,74H,69H,61H,6EH,0,4DH,6FH	; 1160
 	DB	6FH,6EH,0,46H,61H,77H,6EH,0,50H,61H,77H,73H	; 116C
 	DB	0,4DH,6FH,6EH,74H,6FH,72H,0,59H,65H,77H,0	; 1178
@@ -1064,57 +1064,57 @@ D_13ED	DB	54H,68H,65H,20H,44H,75H,6EH,67H,65H,6FH,6EH,20H	; 13ED
 	DB	61H,74H,27H,73H,20H,4CH,69H,66H,65H,20H,49H,49H	; 1651
 	DB	0,54H,68H,65H,20H,48H,6FH,6CH,65H,20H,74H,6FH	; 165D
 	DB	20H,48H,61H,64H,65H,73H,0	; 1669
-	DW	D_0FD8+392			; 1670
-	DW	D_0FD8+394			; 1672
-	DW	D_0FD8+402			; 1674
-	DW	D_0FD8+407			; 1676
-	DW	D_0FD8+412			; 1678
-	DW	D_0FD8+417			; 167A
-	DW	D_0FD8+424			; 167C
-	DW	D_0FD8+428			; 167E
-	DW	D_0FD8+433			; 1680
-	DW	D_0FD8+438			; 1682
-	DW	D_0FD8+445			; 1684
-	DW	D_0FD8+451			; 1686
-	DW	D_0FD8+457			; 1688
-	DW	D_0FD8+462			; 168A
-	DW	D_0FD8+467			; 168C
-	DW	D_0FD8+473			; 168E
-	DW	D_0FD8+478			; 1690
-	DW	D_0FD8+488			; 1692
-	DW	D_0FD8+495			; 1694
-	DW	D_0FD8+508			; 1696
-	DW	D_0FD8+514			; 1698
-	DW	D_0FD8+523			; 169A
-	DW	D_0FD8+535			; 169C
-	DW	D_0FD8+542			; 169E
-	DW	D_0FD8+549			; 16A0
-	DW	D_0FD8+554			; 16A2
-	DW	D_0FD8+561			; 16A4
-	DW	D_0FD8+569			; 16A6
-	DW	D_0FD8+575			; 16A8
-	DW	D_0FD8+583			; 16AA
-	DW	D_0FD8+593			; 16AC
-	DW	D_0FD8+605			; 16AE
-	DW	D_0FD8+612			; 16B0
-	DW	D_0FD8+625			; 16B2
-	DW	D_0FD8+652			; 16B4
-	DW	D_0FD8+680			; 16B6
-	DW	D_0FD8+701			; 16B8
-	DW	D_0FD8+721			; 16BA
-	DW	D_0FD8+743			; 16BC
-	DW	D_0FD8+769			; 16BE
-	DW	D_0FD8+795			; 16C0
-	DW	D_0FD8+817			; 16C2
-	DW	D_0FD8+843			; 16C4
-	DW	D_0FD8+866			; 16C6
-	DW	D_0FD8+895			; 16C8
-	DW	D_0FD8+920			; 16CA
-	DW	D_0FD8+934			; 16CC
-	DW	D_0FD8+957			; 16CE
-	DW	D_0FD8+979			; 16D0
-	DW	D_0FD8+1006			; 16D2
-	DW	D_0FD8+1022			; 16D4
+	DW	strtab+392			; 1670
+	DW	strtab+394			; 1672
+	DW	strtab+402			; 1674
+	DW	strtab+407			; 1676
+	DW	strtab+412			; 1678
+	DW	strtab+417			; 167A
+	DW	strtab+424			; 167C
+	DW	strtab+428			; 167E
+	DW	strtab+433			; 1680
+	DW	strtab+438			; 1682
+	DW	strtab+445			; 1684
+	DW	strtab+451			; 1686
+	DW	strtab+457			; 1688
+	DW	strtab+462			; 168A
+	DW	strtab+467			; 168C
+	DW	strtab+473			; 168E
+	DW	strtab+478			; 1690
+	DW	strtab+488			; 1692
+	DW	strtab+495			; 1694
+	DW	strtab+508			; 1696
+	DW	strtab+514			; 1698
+	DW	strtab+523			; 169A
+	DW	strtab+535			; 169C
+	DW	strtab+542			; 169E
+	DW	strtab+549			; 16A0
+	DW	strtab+554			; 16A2
+	DW	strtab+561			; 16A4
+	DW	strtab+569			; 16A6
+	DW	strtab+575			; 16A8
+	DW	strtab+583			; 16AA
+	DW	strtab+593			; 16AC
+	DW	strtab+605			; 16AE
+	DW	strtab+612			; 16B0
+	DW	strtab+625			; 16B2
+	DW	strtab+652			; 16B4
+	DW	strtab+680			; 16B6
+	DW	strtab+701			; 16B8
+	DW	strtab+721			; 16BA
+	DW	strtab+743			; 16BC
+	DW	strtab+769			; 16BE
+	DW	strtab+795			; 16C0
+	DW	strtab+817			; 16C2
+	DW	strtab+843			; 16C4
+	DW	strtab+866			; 16C6
+	DW	strtab+895			; 16C8
+	DW	strtab+920			; 16CA
+	DW	strtab+934			; 16CC
+	DW	strtab+957			; 16CE
+	DW	strtab+979			; 16D0
+	DW	strtab+1006			; 16D2
+	DW	strtab+1022			; 16D4
 	DW	D_13ED			; 16D6
 	DW	D_13ED+22			; 16D8
 	DW	D_13ED+45			; 16DA
@@ -1309,7 +1309,7 @@ D_1D0C	DB	59H,6FH,75H,20H,63H,61H,6EH,27H,74H,20H,77H,61H	; 1D0C
 	DW	D_1D0C+129			; 1DAE
 	DB	0,57H,65H,73H,74H,0,45H,61H,73H,74H,0,4EH	; 1DB0
 	DB	6FH,72H,74H,68H,0,53H,6FH,75H,74H,68H,0,0	; 1DBC
-D_1DC8	DW	D_1D0C+164			; 1DC8
+dirtab	DW	D_1D0C+164			; 1DC8
 	DW	D_1D0C+165			; 1DCA
 	DW	D_1D0C+170			; 1DCC
 	DW	D_1D0C+175			; 1DCE
@@ -1317,9 +1317,9 @@ D_1DC8	DW	D_1D0C+164			; 1DC8
 	DB	63H,67H,61H,74H,6FH,77H,6EH,2EH,62H,69H,6EH,0	; 1DD2
 	DB	65H,67H,61H,74H,6FH,77H,6EH,2EH,62H,69H,6EH,0	; 1DDE
 	DB	74H,31H,6BH,74H,6FH,77H,6EH,2EH,62H,69H,6EH,0	; 1DEA
-	DW	D_1DC8+10			; 1DF6
-	DW	D_1DC8+22			; 1DF8
-	DW	D_1DC8+34			; 1DFA
+	DW	dirtab+10			; 1DF6
+	DW	dirtab+22			; 1DF8
+	DW	dirtab+34			; 1DFA
 	DB	0,0,48H,0,6CH,0,7EH,0,87H,0,90H,0	; 1DFC
 	DB	0,0,24H,0,36H,0,3FH,0,44H,0,48H,0	; 1E08
 	DB	4,0,8,0,5,0,2,0,8,0,1,0	; 1E14
@@ -1345,45 +1345,45 @@ D_1DC8	DW	D_1D0C+164			; 1DC8
 	DB	69H,6EH,64H,20H,77H,68H,69H,70H,70H,65H,72H,0	; 1F04
 	DB	5AH,6FH,72H,6EH,0,44H,61H,65H,6DH,6FH,6EH,0	; 1F10
 	DB	42H,61H,6CH,72H,6FH,6EH,0,0	; 1F1C
-	DW	D_1DC8+140			; 1F24
-	DW	D_1DC8+147			; 1F26
-	DW	D_0E30+30			; 1F28
-	DW	D_1DC8+156			; 1F2A
-	DW	D_1DC8+166			; 1F2C
-	DW	D_1DC8+170			; 1F2E
-	DW	D_1DC8+177			; 1F30
-	DW	D_0FD8+159			; 1F32
-	DW	D_1DC8+183			; 1F34
-	DW	D_1DC8+191			; 1F36
-	DW	D_1DC8+207			; 1F38
-	DW	D_1DC8+213			; 1F3A
-	DW	D_1DC8+219			; 1F3C
-	DW	D_1DC8+230			; 1F3E
-	DW	D_1DC8+239			; 1F40
-	DW	D_1DC8+255			; 1F42
-	DW	D_1DC8+263			; 1F44
-	DW	D_1DC8+271			; 1F46
-	DW	D_1DC8+286			; 1F48
-	DW	D_1DC8+293			; 1F4A
-	DW	D_1DC8+298			; 1F4C
-	DW	D_1DC8+315			; 1F4E
-	DW	D_1DC8+328			; 1F50
-	DW	D_1DC8+333			; 1F52
-	DW	D_1DC8+340			; 1F54
-D_1F56	DB	20H,4DH,6FH,72H,65H,20H,0	; 1F56
-D_1F5D	DB	5AH,74H,61H,74H,73H,0	; 1F5D
-D_1F63	DB	20H,49H,6EH,76H,65H,6EH,74H,6FH,72H,79H,20H,0	; 1F63
-D_1F6F	DB	50H,6CH,61H,79H,65H,72H,3AH,20H,0	; 1F6F
-D_1F78	DB	41H,20H,4CH,65H,76H,65H,6CH,20H,0	; 1F78
-D_1F81	DB	20H,4DH,61H,6CH,65H,20H,0	; 1F81
-D_1F88	DB	20H,46H,65H,6DH,61H,6CH,65H,20H,0	; 1F88
-D_1F91	DB	43H,6FH,70H,70H,65H,72H,20H,70H,65H,6EH,63H,65H	; 1F91
+	DW	dirtab+140			; 1F24
+	DW	dirtab+147			; 1F26
+	DW	racenam+30			; 1F28
+	DW	dirtab+156			; 1F2A
+	DW	dirtab+166			; 1F2C
+	DW	dirtab+170			; 1F2E
+	DW	dirtab+177			; 1F30
+	DW	strtab+159			; 1F32
+	DW	dirtab+183			; 1F34
+	DW	dirtab+191			; 1F36
+	DW	dirtab+207			; 1F38
+	DW	dirtab+213			; 1F3A
+	DW	dirtab+219			; 1F3C
+	DW	dirtab+230			; 1F3E
+	DW	dirtab+239			; 1F40
+	DW	dirtab+255			; 1F42
+	DW	dirtab+263			; 1F44
+	DW	dirtab+271			; 1F46
+	DW	dirtab+286			; 1F48
+	DW	dirtab+293			; 1F4A
+	DW	dirtab+298			; 1F4C
+	DW	dirtab+315			; 1F4E
+	DW	dirtab+328			; 1F50
+	DW	dirtab+333			; 1F52
+	DW	dirtab+340			; 1F54
+strmore	DB	20H,4DH,6FH,72H,65H,20H,0	; 1F56
+strztats	DB	5AH,74H,61H,74H,73H,0	; 1F5D
+strinv	DB	20H,49H,6EH,76H,65H,6EH,74H,6FH,72H,79H,20H,0	; 1F63
+strplay	DB	50H,6CH,61H,79H,65H,72H,3AH,20H,0	; 1F6F
+strlevel	DB	41H,20H,4CH,65H,76H,65H,6CH,20H,0	; 1F78
+strmale	DB	20H,4DH,61H,6CH,65H,20H,0	; 1F81
+strfem	DB	20H,46H,65H,6DH,61H,6CH,65H,20H,0	; 1F88
+strcopp	DB	43H,6FH,70H,70H,65H,72H,20H,70H,65H,6EH,63H,65H	; 1F91
 	DB	2EH,0	; 1F9D
-D_1F9F	DB	53H,69H,6CH,76H,65H,72H,20H,70H,69H,65H,63H,65H	; 1F9F
+strsilv	DB	53H,69H,6CH,76H,65H,72H,20H,70H,69H,65H,63H,65H	; 1F9F
 	DB	73H,0	; 1FAB
-D_1FAD	DB	47H,6FH,6CH,64H,20H,63H,72H,6FH,77H,6EH,73H,2EH	; 1FAD
+strgold	DB	47H,6FH,6CH,64H,20H,63H,72H,6FH,77H,6EH,73H,2EH	; 1FAD
 	DB	2EH,0	; 1FB9
-D_1FBB	DB	45H,6EH,65H,6DH,79H,20H,76H,65H,73H,73H,65H,6CH	; 1FBB
+strenemy	DB	45H,6EH,65H,6DH,79H,20H,76H,65H,73H,73H,65H,6CH	; 1FBB
 	DB	73H,0,0	; 1FC7
 DATA	ENDS
 

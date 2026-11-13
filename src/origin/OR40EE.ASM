@@ -13,19 +13,19 @@ DGROUP	GROUP	DATA,UDATA
 	ASSUME	CS:PROG,DS:DGROUP
 
 DATA	SEGMENT
-	EXTRN	D_0830:BYTE
+	EXTRN	vidmarg:BYTE
 DATA	ENDS
-	PUBLIC	F_40EE,F_4115,D_09EC
+	PUBLIC	modetand,modeega,D_09EC
 
 PROG	SEGMENT
-F_40EE:
+modetand:
 	PUSH	BP                                 ; 40EE 55
 	MOV	BP, SP                              ; 40EF 8B EC
 	PUSH	SI                                 ; 40F1 56
 	PUSH	DI                                 ; 40F2 57
 	PUSH	DS                                 ; 40F3 1E
 	PUSH	ES                                 ; 40F4 06
-	MOV	WORD PTR D_0830, 4                  ; 40F5 C7 06 30 08 04 00
+	MOV	WORD PTR vidmarg, 4                  ; 40F5 C7 06 30 08 04 00
 	MOV	AH, 0                               ; 40FB B4 00
 	MOV	AL, 9                               ; 40FD B0 09
 	INT	10H                                 ; 40FF CD 10
@@ -41,14 +41,14 @@ F_40EE:
 	POP	SI                                  ; 4112 5E
 	POP	BP                                  ; 4113 5D
 	RET                                     ; 4114 C3
-F_4115:
+modeega:
 	PUSH	BP                                 ; 4115 55
 	MOV	BP, SP                              ; 4116 8B EC
 	PUSH	SI                                 ; 4118 56
 	PUSH	DI                                 ; 4119 57
 	PUSH	DS                                 ; 411A 1E
 	PUSH	ES                                 ; 411B 06
-	MOV	WORD PTR D_0830, 1                  ; 411C C7 06 30 08 01 00
+	MOV	WORD PTR vidmarg, 1                  ; 411C C7 06 30 08 01 00
 	MOV	AH, 0                               ; 4122 B4 00
 	MOV	AL, 0DH                             ; 4124 B0 0D
 	INT	10H                                 ; 4126 CD 10
